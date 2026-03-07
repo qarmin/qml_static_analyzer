@@ -1,0 +1,269 @@
+[
+    (
+        name: "BaseModel",
+        base_type: "Item",
+        id: Some("root"),
+        imports: [
+            "import QtQuick",
+        ],
+        signals: [
+            (
+                name: "valueChanged",
+                parameters: [
+                    (
+                        param_type: "int",
+                        param_name: "newValue",
+                    ),
+                ],
+            ),
+        ],
+        properties: [
+            (
+                name: "value",
+                prop_type: Int,
+                value: Int(0),
+                accessed_properties: [],
+            ),
+            (
+                name: "name",
+                prop_type: String,
+                value: String("base"),
+                accessed_properties: [],
+            ),
+            (
+                name: "active",
+                prop_type: Bool,
+                value: Bool(false),
+                accessed_properties: [],
+            ),
+        ],
+        functions: [
+            (
+                name: "increment",
+                is_signal_handler: false,
+                parameters: [],
+                used_names: [
+                    (
+                        name: "value",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "value",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+            (
+                name: "reset",
+                is_signal_handler: false,
+                parameters: [],
+                used_names: [
+                    (
+                        name: "value",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "active",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+        ],
+        children: [],
+    ),
+    (
+        name: "ExtendedModel",
+        base_type: "BaseModel",
+        id: Some("extended"),
+        imports: [
+            "import QtQuick",
+        ],
+        signals: [
+            (
+                name: "categoryChanged",
+                parameters: [
+                    (
+                        param_type: "string",
+                        param_name: "newCategory",
+                    ),
+                ],
+            ),
+        ],
+        properties: [
+            (
+                name: "category",
+                prop_type: String,
+                value: String("default"),
+                accessed_properties: [],
+            ),
+            (
+                name: "ratio",
+                prop_type: Double,
+                value: Double(1.0),
+                accessed_properties: [],
+            ),
+            (
+                name: "extra",
+                prop_type: Var,
+                value: Unset,
+                accessed_properties: [],
+            ),
+        ],
+        functions: [
+            (
+                name: "setCategory",
+                is_signal_handler: false,
+                parameters: [
+                    "cat",
+                ],
+                used_names: [
+                    (
+                        name: "category",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "cat",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+            (
+                name: "multiply",
+                is_signal_handler: false,
+                parameters: [
+                    "factor",
+                ],
+                used_names: [
+                    (
+                        name: "value",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "value",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "factor",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "ratio",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "ratio",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "factor",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+        ],
+        children: [],
+    ),
+    (
+        name: "SpecializedModel",
+        base_type: "ExtendedModel",
+        id: Some("specialized"),
+        imports: [
+            "import QtQuick",
+        ],
+        signals: [
+            (
+                name: "locked",
+                parameters: [
+                    (
+                        param_type: "bool",
+                        param_name: "state",
+                    ),
+                ],
+            ),
+        ],
+        properties: [
+            (
+                name: "tag",
+                prop_type: String,
+                value: String("special"),
+                accessed_properties: [],
+            ),
+            (
+                name: "priority",
+                prop_type: Int,
+                value: Int(0),
+                accessed_properties: [],
+            ),
+            (
+                name: "locked",
+                prop_type: Bool,
+                value: Bool(false),
+                accessed_properties: [],
+            ),
+        ],
+        functions: [
+            (
+                name: "lock",
+                is_signal_handler: false,
+                parameters: [],
+                used_names: [
+                    (
+                        name: "locked",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "priority",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "priority",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+            (
+                name: "unlock",
+                is_signal_handler: false,
+                parameters: [],
+                used_names: [
+                    (
+                        name: "locked",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+            (
+                name: "applyTag",
+                is_signal_handler: false,
+                parameters: [
+                    "t",
+                ],
+                used_names: [
+                    (
+                        name: "tag",
+                        accessed_item: None,
+                    ),
+                    (
+                        name: "t",
+                        accessed_item: None,
+                    ),
+                ],
+                declared_locals: [],
+                member_assignments: [],
+            ),
+        ],
+        children: [],
+    ),
+]

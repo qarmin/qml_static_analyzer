@@ -1,0 +1,39 @@
+(
+    name: "SignalsItem",
+    base_type: "Item",
+    id: Some("root"),
+    imports: [
+        "import QtQuick",
+    ],
+    signals: [
+        (
+            name: "clicked",
+            parameters: [],
+        ),
+        (
+            name: "valueChanged",
+            parameters: [
+                (
+                    param_type: "int",
+                    param_name: "newValue",
+                ),
+            ],
+        ),
+        (
+            name: "textUpdated",
+            parameters: [
+                (
+                    param_type: "string",
+                    param_name: "text",
+                ),
+                (
+                    param_type: "bool",
+                    param_name: "force",
+                ),
+            ],
+        ),
+    ],
+    properties: [],
+    functions: [],
+    children: [],
+)

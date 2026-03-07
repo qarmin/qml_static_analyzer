@@ -1,0 +1,23 @@
+# Example configuration file for the QML static analyzer.
+# [ignore] section is for paths to ignore (relative to this config file's directory).
+# [new_child] section is for manually declaring dynamic children that the analyzer cannot detect - I suggest using your own python script to generate this section based on your QML files, as it can be quite complicated
+# [cpp_objects] section is for declaring C++ objects/singletons that are accessible globally in QML, so the analyzer can get their members and types right. Format is name = "path/to/header.h" (relative to this config file's directory). Use empty string "" for objects without a header — all member access on them is allowed.
+# [globals] Names that are always considered valid identifiers in QML (e.g. C preprocessor macros).
+
+[ignore]
+paths = [
+    "resources/keyboardLayouts",
+    "resources/keyboardStyles",
+]
+
+[new_child]
+ExamsTab = ["ExamPreview", "InvalidExam"]
+main = ["Globals", "MainContent", "WelcomeContent"]
+"main.contentLoader" = ["MainContent", "WelcomeContent"]
+
+[cpp_objects]
+guiStyle = "gui/src/commons/guistyle.h"
+diskManager = "gui/src/commons/diskManager.h"
+
+[globals]
+names = ["AP_GUI_TEST", "AP_DEBUG_TIME"]

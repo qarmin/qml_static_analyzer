@@ -1,0 +1,6 @@
+/target
+.idea/
+gui/
+qml_static_analyzer
+test
+snap_test.txt

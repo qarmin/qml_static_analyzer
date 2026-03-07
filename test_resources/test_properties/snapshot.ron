@@ -1,0 +1,43 @@
+(
+    name: "PropertiesItem",
+    base_type: "Rectangle",
+    id: Some("root"),
+    imports: [
+        "import QtQuick",
+    ],
+    signals: [],
+    properties: [
+        (
+            name: "count",
+            prop_type: Int,
+            value: Int(42),
+            accessed_properties: [],
+        ),
+        (
+            name: "visible2",
+            prop_type: Bool,
+            value: Bool(true),
+            accessed_properties: [],
+        ),
+        (
+            name: "label",
+            prop_type: String,
+            value: String("hello"),
+            accessed_properties: [],
+        ),
+        (
+            name: "anyValue",
+            prop_type: Var,
+            value: Int(99),
+            accessed_properties: [],
+        ),
+        (
+            name: "ratio",
+            prop_type: Double,
+            value: Double(3.13),
+            accessed_properties: [],
+        ),
+    ],
+    functions: [],
+    children: [],
+)

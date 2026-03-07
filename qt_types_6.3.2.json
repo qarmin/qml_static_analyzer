@@ -1,0 +1,8343 @@
+{
+  "AbstractButton": {
+    "enums": {
+      "Display": [
+        "IconOnly",
+        "TextOnly",
+        "TextBesideIcon",
+        "TextUnderIcon"
+      ]
+    },
+    "methods": {
+      "toggle": []
+    },
+    "parent": "Control",
+    "properties": {
+      "action": "Action",
+      "autoExclusive": "bool",
+      "autoRepeat": "bool",
+      "autoRepeatDelay": "int",
+      "autoRepeatInterval": "int",
+      "checkable": "bool",
+      "checked": "bool",
+      "display": "var",
+      "down": "bool",
+      "icon": "var",
+      "implicitIndicatorHeight": "real",
+      "implicitIndicatorWidth": "real",
+      "indicator": "Item",
+      "pressX": "real",
+      "pressY": "real",
+      "pressed": "bool",
+      "text": "string"
+    },
+    "signals": {
+      "actionChanged": [],
+      "autoExclusiveChanged": [],
+      "autoRepeatChanged": [],
+      "autoRepeatDelayChanged": [],
+      "autoRepeatIntervalChanged": [],
+      "canceled": [],
+      "checkableChanged": [],
+      "checkedChanged": [],
+      "clicked": [],
+      "displayChanged": [],
+      "doubleClicked": [],
+      "downChanged": [],
+      "iconChanged": [],
+      "implicitIndicatorHeightChanged": [],
+      "implicitIndicatorWidthChanged": [],
+      "indicatorChanged": [],
+      "pressAndHold": [],
+      "pressXChanged": [],
+      "pressYChanged": [],
+      "pressed": [],
+      "pressedChanged": [],
+      "released": [],
+      "textChanged": [],
+      "toggled": []
+    }
+  },
+  "AbstractDayOfWeekRow": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "delegate": "Component",
+      "source": "var"
+    },
+    "signals": {
+      "delegateChanged": [],
+      "sourceChanged": []
+    }
+  },
+  "AbstractDelegateComponent": {
+    "enums": {},
+    "methods": {},
+    "parent": "Component",
+    "properties": {},
+    "signals": {
+      "delegateChanged": []
+    }
+  },
+  "AbstractMonthGrid": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "delegate": "Component",
+      "month": "int",
+      "source": "var",
+      "title": "string",
+      "year": "int"
+    },
+    "signals": {
+      "clicked": [
+        "var"
+      ],
+      "delegateChanged": [],
+      "monthChanged": [],
+      "pressAndHold": [
+        "var"
+      ],
+      "pressed": [
+        "var"
+      ],
+      "released": [
+        "var"
+      ],
+      "sourceChanged": [],
+      "titleChanged": [],
+      "yearChanged": []
+    }
+  },
+  "AbstractWeekNumberColumn": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "delegate": "Component",
+      "month": "int",
+      "source": "var",
+      "year": "int"
+    },
+    "signals": {
+      "delegateChanged": [],
+      "monthChanged": [],
+      "sourceChanged": [],
+      "yearChanged": []
+    }
+  },
+  "Accessible": {
+    "enums": {},
+    "methods": {
+      "cursorPositionChanged": [],
+      "setIgnored": [
+        "bool"
+      ],
+      "stripHtml": [
+        "string"
+      ],
+      "valueChanged": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "checkStateMixed": "bool",
+      "checkable": "bool",
+      "checked": "bool",
+      "defaultButton": "bool",
+      "description": "string",
+      "editable": "bool",
+      "focusable": "bool",
+      "focused": "bool",
+      "ignored": "bool",
+      "multiLine": "bool",
+      "name": "string",
+      "passwordEdit": "bool",
+      "pressed": "bool",
+      "readOnly": "bool",
+      "role": "enumeration",
+      "searchEdit": "bool",
+      "selectable": "bool",
+      "selectableText": "bool",
+      "selected": "bool"
+    },
+    "signals": {
+      "checkStateMixedChanged": [
+        "bool"
+      ],
+      "checkableChanged": [
+        "bool"
+      ],
+      "checkedChanged": [
+        "bool"
+      ],
+      "decreaseAction": [],
+      "defaultButtonChanged": [
+        "bool"
+      ],
+      "descriptionChanged": [],
+      "editableChanged": [
+        "bool"
+      ],
+      "focusableChanged": [
+        "bool"
+      ],
+      "focusedChanged": [
+        "bool"
+      ],
+      "ignoredChanged": [],
+      "increaseAction": [],
+      "multiLineChanged": [
+        "bool"
+      ],
+      "nameChanged": [],
+      "nextPageAction": [],
+      "passwordEditChanged": [
+        "bool"
+      ],
+      "pressAction": [],
+      "pressedChanged": [
+        "bool"
+      ],
+      "previousPageAction": [],
+      "readOnlyChanged": [
+        "bool"
+      ],
+      "roleChanged": [],
+      "scrollDownAction": [],
+      "scrollLeftAction": [],
+      "scrollRightAction": [],
+      "scrollUpAction": [],
+      "searchEditChanged": [
+        "bool"
+      ],
+      "selectableChanged": [
+        "bool"
+      ],
+      "selectableTextChanged": [
+        "bool"
+      ],
+      "selectedChanged": [
+        "bool"
+      ],
+      "toggleAction": []
+    }
+  },
+  "Action": {
+    "enums": {},
+    "methods": {
+      "toggle": [],
+      "trigger": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "checkable": "bool",
+      "checked": "bool",
+      "enabled": "bool",
+      "icon": "var",
+      "shortcut": "var",
+      "text": "string"
+    },
+    "signals": {
+      "checkableChanged": [
+        "bool"
+      ],
+      "checkedChanged": [
+        "bool"
+      ],
+      "enabledChanged": [
+        "bool"
+      ],
+      "iconChanged": [
+        "var"
+      ],
+      "shortcutChanged": [
+        "var"
+      ],
+      "textChanged": [
+        "string"
+      ],
+      "toggled": [],
+      "triggered": []
+    }
+  },
+  "ActionGroup": {
+    "enums": {},
+    "methods": {
+      "addAction": [
+        "Action"
+      ],
+      "removeAction": [
+        "Action"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "actions": "list",
+      "checkedAction": "Action",
+      "enabled": "bool",
+      "exclusive": "bool",
+      "group": "ActionGroup"
+    },
+    "signals": {
+      "actionsChanged": [],
+      "checkedActionChanged": [],
+      "enabledChanged": [],
+      "exclusiveChanged": [],
+      "triggered": [
+        "Action"
+      ]
+    }
+  },
+  "AnchorAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "duration": "int",
+      "easing": "var",
+      "targets": "list"
+    },
+    "signals": {
+      "durationChanged": [
+        "int"
+      ],
+      "easingChanged": [
+        "var"
+      ]
+    }
+  },
+  "AnchorChanges": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "anchors": "AnchorSet",
+      "target": "Item"
+    },
+    "signals": {}
+  },
+  "AnimatedImage": {
+    "enums": {},
+    "methods": {},
+    "parent": "Image",
+    "properties": {
+      "currentFrame": "int",
+      "frameCount": "int",
+      "paused": "bool",
+      "playing": "bool",
+      "sourceSize": "size",
+      "speed": "real"
+    },
+    "signals": {
+      "currentFrameChanged": [],
+      "frameChanged": [],
+      "frameCountChanged": [],
+      "pausedChanged": [],
+      "playingChanged": [],
+      "speedChanged": []
+    }
+  },
+  "AnimatedSprite": {
+    "enums": {
+      "FinishBehavior": [
+        "FinishAtInitialFrame",
+        "FinishAtFinalFrame"
+      ],
+      "LoopParameters": [
+        "Infinite"
+      ]
+    },
+    "methods": {
+      "advance": [],
+      "pause": [],
+      "resetFrameDuration": [],
+      "resetFrameRate": [],
+      "restart": [],
+      "resume": [],
+      "setCurrentFrame": [
+        "int"
+      ],
+      "setFrameCount": [
+        "int"
+      ],
+      "setFrameDuration": [
+        "int"
+      ],
+      "setFrameHeight": [
+        "int"
+      ],
+      "setFrameRate": [
+        "real"
+      ],
+      "setFrameSync": [
+        "bool"
+      ],
+      "setFrameWidth": [
+        "int"
+      ],
+      "setFrameX": [
+        "int"
+      ],
+      "setFrameY": [
+        "int"
+      ],
+      "setInterpolate": [
+        "bool"
+      ],
+      "setLoops": [
+        "int"
+      ],
+      "setPaused": [
+        "bool"
+      ],
+      "setReverse": [
+        "bool"
+      ],
+      "setRunning": [
+        "bool"
+      ],
+      "setSource": [
+        "url"
+      ],
+      "start": [],
+      "stop": []
+    },
+    "parent": "Item",
+    "properties": {
+      "currentFrame": "int",
+      "finishBehavior": "var",
+      "frameCount": "int",
+      "frameDuration": "int",
+      "frameHeight": "int",
+      "frameRate": "real",
+      "frameSync": "bool",
+      "frameWidth": "int",
+      "frameX": "int",
+      "frameY": "int",
+      "interpolate": "bool",
+      "loops": "int",
+      "paused": "bool",
+      "reverse": "bool",
+      "running": "bool",
+      "source": "url"
+    },
+    "signals": {
+      "currentFrameChanged": [
+        "int"
+      ],
+      "finishBehaviorChanged": [
+        "var"
+      ],
+      "finished": [],
+      "frameCountChanged": [
+        "int"
+      ],
+      "frameDurationChanged": [
+        "int"
+      ],
+      "frameHeightChanged": [
+        "int"
+      ],
+      "frameRateChanged": [
+        "real"
+      ],
+      "frameSyncChanged": [
+        "bool"
+      ],
+      "frameWidthChanged": [
+        "int"
+      ],
+      "frameXChanged": [
+        "int"
+      ],
+      "frameYChanged": [
+        "int"
+      ],
+      "interpolateChanged": [
+        "bool"
+      ],
+      "loopsChanged": [
+        "int"
+      ],
+      "pausedChanged": [
+        "bool"
+      ],
+      "reverseChanged": [
+        "bool"
+      ],
+      "runningChanged": [
+        "bool"
+      ],
+      "sourceChanged": [
+        "url"
+      ]
+    }
+  },
+  "Animation": {
+    "enums": {
+      "Loops": [
+        "Infinite"
+      ]
+    },
+    "methods": {
+      "complete": [],
+      "pause": [],
+      "restart": [],
+      "resume": [],
+      "start": [],
+      "stop": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "alwaysRunToEnd": "bool",
+      "loops": "int",
+      "paused": "bool",
+      "running": "bool"
+    },
+    "signals": {
+      "alwaysRunToEndChanged": [
+        "bool"
+      ],
+      "finished": [],
+      "loopCountChanged": [
+        "int"
+      ],
+      "pausedChanged": [
+        "bool"
+      ],
+      "runningChanged": [
+        "bool"
+      ],
+      "started": [],
+      "stopped": []
+    }
+  },
+  "AnimationController": {
+    "enums": {},
+    "methods": {
+      "completeToBeginning": [],
+      "completeToEnd": [],
+      "reload": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "animation": "AbstractAnimation",
+      "progress": "real"
+    },
+    "signals": {
+      "animationChanged": [],
+      "progressChanged": []
+    }
+  },
+  "Animator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "duration": "int",
+      "easing": "var",
+      "from": "real",
+      "target": "Item",
+      "to": "real"
+    },
+    "signals": {
+      "durationChanged": [
+        "int"
+      ],
+      "easingChanged": [
+        "var"
+      ],
+      "fromChanged": [
+        "real"
+      ],
+      "targetItemChanged": [
+        "Item"
+      ],
+      "toChanged": [
+        "real"
+      ]
+    }
+  },
+  "Application": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "arguments": "var",
+      "displayName": "string",
+      "domain": "string",
+      "font": "font",
+      "layoutDirection": "enumeration",
+      "name": "string",
+      "organization": "string",
+      "screens": "list",
+      "state": "enumeration",
+      "supportsMultipleWindows": "bool",
+      "version": "string"
+    },
+    "signals": {
+      "aboutToQuit": [],
+      "activeChanged": [],
+      "displayNameChanged": [],
+      "domainChanged": [],
+      "layoutDirectionChanged": [],
+      "nameChanged": [],
+      "organizationChanged": [],
+      "screensChanged": [],
+      "stateChanged": [
+        "enumeration"
+      ],
+      "versionChanged": []
+    }
+  },
+  "ApplicationWindow": {
+    "enums": {},
+    "methods": {},
+    "parent": "Window",
+    "properties": {
+      "activeFocusControl": "Item",
+      "background": "Item",
+      "contentData": "list",
+      "contentItem": "Item",
+      "font": "font",
+      "footer": "Item",
+      "header": "Item",
+      "locale": "var",
+      "menuBar": "Item",
+      "palette": "Palette",
+      "screen": "QtObject",
+      "visibility": "enumeration",
+      "visible": "bool",
+      "window": "ApplicationWindow"
+    },
+    "signals": {
+      "activeFocusControlChanged": [],
+      "backgroundChanged": [],
+      "fontChanged": [],
+      "footerChanged": [],
+      "headerChanged": [],
+      "localeChanged": [],
+      "menuBarChanged": [],
+      "screenChanged": [],
+      "visibilityChanged": [
+        "enumeration"
+      ],
+      "visibleChanged": [
+        "bool"
+      ]
+    }
+  },
+  "Behavior": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "animation": "AbstractAnimation",
+      "enabled": "bool",
+      "targetProperty": "var",
+      "targetValue": "var"
+    },
+    "signals": {
+      "enabledChanged": [],
+      "targetPropertyChanged": [],
+      "targetValueChanged": []
+    }
+  },
+  "Binding": {
+    "enums": {
+      "RestorationMode": [
+        "RestoreNone",
+        "RestoreBinding",
+        "RestoreValue",
+        "RestoreBindingOrValue"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "delayed": "bool",
+      "property": "string",
+      "restoreMode": "var",
+      "target": "QtObject",
+      "value": "var",
+      "when": "bool"
+    },
+    "signals": {
+      "restoreModeChanged": []
+    }
+  },
+  "BorderImage": {
+    "enums": {
+      "TileMode": [
+        "Stretch",
+        "Repeat",
+        "Round"
+      ]
+    },
+    "methods": {},
+    "parent": "ImageBase",
+    "properties": {
+      "border": "ScaleGrid",
+      "horizontalTileMode": "var",
+      "sourceSize": "size",
+      "verticalTileMode": "var"
+    },
+    "signals": {
+      "horizontalTileModeChanged": [],
+      "sourceSizeChanged": [],
+      "verticalTileModeChanged": []
+    }
+  },
+  "BorderImageMesh": {
+    "enums": {
+      "TileMode": [
+        "Stretch",
+        "Repeat",
+        "Round"
+      ]
+    },
+    "methods": {},
+    "parent": "ShaderEffectMesh",
+    "properties": {
+      "border": "ScaleGrid",
+      "horizontalTileMode": "var",
+      "size": "size",
+      "verticalTileMode": "var"
+    },
+    "signals": {
+      "horizontalTileModeChanged": [],
+      "sizeChanged": [],
+      "verticalTileModeChanged": []
+    }
+  },
+  "BusyIndicator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "running": "bool"
+    },
+    "signals": {
+      "runningChanged": []
+    }
+  },
+  "Button": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "flat": "bool",
+      "highlighted": "bool"
+    },
+    "signals": {
+      "flatChanged": [],
+      "highlightedChanged": []
+    }
+  },
+  "ButtonGroup": {
+    "enums": {},
+    "methods": {
+      "addButton": [
+        "AbstractButton"
+      ],
+      "removeButton": [
+        "AbstractButton"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "buttons": "list",
+      "checkState": "enumeration",
+      "checkedButton": "AbstractButton",
+      "exclusive": "bool",
+      "group": "ButtonGroup"
+    },
+    "signals": {
+      "buttonsChanged": [],
+      "checkStateChanged": [],
+      "checkedButtonChanged": [],
+      "clicked": [
+        "AbstractButton"
+      ],
+      "exclusiveChanged": []
+    }
+  },
+  "Calendar": {
+    "enums": {
+      "Month": [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "CalendarModel": {
+    "enums": {},
+    "methods": {
+      "indexOf": [
+        "int",
+        "int"
+      ],
+      "monthAt": [
+        "int"
+      ],
+      "yearAt": [
+        "int"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "count": "int",
+      "from": "var",
+      "to": "var"
+    },
+    "signals": {
+      "columnsAboutToBeInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsAboutToBeMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "columnsAboutToBeRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "columnsRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "countChanged": [],
+      "dataChanged": [
+        "var",
+        "var"
+      ],
+      "fromChanged": [],
+      "headerDataChanged": [
+        "enumeration",
+        "int",
+        "int"
+      ],
+      "layoutAboutToBeChanged": [],
+      "layoutChanged": [],
+      "modelAboutToBeReset": [],
+      "modelReset": [],
+      "rowsAboutToBeInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsAboutToBeMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "rowsAboutToBeRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "rowsRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "toChanged": []
+    }
+  },
+  "Canvas": {
+    "enums": {
+      "RenderStrategy": [
+        "Immediate",
+        "Threaded",
+        "Cooperative"
+      ],
+      "RenderTarget": [
+        "Image",
+        "FramebufferObject"
+      ]
+    },
+    "methods": {
+      "cancelRequestAnimationFrame": [
+        "V4Function"
+      ],
+      "getContext": [
+        "V4Function"
+      ],
+      "isImageError": [
+        "url"
+      ],
+      "isImageLoaded": [
+        "url"
+      ],
+      "isImageLoading": [
+        "url"
+      ],
+      "loadImage": [
+        "url"
+      ],
+      "markDirty": [],
+      "requestAnimationFrame": [
+        "V4Function"
+      ],
+      "requestPaint": [],
+      "save": [
+        "string"
+      ],
+      "toDataURL": [],
+      "unloadImage": [
+        "url"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "available": "bool",
+      "canvasSize": "size",
+      "canvasWindow": "rect",
+      "context": "var",
+      "contextType": "string",
+      "renderStrategy": "var",
+      "renderTarget": "var",
+      "tileSize": "size"
+    },
+    "signals": {
+      "availableChanged": [],
+      "canvasSizeChanged": [],
+      "canvasWindowChanged": [],
+      "contextChanged": [],
+      "contextTypeChanged": [],
+      "imageLoaded": [],
+      "paint": [
+        "rect"
+      ],
+      "painted": [],
+      "renderStrategyChanged": [],
+      "renderTargetChanged": [],
+      "tileSizeChanged": []
+    }
+  },
+  "CheckBox": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "checkState": "enumeration",
+      "nextCheckState": "var",
+      "tristate": "bool"
+    },
+    "signals": {
+      "checkStateChanged": [],
+      "nextCheckStateChanged": [],
+      "tristateChanged": []
+    }
+  },
+  "CheckDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "ItemDelegate",
+    "properties": {
+      "checkState": "enumeration",
+      "nextCheckState": "var",
+      "tristate": "bool"
+    },
+    "signals": {
+      "checkStateChanged": [],
+      "nextCheckStateChanged": [],
+      "tristateChanged": []
+    }
+  },
+  "CheckLabel": {
+    "enums": {},
+    "methods": {},
+    "parent": "Text",
+    "properties": {},
+    "signals": {}
+  },
+  "ClippedText": {
+    "enums": {},
+    "methods": {},
+    "parent": "Text",
+    "properties": {
+      "clipHeight": "real",
+      "clipWidth": "real",
+      "clipX": "real",
+      "clipY": "real"
+    },
+    "signals": {}
+  },
+  "Color": {
+    "enums": {},
+    "methods": {
+      "blend": [
+        "color",
+        "color",
+        "real"
+      ],
+      "transparent": [
+        "color",
+        "real"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "ColorAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "PropertyAnimation",
+    "properties": {
+      "from": "color",
+      "to": "color"
+    },
+    "signals": {}
+  },
+  "ColorGroup": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "alternateBase": "color",
+      "base": "color",
+      "brightText": "color",
+      "button": "color",
+      "buttonText": "color",
+      "dark": "color",
+      "highlight": "color",
+      "highlightedText": "color",
+      "light": "color",
+      "link": "color",
+      "linkVisited": "color",
+      "mid": "color",
+      "midlight": "color",
+      "placeholderText": "color",
+      "shadow": "color",
+      "text": "color",
+      "toolTipBase": "color",
+      "toolTipText": "color",
+      "window": "color",
+      "windowText": "color"
+    },
+    "signals": {
+      "alternateBaseChanged": [],
+      "baseChanged": [],
+      "brightTextChanged": [],
+      "buttonChanged": [],
+      "buttonTextChanged": [],
+      "changed": [],
+      "darkChanged": [],
+      "highlightChanged": [],
+      "highlightedTextChanged": [],
+      "lightChanged": [],
+      "linkChanged": [],
+      "linkVisitedChanged": [],
+      "midChanged": [],
+      "midlightChanged": [],
+      "placeholderTextChanged": [],
+      "shadowChanged": [],
+      "textChanged": [],
+      "toolTipBaseChanged": [],
+      "toolTipTextChanged": [],
+      "windowChanged": [],
+      "windowTextChanged": []
+    }
+  },
+  "ColorImage": {
+    "enums": {},
+    "methods": {},
+    "parent": "Image",
+    "properties": {
+      "color": "color",
+      "defaultColor": "color"
+    },
+    "signals": {
+      "colorChanged": [],
+      "defaultColorChanged": []
+    }
+  },
+  "ColorSpace": {
+    "enums": {
+      "NamedColorSpace": [
+        "Unknown",
+        "SRgb",
+        "SRgbLinear",
+        "AdobeRgb",
+        "DisplayP3",
+        "ProPhotoRgb"
+      ],
+      "Primaries": [
+        "Custom",
+        "SRgb",
+        "AdobeRgb",
+        "DciP3D65",
+        "ProPhotoRgb"
+      ],
+      "TransferFunction": [
+        "Custom",
+        "Linear",
+        "Gamma",
+        "SRgb",
+        "ProPhotoRgb"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "Column": {
+    "enums": {},
+    "methods": {},
+    "parent": "Positioner",
+    "properties": {},
+    "signals": {}
+  },
+  "ColumnLayout": {
+    "enums": {},
+    "methods": {},
+    "parent": "Layout",
+    "properties": {
+      "layoutDirection": "enumeration",
+      "spacing": "real"
+    },
+    "signals": {
+      "layoutDirectionChanged": [],
+      "spacingChanged": []
+    }
+  },
+  "ComboBox": {
+    "enums": {
+      "ImplicitContentWidthPolicy": [
+        "ContentItemImplicitWidth",
+        "WidestText",
+        "WidestTextWhenCompleted"
+      ]
+    },
+    "methods": {
+      "decrementCurrentIndex": [],
+      "find": [
+        "string"
+      ],
+      "incrementCurrentIndex": [],
+      "indexOfValue": [
+        "var"
+      ],
+      "selectAll": [],
+      "textAt": [
+        "int"
+      ],
+      "valueAt": [
+        "int"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "acceptableInput": "bool",
+      "count": "int",
+      "currentIndex": "int",
+      "currentText": "string",
+      "currentValue": "var",
+      "delegate": "Component",
+      "delegateModel": "InstanceModel",
+      "displayText": "string",
+      "down": "bool",
+      "editText": "string",
+      "editable": "bool",
+      "flat": "bool",
+      "highlightedIndex": "int",
+      "implicitContentWidthPolicy": "var",
+      "implicitIndicatorHeight": "real",
+      "implicitIndicatorWidth": "real",
+      "indicator": "Item",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
+      "model": "var",
+      "popup": "Popup",
+      "pressed": "bool",
+      "selectTextByMouse": "bool",
+      "textRole": "string",
+      "validator": "QValidator",
+      "valueRole": "string"
+    },
+    "signals": {
+      "acceptableInputChanged": [],
+      "accepted": [],
+      "activated": [
+        "int"
+      ],
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "currentTextChanged": [],
+      "currentValueChanged": [],
+      "delegateChanged": [],
+      "delegateModelChanged": [],
+      "displayTextChanged": [],
+      "downChanged": [],
+      "editTextChanged": [],
+      "editableChanged": [],
+      "flatChanged": [],
+      "highlighted": [
+        "int"
+      ],
+      "highlightedIndexChanged": [],
+      "implicitContentWidthPolicyChanged": [],
+      "implicitIndicatorHeightChanged": [],
+      "implicitIndicatorWidthChanged": [],
+      "indicatorChanged": [],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
+      "modelChanged": [],
+      "popupChanged": [],
+      "pressedChanged": [],
+      "selectTextByMouseChanged": [],
+      "textRoleChanged": [],
+      "validatorChanged": [],
+      "valueRoleChanged": []
+    }
+  },
+  "Component": {
+    "enums": {
+      "CompilationMode": [
+        "PreferSynchronous",
+        "Asynchronous"
+      ],
+      "Status": [
+        "Null",
+        "Ready",
+        "Loading",
+        "Error"
+      ]
+    },
+    "methods": {
+      "errorString": [],
+      "loadUrl": [
+        "url",
+        "var"
+      ],
+      "setData": [
+        "var",
+        "url"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "progress": "real",
+      "status": "var",
+      "url": "url"
+    },
+    "signals": {
+      "progressChanged": [
+        "real"
+      ],
+      "statusChanged": [
+        "enumeration"
+      ]
+    }
+  },
+  "Connections": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "enabled": "bool",
+      "ignoreUnknownSignals": "bool",
+      "target": "QtObject"
+    },
+    "signals": {
+      "enabledChanged": [],
+      "targetChanged": []
+    }
+  },
+  "Container": {
+    "enums": {},
+    "methods": {
+      "addItem": [
+        "Item"
+      ],
+      "decrementCurrentIndex": [],
+      "incrementCurrentIndex": [],
+      "insertItem": [
+        "int",
+        "Item"
+      ],
+      "itemAt": [
+        "int"
+      ],
+      "moveItem": [
+        "int",
+        "int"
+      ],
+      "removeItem": [
+        "Item"
+      ],
+      "setCurrentIndex": [
+        "int"
+      ],
+      "takeItem": [
+        "int"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "contentChildren": "list",
+      "contentData": "list",
+      "contentHeight": "real",
+      "contentModel": "var",
+      "contentWidth": "real",
+      "count": "int",
+      "currentIndex": "int",
+      "currentItem": "Item"
+    },
+    "signals": {
+      "contentChildrenChanged": [],
+      "contentHeightChanged": [],
+      "contentWidthChanged": [],
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "currentItemChanged": []
+    }
+  },
+  "Control": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "availableHeight": "real",
+      "availableWidth": "real",
+      "background": "Item",
+      "baselineOffset": "real",
+      "bottomInset": "real",
+      "bottomPadding": "real",
+      "contentItem": "Item",
+      "focusPolicy": "enumeration",
+      "focusReason": "enumeration",
+      "font": "font",
+      "horizontalPadding": "real",
+      "hoverEnabled": "bool",
+      "hovered": "bool",
+      "implicitBackgroundHeight": "real",
+      "implicitBackgroundWidth": "real",
+      "implicitContentHeight": "real",
+      "implicitContentWidth": "real",
+      "leftInset": "real",
+      "leftPadding": "real",
+      "locale": "var",
+      "mirrored": "bool",
+      "padding": "real",
+      "rightInset": "real",
+      "rightPadding": "real",
+      "spacing": "real",
+      "topInset": "real",
+      "topPadding": "real",
+      "verticalPadding": "real",
+      "visualFocus": "bool",
+      "wheelEnabled": "bool"
+    },
+    "signals": {
+      "availableHeightChanged": [],
+      "availableWidthChanged": [],
+      "backgroundChanged": [],
+      "baselineOffsetChanged": [],
+      "bottomInsetChanged": [],
+      "bottomPaddingChanged": [],
+      "contentItemChanged": [],
+      "focusPolicyChanged": [],
+      "focusReasonChanged": [],
+      "fontChanged": [],
+      "horizontalPaddingChanged": [],
+      "hoverEnabledChanged": [],
+      "hoveredChanged": [],
+      "implicitBackgroundHeightChanged": [],
+      "implicitBackgroundWidthChanged": [],
+      "implicitContentHeightChanged": [],
+      "implicitContentWidthChanged": [],
+      "leftInsetChanged": [],
+      "leftPaddingChanged": [],
+      "localeChanged": [],
+      "mirroredChanged": [],
+      "paddingChanged": [],
+      "rightInsetChanged": [],
+      "rightPaddingChanged": [],
+      "spacingChanged": [],
+      "topInsetChanged": [],
+      "topPaddingChanged": [],
+      "verticalPaddingChanged": [],
+      "visualFocusChanged": [],
+      "wheelEnabledChanged": []
+    }
+  },
+  "DelayButton": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "delay": "int",
+      "progress": "real",
+      "transition": "Transition"
+    },
+    "signals": {
+      "activated": [],
+      "delayChanged": [],
+      "progressChanged": [],
+      "transitionChanged": []
+    }
+  },
+  "DelegateModel": {
+    "enums": {},
+    "methods": {
+      "modelIndex": [
+        "int"
+      ],
+      "parentModelIndex": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "count": "int",
+      "delegate": "Component",
+      "filterOnGroup": "string",
+      "groups": "list",
+      "inItems": "bool",
+      "inPersistedItems": "bool",
+      "isUnresolved": "bool",
+      "items": "DelegateModelGroup",
+      "itemsIndex": "int",
+      "model": "var",
+      "parts": "QtObject",
+      "persistedItems": "DelegateModelGroup",
+      "persistedItemsIndex": "int",
+      "rootIndex": "var"
+    },
+    "signals": {
+      "countChanged": [],
+      "createdItem": [
+        "int",
+        "QtObject"
+      ],
+      "defaultGroupsChanged": [],
+      "delegateChanged": [],
+      "destroyingItem": [
+        "QtObject"
+      ],
+      "filterGroupChanged": [],
+      "initItem": [
+        "int",
+        "QtObject"
+      ],
+      "itemPooled": [
+        "int",
+        "QtObject"
+      ],
+      "itemReused": [
+        "int",
+        "QtObject"
+      ],
+      "modelUpdated": [
+        "var",
+        "bool"
+      ],
+      "rootIndexChanged": []
+    }
+  },
+  "DelegateModelGroup": {
+    "enums": {},
+    "methods": {
+      "addGroups": [
+        "V4Function"
+      ],
+      "create": [
+        "V4Function"
+      ],
+      "get": [
+        "int"
+      ],
+      "insert": [
+        "V4Function"
+      ],
+      "move": [
+        "V4Function"
+      ],
+      "remove": [
+        "V4Function"
+      ],
+      "removeGroups": [
+        "V4Function"
+      ],
+      "resolve": [
+        "V4Function"
+      ],
+      "setGroups": [
+        "V4Function"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "count": "int",
+      "includeByDefault": "bool",
+      "name": "string"
+    },
+    "signals": {
+      "changed": [
+        "var",
+        "var"
+      ],
+      "countChanged": [],
+      "defaultIncludeChanged": [],
+      "nameChanged": []
+    }
+  },
+  "Dial": {
+    "enums": {
+      "InputMode": [
+        "Circular",
+        "Horizontal",
+        "Vertical"
+      ],
+      "SnapMode": [
+        "NoSnap",
+        "SnapAlways",
+        "SnapOnRelease"
+      ]
+    },
+    "methods": {
+      "decrease": [],
+      "increase": []
+    },
+    "parent": "Control",
+    "properties": {
+      "angle": "real",
+      "from": "real",
+      "handle": "Item",
+      "inputMode": "var",
+      "live": "bool",
+      "position": "real",
+      "pressed": "bool",
+      "snapMode": "var",
+      "stepSize": "real",
+      "to": "real",
+      "value": "real",
+      "wrap": "bool"
+    },
+    "signals": {
+      "angleChanged": [],
+      "fromChanged": [],
+      "handleChanged": [],
+      "inputModeChanged": [],
+      "liveChanged": [],
+      "moved": [],
+      "positionChanged": [],
+      "pressedChanged": [],
+      "snapModeChanged": [],
+      "stepSizeChanged": [],
+      "toChanged": [],
+      "valueChanged": [],
+      "wrapChanged": []
+    }
+  },
+  "Dialog": {
+    "enums": {
+      "StandardCode": [
+        "Rejected",
+        "Accepted"
+      ]
+    },
+    "methods": {
+      "accept": [],
+      "done": [
+        "int"
+      ],
+      "reject": [],
+      "standardButton": [
+        "enumeration"
+      ]
+    },
+    "parent": "Popup",
+    "properties": {
+      "footer": "Item",
+      "header": "Item",
+      "implicitFooterHeight": "real",
+      "implicitFooterWidth": "real",
+      "implicitHeaderHeight": "real",
+      "implicitHeaderWidth": "real",
+      "result": "int",
+      "standardButtons": "enumeration",
+      "title": "string"
+    },
+    "signals": {
+      "accepted": [],
+      "applied": [],
+      "discarded": [],
+      "footerChanged": [],
+      "headerChanged": [],
+      "helpRequested": [],
+      "implicitFooterHeightChanged": [],
+      "implicitFooterWidthChanged": [],
+      "implicitHeaderHeightChanged": [],
+      "implicitHeaderWidthChanged": [],
+      "rejected": [],
+      "reset": [],
+      "resultChanged": [],
+      "standardButtonsChanged": [],
+      "titleChanged": []
+    }
+  },
+  "DialogButtonBox": {
+    "enums": {
+      "Position": [
+        "Header",
+        "Footer"
+      ]
+    },
+    "methods": {
+      "standardButton": [
+        "enumeration"
+      ]
+    },
+    "parent": "Container",
+    "properties": {
+      "alignment": "enumeration",
+      "buttonBox": "DialogButtonBox",
+      "buttonLayout": "enumeration",
+      "buttonRole": "enumeration",
+      "delegate": "Component",
+      "position": "var",
+      "standardButtons": "enumeration"
+    },
+    "signals": {
+      "accepted": [],
+      "alignmentChanged": [],
+      "applied": [],
+      "buttonLayoutChanged": [],
+      "clicked": [
+        "AbstractButton"
+      ],
+      "delegateChanged": [],
+      "discarded": [],
+      "helpRequested": [],
+      "positionChanged": [],
+      "rejected": [],
+      "reset": [],
+      "standardButtonsChanged": []
+    }
+  },
+  "DoubleValidator": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "bottom": "real",
+      "decimals": "int",
+      "locale": "string",
+      "notation": "var",
+      "top": "real"
+    },
+    "signals": {
+      "bottomChanged": [
+        "real"
+      ],
+      "changed": [],
+      "decimalsChanged": [
+        "int"
+      ],
+      "localeNameChanged": [],
+      "notationChanged": [
+        "enumeration"
+      ],
+      "topChanged": [
+        "real"
+      ]
+    }
+  },
+  "Drag": {
+    "enums": {
+      "Axis": [
+        "XAxis",
+        "YAxis",
+        "XAndYAxis",
+        "XandYAxis"
+      ],
+      "DragType": [
+        "None",
+        "Automatic",
+        "Internal"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "axis": "var",
+      "dragType": "enumeration",
+      "filterChildren": "bool",
+      "hotSpot": "point",
+      "imageSource": "url",
+      "keys": "var",
+      "maximumX": "real",
+      "maximumY": "real",
+      "mimeData": "var",
+      "minimumX": "real",
+      "minimumY": "real",
+      "proposedAction": "enumeration",
+      "smoothed": "bool",
+      "source": "QtObject",
+      "supportedActions": "enumeration",
+      "target": "Item",
+      "threshold": "real"
+    },
+    "signals": {
+      "activeChanged": [],
+      "axisChanged": [],
+      "filterChildrenChanged": [],
+      "maximumXChanged": [],
+      "maximumYChanged": [],
+      "minimumXChanged": [],
+      "minimumYChanged": [],
+      "smoothedChanged": [],
+      "targetChanged": [],
+      "thresholdChanged": []
+    }
+  },
+  "DragAxis": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "enabled": "bool",
+      "maximum": "real",
+      "minimum": "real"
+    },
+    "signals": {
+      "enabledChanged": [],
+      "maximumChanged": [],
+      "minimumChanged": []
+    }
+  },
+  "DragEvent": {
+    "enums": {},
+    "methods": {
+      "accept": [
+        "enumeration"
+      ],
+      "acceptProposedAction": [],
+      "getDataAsArrayBuffer": [
+        "string"
+      ],
+      "getDataAsString": [
+        "string"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "accepted": "bool",
+      "action": "enumeration",
+      "colorData": "var",
+      "formats": "var",
+      "hasColor": "bool",
+      "hasHtml": "bool",
+      "hasText": "bool",
+      "hasUrls": "bool",
+      "html": "string",
+      "keys": "var",
+      "proposedAction": "enumeration",
+      "source": "QtObject",
+      "supportedActions": "enumeration",
+      "text": "string",
+      "urls": "list",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {}
+  },
+  "DragHandler": {
+    "enums": {
+      "SnapMode": [
+        "NoSnap",
+        "SnapAuto",
+        "SnapIfPressedOutsideTarget",
+        "SnapAlways"
+      ]
+    },
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "activeTranslation": "vector2d",
+      "centroid": "var",
+      "maximumPointCount": "int",
+      "minimumPointCount": "int",
+      "persistentTranslation": "vector2d",
+      "snapMode": "var",
+      "translation": "vector2d",
+      "xAxis": "DragAxis",
+      "yAxis": "DragAxis"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "centroidChanged": [],
+      "maximumPointCountChanged": [],
+      "minimumPointCountChanged": [],
+      "snapModeChanged": [],
+      "translationChanged": []
+    }
+  },
+  "Drawer": {
+    "enums": {},
+    "methods": {},
+    "parent": "Popup",
+    "properties": {
+      "dragMargin": "real",
+      "edge": "enumeration",
+      "interactive": "bool",
+      "position": "real"
+    },
+    "signals": {
+      "dragMarginChanged": [],
+      "edgeChanged": [],
+      "interactiveChanged": [],
+      "positionChanged": []
+    }
+  },
+  "DropArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "containsDrag": "bool",
+      "drag": "DropAreaDrag",
+      "keys": "var"
+    },
+    "signals": {
+      "containsDragChanged": [],
+      "dropped": [
+        "DragEvent"
+      ],
+      "entered": [
+        "DragEvent"
+      ],
+      "exited": [],
+      "keysChanged": [],
+      "positionChanged": [
+        "DragEvent"
+      ],
+      "sourceChanged": []
+    }
+  },
+  "Easing": {
+    "enums": {
+      "Type": [
+        "Linear",
+        "InQuad",
+        "OutQuad",
+        "InOutQuad",
+        "OutInQuad",
+        "InCubic",
+        "OutCubic",
+        "InOutCubic",
+        "OutInCubic",
+        "InQuart",
+        "OutQuart",
+        "InOutQuart",
+        "OutInQuart",
+        "InQuint",
+        "OutQuint",
+        "InOutQuint",
+        "OutInQuint",
+        "InSine",
+        "OutSine",
+        "InOutSine",
+        "OutInSine",
+        "InExpo",
+        "OutExpo",
+        "InOutExpo",
+        "OutInExpo",
+        "InCirc",
+        "OutCirc",
+        "InOutCirc",
+        "OutInCirc",
+        "InElastic",
+        "OutElastic",
+        "InOutElastic",
+        "OutInElastic",
+        "InBack",
+        "OutBack",
+        "InOutBack",
+        "OutInBack",
+        "InBounce",
+        "OutBounce",
+        "InOutBounce",
+        "OutInBounce",
+        "InCurve",
+        "OutCurve",
+        "SineCurve",
+        "CosineCurve",
+        "BezierSpline",
+        "Bezier"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "EnterKey": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "type": "enumeration"
+    },
+    "signals": {
+      "typeChanged": []
+    }
+  },
+  "FileDialog": {
+    "enums": {
+      "FileMode": [
+        "OpenFile",
+        "OpenFiles",
+        "SaveFile"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "acceptLabel": "string",
+      "currentFile": "url",
+      "currentFiles": "list",
+      "currentFolder": "url",
+      "data": "list",
+      "defaultSuffix": "string",
+      "fileMode": "var",
+      "flags": "enumeration",
+      "modality": "enumeration",
+      "nameFilters": "var",
+      "options": "enumeration",
+      "parentWindow": "QWindow",
+      "rejectLabel": "string",
+      "result": "var",
+      "selectedFile": "url",
+      "selectedFiles": "list",
+      "selectedNameFilter": "FileNameFilter",
+      "title": "string",
+      "visible": "bool"
+    },
+    "signals": {
+      "acceptLabelChanged": [],
+      "accepted": [],
+      "currentFileChanged": [],
+      "currentFilesChanged": [],
+      "currentFolderChanged": [],
+      "defaultSuffixChanged": [],
+      "fileModeChanged": [],
+      "flagsChanged": [],
+      "modalityChanged": [],
+      "nameFiltersChanged": [],
+      "optionsChanged": [],
+      "parentWindowChanged": [],
+      "rejectLabelChanged": [],
+      "rejected": [],
+      "resultChanged": [],
+      "selectedFileChanged": [],
+      "selectedFilesChanged": [],
+      "titleChanged": [],
+      "visibleChanged": []
+    }
+  },
+  "Flickable": {
+    "enums": {
+      "BoundsBehavior": [
+        "StopAtBounds",
+        "DragOverBounds",
+        "OvershootBounds",
+        "DragAndOvershootBounds"
+      ],
+      "BoundsMovement": [
+        "FollowBoundsBehavior"
+      ],
+      "FlickableDirection": [
+        "AutoFlickDirection",
+        "HorizontalFlick",
+        "VerticalFlick",
+        "HorizontalAndVerticalFlick",
+        "AutoFlickIfNeeded"
+      ]
+    },
+    "methods": {
+      "cancelFlick": [],
+      "flick": [
+        "real",
+        "real"
+      ],
+      "resizeContent": [
+        "real",
+        "real",
+        "point"
+      ],
+      "returnToBounds": []
+    },
+    "parent": "Item",
+    "properties": {
+      "atXBeginning": "bool",
+      "atXEnd": "bool",
+      "atYBeginning": "bool",
+      "atYEnd": "bool",
+      "bottomMargin": "real",
+      "boundsBehavior": "var",
+      "boundsMovement": "var",
+      "contentHeight": "real",
+      "contentItem": "Item",
+      "contentWidth": "real",
+      "contentX": "real",
+      "contentY": "real",
+      "dragging": "bool",
+      "draggingHorizontally": "bool",
+      "draggingVertically": "bool",
+      "flickDeceleration": "real",
+      "flickableChildren": "list",
+      "flickableData": "list",
+      "flickableDirection": "var",
+      "flicking": "bool",
+      "flickingHorizontally": "bool",
+      "flickingVertically": "bool",
+      "horizontalOvershoot": "real",
+      "horizontalVelocity": "real",
+      "interactive": "bool",
+      "leftMargin": "real",
+      "maximumFlickVelocity": "real",
+      "moving": "bool",
+      "movingHorizontally": "bool",
+      "movingVertically": "bool",
+      "originX": "real",
+      "originY": "real",
+      "pixelAligned": "bool",
+      "pressDelay": "int",
+      "rebound": "Transition",
+      "rightMargin": "real",
+      "synchronousDrag": "bool",
+      "topMargin": "real",
+      "verticalOvershoot": "real",
+      "verticalVelocity": "real",
+      "visibleArea": "FlickableVisibleArea"
+    },
+    "signals": {
+      "atXBeginningChanged": [],
+      "atXEndChanged": [],
+      "atYBeginningChanged": [],
+      "atYEndChanged": [],
+      "bottomMarginChanged": [],
+      "boundsBehaviorChanged": [],
+      "boundsMovementChanged": [],
+      "contentHeightChanged": [],
+      "contentWidthChanged": [],
+      "contentXChanged": [],
+      "contentYChanged": [],
+      "dragEnded": [],
+      "dragStarted": [],
+      "draggingChanged": [],
+      "draggingHorizontallyChanged": [],
+      "draggingVerticallyChanged": [],
+      "flickDecelerationChanged": [],
+      "flickEnded": [],
+      "flickStarted": [],
+      "flickableDirectionChanged": [],
+      "flickingChanged": [],
+      "flickingHorizontallyChanged": [],
+      "flickingVerticallyChanged": [],
+      "horizontalOvershootChanged": [],
+      "horizontalVelocityChanged": [],
+      "interactiveChanged": [],
+      "isAtBoundaryChanged": [],
+      "leftMarginChanged": [],
+      "maximumFlickVelocityChanged": [],
+      "movementEnded": [],
+      "movementStarted": [],
+      "movingChanged": [],
+      "movingHorizontallyChanged": [],
+      "movingVerticallyChanged": [],
+      "originXChanged": [],
+      "originYChanged": [],
+      "pixelAlignedChanged": [],
+      "pressDelayChanged": [],
+      "reboundChanged": [],
+      "rightMarginChanged": [],
+      "synchronousDragChanged": [],
+      "topMarginChanged": [],
+      "verticalOvershootChanged": [],
+      "verticalVelocityChanged": []
+    }
+  },
+  "Flipable": {
+    "enums": {
+      "Side": [
+        "Front",
+        "Back"
+      ]
+    },
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "back": "Item",
+      "front": "Item",
+      "side": "var"
+    },
+    "signals": {
+      "backChanged": [],
+      "frontChanged": [],
+      "sideChanged": []
+    }
+  },
+  "Flow": {
+    "enums": {
+      "Flow": [
+        "LeftToRight",
+        "TopToBottom"
+      ]
+    },
+    "methods": {},
+    "parent": "Positioner",
+    "properties": {
+      "effectiveLayoutDirection": "enumeration",
+      "flow": "var",
+      "layoutDirection": "enumeration"
+    },
+    "signals": {
+      "effectiveLayoutDirectionChanged": [],
+      "flowChanged": [],
+      "layoutDirectionChanged": []
+    }
+  },
+  "FocusScope": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {},
+    "signals": {}
+  },
+  "FolderDialog": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "acceptLabel": "string",
+      "currentFolder": "url",
+      "data": "list",
+      "flags": "enumeration",
+      "modality": "enumeration",
+      "options": "enumeration",
+      "parentWindow": "QWindow",
+      "rejectLabel": "string",
+      "result": "var",
+      "selectedFolder": "url",
+      "title": "string",
+      "visible": "bool"
+    },
+    "signals": {
+      "acceptLabelChanged": [],
+      "accepted": [],
+      "currentFolderChanged": [],
+      "flagsChanged": [],
+      "modalityChanged": [],
+      "optionsChanged": [],
+      "parentWindowChanged": [],
+      "rejectLabelChanged": [],
+      "rejected": [],
+      "resultChanged": [],
+      "selectedFolderChanged": [],
+      "titleChanged": [],
+      "visibleChanged": []
+    }
+  },
+  "Font": {
+    "enums": {
+      "Capitalization": [
+        "MixedCase",
+        "AllUppercase",
+        "AllLowercase",
+        "SmallCaps",
+        "Capitalize"
+      ],
+      "FontWeight": [
+        "Thin",
+        "ExtraLight",
+        "Light",
+        "Normal",
+        "Medium",
+        "DemiBold",
+        "Bold",
+        "ExtraBold",
+        "Black"
+      ],
+      "HintingPreference": [
+        "PreferDefaultHinting",
+        "PreferNoHinting",
+        "PreferVerticalHinting",
+        "PreferFullHinting"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "FontDialog": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "currentFont": "font",
+      "data": "list",
+      "flags": "enumeration",
+      "modality": "enumeration",
+      "options": "enumeration",
+      "parentWindow": "QWindow",
+      "result": "var",
+      "selectedFont": "font",
+      "title": "string",
+      "visible": "bool"
+    },
+    "signals": {
+      "accepted": [],
+      "currentFontChanged": [],
+      "flagsChanged": [],
+      "modalityChanged": [],
+      "optionsChanged": [],
+      "parentWindowChanged": [],
+      "rejected": [],
+      "resultChanged": [],
+      "selectedFontChanged": [],
+      "titleChanged": [],
+      "visibleChanged": []
+    }
+  },
+  "FontLoader": {
+    "enums": {
+      "Status": [
+        "Null",
+        "Ready",
+        "Loading",
+        "Error"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "font": "font",
+      "name": "string",
+      "source": "url",
+      "status": "var"
+    },
+    "signals": {
+      "fontChanged": [],
+      "nameChanged": [],
+      "sourceChanged": [],
+      "statusChanged": []
+    }
+  },
+  "FontMetrics": {
+    "enums": {},
+    "methods": {
+      "advanceWidth": [
+        "string"
+      ],
+      "boundingRect": [
+        "string"
+      ],
+      "elidedText": [
+        "string",
+        "enumeration",
+        "real"
+      ],
+      "tightBoundingRect": [
+        "string"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "ascent": "real",
+      "averageCharacterWidth": "real",
+      "descent": "real",
+      "font": "font",
+      "height": "real",
+      "leading": "real",
+      "lineSpacing": "real",
+      "lineWidth": "real",
+      "maximumCharacterWidth": "real",
+      "minimumLeftBearing": "real",
+      "minimumRightBearing": "real",
+      "overlinePosition": "real",
+      "strikeOutPosition": "real",
+      "underlinePosition": "real",
+      "xHeight": "real"
+    },
+    "signals": {
+      "fontChanged": [
+        "font"
+      ]
+    }
+  },
+  "Frame": {
+    "enums": {},
+    "methods": {},
+    "parent": "Pane",
+    "properties": {},
+    "signals": {}
+  },
+  "GestureEvent": {
+    "enums": {},
+    "methods": {
+      "grab": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "dragThreshold": "real",
+      "touchPoints": "list"
+    },
+    "signals": {}
+  },
+  "Gradient": {
+    "enums": {
+      "Orientation": [
+        "Vertical",
+        "Horizontal"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "orientation": "var",
+      "stops": "list"
+    },
+    "signals": {
+      "orientationChanged": [],
+      "updated": []
+    }
+  },
+  "GradientStop": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "color": "color",
+      "position": "real"
+    },
+    "signals": {}
+  },
+  "GraphicsInfo": {
+    "enums": {
+      "GraphicsApi": [
+        "Unknown",
+        "Software",
+        "OpenVG",
+        "OpenGL",
+        "Direct3D11",
+        "Vulkan",
+        "Metal",
+        "Null",
+        "OpenGLRhi",
+        "Direct3D11Rhi",
+        "VulkanRhi",
+        "MetalRhi",
+        "NullRhi"
+      ],
+      "OpenGLContextProfile": [
+        "OpenGLNoProfile",
+        "OpenGLCoreProfile",
+        "OpenGLCompatibilityProfile"
+      ],
+      "RenderableType": [
+        "SurfaceFormatUnspecified",
+        "SurfaceFormatOpenGL",
+        "SurfaceFormatOpenGLES"
+      ],
+      "ShaderCompilationType": [
+        "RuntimeCompilation",
+        "OfflineCompilation"
+      ],
+      "ShaderSourceType": [
+        "ShaderSourceString",
+        "ShaderSourceFile",
+        "ShaderByteCode"
+      ],
+      "ShaderType": [
+        "UnknownShadingLanguage",
+        "GLSL",
+        "HLSL",
+        "RhiShader"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "api": "var",
+      "majorVersion": "int",
+      "minorVersion": "int",
+      "profile": "var",
+      "renderableType": "var",
+      "shaderCompilationType": "var",
+      "shaderSourceType": "var",
+      "shaderType": "var"
+    },
+    "signals": {
+      "apiChanged": [],
+      "majorVersionChanged": [],
+      "minorVersionChanged": [],
+      "profileChanged": [],
+      "renderableTypeChanged": [],
+      "shaderCompilationTypeChanged": [],
+      "shaderSourceTypeChanged": [],
+      "shaderTypeChanged": []
+    }
+  },
+  "Grid": {
+    "enums": {
+      "Flow": [
+        "LeftToRight",
+        "TopToBottom"
+      ],
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ]
+    },
+    "methods": {},
+    "parent": "Positioner",
+    "properties": {
+      "columnSpacing": "real",
+      "columns": "int",
+      "effectiveHorizontalItemAlignment": "var",
+      "effectiveLayoutDirection": "enumeration",
+      "flow": "var",
+      "horizontalItemAlignment": "var",
+      "layoutDirection": "enumeration",
+      "rowSpacing": "real",
+      "rows": "int",
+      "verticalItemAlignment": "var"
+    },
+    "signals": {
+      "columnSpacingChanged": [],
+      "columnsChanged": [],
+      "effectiveHorizontalAlignmentChanged": [
+        "var"
+      ],
+      "effectiveLayoutDirectionChanged": [],
+      "flowChanged": [],
+      "horizontalAlignmentChanged": [
+        "var"
+      ],
+      "layoutDirectionChanged": [],
+      "rowSpacingChanged": [],
+      "rowsChanged": [],
+      "verticalAlignmentChanged": [
+        "var"
+      ]
+    }
+  },
+  "GridLayout": {
+    "enums": {
+      "Flow": [
+        "LeftToRight",
+        "TopToBottom"
+      ]
+    },
+    "methods": {},
+    "parent": "Layout",
+    "properties": {
+      "columnSpacing": "real",
+      "columns": "int",
+      "flow": "var",
+      "layoutDirection": "enumeration",
+      "rowSpacing": "real",
+      "rows": "int"
+    },
+    "signals": {
+      "columnSpacingChanged": [],
+      "columnsChanged": [],
+      "flowChanged": [],
+      "layoutDirectionChanged": [],
+      "rowSpacingChanged": [],
+      "rowsChanged": []
+    }
+  },
+  "GridMesh": {
+    "enums": {},
+    "methods": {},
+    "parent": "ShaderEffectMesh",
+    "properties": {
+      "resolution": "size"
+    },
+    "signals": {
+      "resolutionChanged": []
+    }
+  },
+  "GridView": {
+    "enums": {
+      "Flow": [
+        "FlowLeftToRight",
+        "FlowTopToBottom"
+      ],
+      "SnapMode": [
+        "NoSnap",
+        "SnapToRow",
+        "SnapOneRow"
+      ]
+    },
+    "methods": {
+      "moveCurrentIndexDown": [],
+      "moveCurrentIndexLeft": [],
+      "moveCurrentIndexRight": [],
+      "moveCurrentIndexUp": []
+    },
+    "parent": "ItemView",
+    "properties": {
+      "cellHeight": "real",
+      "cellWidth": "real",
+      "delayRemove": "bool",
+      "flow": "var",
+      "isCurrentItem": "bool",
+      "nextSection": "string",
+      "previousSection": "string",
+      "section": "string",
+      "snapMode": "var",
+      "view": "ItemView"
+    },
+    "signals": {
+      "cellHeightChanged": [],
+      "cellWidthChanged": [],
+      "flowChanged": [],
+      "highlightMoveDurationChanged": [],
+      "snapModeChanged": []
+    }
+  },
+  "GroupBox": {
+    "enums": {},
+    "methods": {},
+    "parent": "Frame",
+    "properties": {
+      "implicitLabelHeight": "real",
+      "implicitLabelWidth": "real",
+      "label": "Item",
+      "title": "string"
+    },
+    "signals": {
+      "implicitLabelHeightChanged": [],
+      "implicitLabelWidthChanged": [],
+      "labelChanged": [],
+      "titleChanged": []
+    }
+  },
+  "HorizontalHeaderView": {
+    "enums": {},
+    "methods": {},
+    "parent": "TableView",
+    "properties": {
+      "textRole": "string"
+    },
+    "signals": {
+      "textRoleChanged": []
+    }
+  },
+  "HoverHandler": {
+    "enums": {},
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "blocking": "bool",
+      "hovered": "bool",
+      "point": "var"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "blockingChanged": [],
+      "hoveredChanged": [],
+      "pointChanged": []
+    }
+  },
+  "IconImage": {
+    "enums": {},
+    "methods": {},
+    "parent": "Image",
+    "properties": {
+      "color": "color",
+      "name": "string"
+    },
+    "signals": {
+      "colorChanged": [],
+      "nameChanged": []
+    }
+  },
+  "IconLabel": {
+    "enums": {
+      "Display": [
+        "IconOnly",
+        "TextOnly",
+        "TextBesideIcon",
+        "TextUnderIcon"
+      ]
+    },
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "alignment": "enumeration",
+      "bottomPadding": "real",
+      "color": "color",
+      "display": "var",
+      "font": "font",
+      "icon": "var",
+      "leftPadding": "real",
+      "mirrored": "bool",
+      "rightPadding": "real",
+      "spacing": "real",
+      "text": "string",
+      "topPadding": "real"
+    },
+    "signals": {}
+  },
+  "Image": {
+    "enums": {
+      "FillMode": [
+        "Stretch",
+        "PreserveAspectFit",
+        "PreserveAspectCrop",
+        "Tile",
+        "TileVertically",
+        "TileHorizontally",
+        "Pad"
+      ],
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ]
+    },
+    "methods": {},
+    "parent": "ImageBase",
+    "properties": {
+      "autoTransform": "bool",
+      "fillMode": "var",
+      "horizontalAlignment": "var",
+      "mipmap": "bool",
+      "paintedHeight": "real",
+      "paintedWidth": "real",
+      "sourceClipRect": "rect",
+      "verticalAlignment": "var"
+    },
+    "signals": {
+      "autoTransformChanged": [],
+      "fillModeChanged": [],
+      "horizontalAlignmentChanged": [
+        "var"
+      ],
+      "mipmapChanged": [
+        "bool"
+      ],
+      "paintedGeometryChanged": [],
+      "verticalAlignmentChanged": [
+        "var"
+      ]
+    }
+  },
+  "ImageBase": {
+    "enums": {
+      "LoadPixmapOptions": [
+        "NoOption",
+        "HandleDPR",
+        "UseProviderOptions"
+      ],
+      "Status": [
+        "Null",
+        "Ready",
+        "Loading",
+        "Error"
+      ]
+    },
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "asynchronous": "bool",
+      "cache": "bool",
+      "colorSpace": "var",
+      "currentFrame": "int",
+      "frameCount": "int",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "mirror": "bool",
+      "mirrorVertically": "bool",
+      "progress": "real",
+      "source": "url",
+      "sourceSize": "size",
+      "status": "var"
+    },
+    "signals": {
+      "asynchronousChanged": [],
+      "cacheChanged": [],
+      "colorSpaceChanged": [],
+      "currentFrameChanged": [],
+      "frameCountChanged": [],
+      "mirrorChanged": [],
+      "mirrorVerticallyChanged": [],
+      "progressChanged": [
+        "real"
+      ],
+      "sourceChanged": [
+        "url"
+      ],
+      "sourceClipRectChanged": [],
+      "sourceSizeChanged": [],
+      "statusChanged": [
+        "enumeration"
+      ]
+    }
+  },
+  "InputDevice": {
+    "enums": {
+      "Capabilities": [
+        "None",
+        "Position",
+        "Area",
+        "Pressure",
+        "Velocity",
+        "NormalizedPosition",
+        "MouseEmulation",
+        "PixelScroll",
+        "Scroll",
+        "Hover",
+        "Rotation",
+        "XTilt",
+        "YTilt",
+        "TangentialPressure",
+        "ZPosition",
+        "All"
+      ],
+      "DeviceTypes": [
+        "Unknown",
+        "Mouse",
+        "TouchScreen",
+        "TouchPad",
+        "Puck",
+        "Stylus",
+        "Airbrush",
+        "Keyboard",
+        "AllDevices"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "availableVirtualGeometry": "rect",
+      "capabilities": "var",
+      "name": "string",
+      "seatName": "string",
+      "systemId": "int",
+      "type": "var"
+    },
+    "signals": {
+      "availableVirtualGeometryChanged": [
+        "rect"
+      ]
+    }
+  },
+  "InputMethod": {
+    "enums": {
+      "Action": [
+        "Click",
+        "ContextMenu"
+      ]
+    },
+    "methods": {
+      "commit": [],
+      "hide": [],
+      "invokeAction": [
+        "var",
+        "int"
+      ],
+      "reset": [],
+      "show": [],
+      "update": [
+        "enumeration"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "anchorRectangle": "rect",
+      "animating": "bool",
+      "cursorRectangle": "rect",
+      "inputDirection": "enumeration",
+      "inputItemClipRectangle": "rect",
+      "keyboardRectangle": "rect",
+      "locale": "var",
+      "visible": "bool"
+    },
+    "signals": {
+      "anchorRectangleChanged": [],
+      "animatingChanged": [],
+      "cursorRectangleChanged": [],
+      "inputDirectionChanged": [
+        "enumeration"
+      ],
+      "inputItemClipRectangleChanged": [],
+      "keyboardRectangleChanged": [],
+      "localeChanged": [],
+      "visibleChanged": []
+    }
+  },
+  "Instantiator": {
+    "enums": {},
+    "methods": {
+      "objectAt": [
+        "int"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "asynchronous": "bool",
+      "count": "int",
+      "delegate": "Component",
+      "model": "var",
+      "object": "QtObject"
+    },
+    "signals": {
+      "activeChanged": [],
+      "asynchronousChanged": [],
+      "countChanged": [],
+      "delegateChanged": [],
+      "modelChanged": [],
+      "objectAdded": [
+        "int",
+        "QtObject"
+      ],
+      "objectChanged": [],
+      "objectRemoved": [
+        "int",
+        "QtObject"
+      ]
+    }
+  },
+  "IntValidator": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "bottom": "int",
+      "locale": "string",
+      "top": "int"
+    },
+    "signals": {
+      "bottomChanged": [
+        "int"
+      ],
+      "changed": [],
+      "localeNameChanged": [],
+      "topChanged": [
+        "int"
+      ]
+    }
+  },
+  "Item": {
+    "enums": {
+      "Flags": [
+        "ItemClipsChildrenToShape",
+        "ItemAcceptsInputMethod",
+        "ItemIsFocusScope",
+        "ItemHasContents",
+        "ItemAcceptsDrops",
+        "ItemIsViewport",
+        "ItemObservesViewport"
+      ],
+      "TransformOrigin": [
+        "TopLeft",
+        "Top",
+        "TopRight",
+        "Left",
+        "Center",
+        "Right",
+        "BottomLeft",
+        "Bottom",
+        "BottomRight"
+      ]
+    },
+    "methods": {
+      "childAt": [
+        "real",
+        "real"
+      ],
+      "contains": [
+        "point"
+      ],
+      "dumpItemTree": [],
+      "ensurePolished": [],
+      "forceActiveFocus": [
+        "enumeration"
+      ],
+      "grabToImage": [
+        "var"
+      ],
+      "mapFromGlobal": [
+        "V4Function"
+      ],
+      "mapFromItem": [
+        "V4Function"
+      ],
+      "mapToGlobal": [
+        "V4Function"
+      ],
+      "mapToItem": [
+        "V4Function"
+      ],
+      "nextItemInFocusChain": [],
+      "update": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "activeFocus": "bool",
+      "activeFocusOnTab": "bool",
+      "anchors": "Anchors",
+      "antialiasing": "bool",
+      "baseline": "var",
+      "baselineOffset": "real",
+      "bottom": "var",
+      "children": "list",
+      "childrenRect": "rect",
+      "clip": "bool",
+      "containmentMask": "QtObject",
+      "data": "list",
+      "enabled": "bool",
+      "focus": "bool",
+      "height": "real",
+      "horizontalCenter": "var",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "layer": "ItemLayer",
+      "left": "var",
+      "opacity": "real",
+      "palette": "Palette",
+      "parent": "Item",
+      "resources": "list",
+      "right": "var",
+      "rotation": "real",
+      "scale": "real",
+      "smooth": "bool",
+      "state": "string",
+      "states": "list",
+      "top": "var",
+      "transform": "list",
+      "transformOrigin": "var",
+      "transformOriginPoint": "point",
+      "transitions": "list",
+      "verticalCenter": "var",
+      "visible": "bool",
+      "visibleChildren": "list",
+      "width": "real",
+      "x": "real",
+      "y": "real",
+      "z": "real"
+    },
+    "signals": {
+      "activeFocusChanged": [
+        "bool"
+      ],
+      "activeFocusOnTabChanged": [
+        "bool"
+      ],
+      "antialiasingChanged": [
+        "bool"
+      ],
+      "baselineOffsetChanged": [
+        "real"
+      ],
+      "childrenChanged": [],
+      "childrenRectChanged": [
+        "rect"
+      ],
+      "clipChanged": [
+        "bool"
+      ],
+      "containmentMaskChanged": [],
+      "enabledChanged": [],
+      "focusChanged": [
+        "bool"
+      ],
+      "heightChanged": [],
+      "implicitHeightChanged": [],
+      "implicitWidthChanged": [],
+      "opacityChanged": [],
+      "paletteChanged": [],
+      "paletteCreated": [],
+      "parentChanged": [
+        "Item"
+      ],
+      "rotationChanged": [],
+      "scaleChanged": [],
+      "smoothChanged": [
+        "bool"
+      ],
+      "stateChanged": [
+        "string"
+      ],
+      "transformOriginChanged": [
+        "var"
+      ],
+      "visibleChanged": [],
+      "visibleChildrenChanged": [],
+      "widthChanged": [],
+      "windowChanged": [
+        "Window"
+      ],
+      "xChanged": [],
+      "yChanged": [],
+      "zChanged": []
+    }
+  },
+  "ItemDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "highlighted": "bool"
+    },
+    "signals": {
+      "highlightedChanged": []
+    }
+  },
+  "ItemGroup": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "implicitHeight": "real",
+      "implicitWidth": "real"
+    },
+    "signals": {}
+  },
+  "ItemSelectionModel": {
+    "enums": {
+      "SelectionFlags": [
+        "NoUpdate",
+        "Clear",
+        "Select",
+        "Deselect",
+        "Toggle",
+        "Current",
+        "Rows",
+        "Columns",
+        "SelectCurrent",
+        "ToggleCurrent",
+        "ClearAndSelect"
+      ]
+    },
+    "methods": {
+      "clear": [],
+      "clearCurrentIndex": [],
+      "clearSelection": [],
+      "columnIntersectsSelection": [
+        "int"
+      ],
+      "isColumnSelected": [
+        "int"
+      ],
+      "isRowSelected": [
+        "int"
+      ],
+      "isSelected": [
+        "var"
+      ],
+      "reset": [],
+      "rowIntersectsSelection": [
+        "int"
+      ],
+      "select": [
+        "var",
+        "enumeration"
+      ],
+      "selectedColumns": [],
+      "selectedRows": [],
+      "setCurrentIndex": [
+        "var",
+        "enumeration"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "currentIndex": "var",
+      "hasSelection": "bool",
+      "model": "QAbstractItemModel",
+      "selectedIndexes": "var",
+      "selection": "var"
+    },
+    "signals": {
+      "currentChanged": [
+        "var",
+        "var"
+      ],
+      "currentColumnChanged": [
+        "var",
+        "var"
+      ],
+      "currentRowChanged": [
+        "var",
+        "var"
+      ],
+      "modelChanged": [
+        "QAbstractItemModel"
+      ],
+      "selectionChanged": [
+        "var",
+        "var"
+      ]
+    }
+  },
+  "ItemView": {
+    "enums": {
+      "HighlightRangeMode": [
+        "NoHighlightRange",
+        "ApplyRange",
+        "StrictlyEnforceRange"
+      ],
+      "LayoutDirection": [
+        "LeftToRight",
+        "RightToLeft",
+        "VerticalTopToBottom",
+        "VerticalBottomToTop"
+      ],
+      "PositionMode": [
+        "Beginning",
+        "Center",
+        "End",
+        "Visible",
+        "Contain",
+        "SnapPosition"
+      ],
+      "VerticalLayoutDirection": [
+        "TopToBottom",
+        "BottomToTop"
+      ]
+    },
+    "methods": {
+      "forceLayout": [],
+      "indexAt": [
+        "real",
+        "real"
+      ],
+      "itemAt": [
+        "real",
+        "real"
+      ],
+      "itemAtIndex": [
+        "int"
+      ],
+      "positionViewAtBeginning": [],
+      "positionViewAtEnd": [],
+      "positionViewAtIndex": [
+        "int",
+        "int"
+      ]
+    },
+    "parent": "Flickable",
+    "properties": {
+      "add": "Transition",
+      "addDisplaced": "Transition",
+      "cacheBuffer": "int",
+      "count": "int",
+      "currentIndex": "int",
+      "currentItem": "Item",
+      "delegate": "Component",
+      "displaced": "Transition",
+      "displayMarginBeginning": "int",
+      "displayMarginEnd": "int",
+      "effectiveLayoutDirection": "enumeration",
+      "footer": "Component",
+      "footerItem": "Item",
+      "header": "Component",
+      "headerItem": "Item",
+      "highlight": "Component",
+      "highlightFollowsCurrentItem": "bool",
+      "highlightItem": "Item",
+      "highlightMoveDuration": "int",
+      "highlightRangeMode": "var",
+      "keyNavigationEnabled": "bool",
+      "keyNavigationWraps": "bool",
+      "layoutDirection": "enumeration",
+      "model": "var",
+      "move": "Transition",
+      "moveDisplaced": "Transition",
+      "populate": "Transition",
+      "preferredHighlightBegin": "real",
+      "preferredHighlightEnd": "real",
+      "remove": "Transition",
+      "removeDisplaced": "Transition",
+      "reuseItems": "bool",
+      "verticalLayoutDirection": "var"
+    },
+    "signals": {
+      "addDisplacedTransitionChanged": [],
+      "addTransitionChanged": [],
+      "cacheBufferChanged": [],
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "currentItemChanged": [],
+      "delegateChanged": [],
+      "displacedTransitionChanged": [],
+      "displayMarginBeginningChanged": [],
+      "displayMarginEndChanged": [],
+      "effectiveLayoutDirectionChanged": [],
+      "footerChanged": [],
+      "footerItemChanged": [],
+      "headerChanged": [],
+      "headerItemChanged": [],
+      "highlightChanged": [],
+      "highlightFollowsCurrentItemChanged": [],
+      "highlightItemChanged": [],
+      "highlightMoveDurationChanged": [],
+      "highlightRangeModeChanged": [],
+      "keyNavigationEnabledChanged": [],
+      "keyNavigationWrapsChanged": [],
+      "layoutDirectionChanged": [],
+      "modelChanged": [],
+      "moveDisplacedTransitionChanged": [],
+      "moveTransitionChanged": [],
+      "populateTransitionChanged": [],
+      "preferredHighlightBeginChanged": [],
+      "preferredHighlightEndChanged": [],
+      "removeDisplacedTransitionChanged": [],
+      "removeTransitionChanged": [],
+      "reuseItemsChanged": [],
+      "verticalLayoutDirectionChanged": []
+    }
+  },
+  "KeyNavigation": {
+    "enums": {
+      "Priority": [
+        "BeforeItem",
+        "AfterItem"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "backtab": "Item",
+      "down": "Item",
+      "left": "Item",
+      "priority": "var",
+      "right": "Item",
+      "tab": "Item",
+      "up": "Item"
+    },
+    "signals": {
+      "backtabChanged": [],
+      "downChanged": [],
+      "leftChanged": [],
+      "priorityChanged": [],
+      "rightChanged": [],
+      "tabChanged": [],
+      "upChanged": []
+    }
+  },
+  "Keys": {
+    "enums": {
+      "Priority": [
+        "BeforeItem",
+        "AfterItem"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "enabled": "bool",
+      "forwardTo": "list",
+      "priority": "var"
+    },
+    "signals": {
+      "asteriskPressed": [
+        "KeyEvent"
+      ],
+      "backPressed": [
+        "KeyEvent"
+      ],
+      "backtabPressed": [
+        "KeyEvent"
+      ],
+      "callPressed": [
+        "KeyEvent"
+      ],
+      "cancelPressed": [
+        "KeyEvent"
+      ],
+      "context1Pressed": [
+        "KeyEvent"
+      ],
+      "context2Pressed": [
+        "KeyEvent"
+      ],
+      "context3Pressed": [
+        "KeyEvent"
+      ],
+      "context4Pressed": [
+        "KeyEvent"
+      ],
+      "deletePressed": [
+        "KeyEvent"
+      ],
+      "digit0Pressed": [
+        "KeyEvent"
+      ],
+      "digit1Pressed": [
+        "KeyEvent"
+      ],
+      "digit2Pressed": [
+        "KeyEvent"
+      ],
+      "digit3Pressed": [
+        "KeyEvent"
+      ],
+      "digit4Pressed": [
+        "KeyEvent"
+      ],
+      "digit5Pressed": [
+        "KeyEvent"
+      ],
+      "digit6Pressed": [
+        "KeyEvent"
+      ],
+      "digit7Pressed": [
+        "KeyEvent"
+      ],
+      "digit8Pressed": [
+        "KeyEvent"
+      ],
+      "digit9Pressed": [
+        "KeyEvent"
+      ],
+      "downPressed": [
+        "KeyEvent"
+      ],
+      "enabledChanged": [],
+      "enterPressed": [
+        "KeyEvent"
+      ],
+      "escapePressed": [
+        "KeyEvent"
+      ],
+      "flipPressed": [
+        "KeyEvent"
+      ],
+      "hangupPressed": [
+        "KeyEvent"
+      ],
+      "leftPressed": [
+        "KeyEvent"
+      ],
+      "menuPressed": [
+        "KeyEvent"
+      ],
+      "noPressed": [
+        "KeyEvent"
+      ],
+      "numberSignPressed": [
+        "KeyEvent"
+      ],
+      "pressed": [
+        "KeyEvent"
+      ],
+      "priorityChanged": [],
+      "released": [
+        "KeyEvent"
+      ],
+      "returnPressed": [
+        "KeyEvent"
+      ],
+      "rightPressed": [
+        "KeyEvent"
+      ],
+      "selectPressed": [
+        "KeyEvent"
+      ],
+      "shortcutOverride": [
+        "KeyEvent"
+      ],
+      "spacePressed": [
+        "KeyEvent"
+      ],
+      "tabPressed": [
+        "KeyEvent"
+      ],
+      "upPressed": [
+        "KeyEvent"
+      ],
+      "volumeDownPressed": [
+        "KeyEvent"
+      ],
+      "volumeUpPressed": [
+        "KeyEvent"
+      ],
+      "yesPressed": [
+        "KeyEvent"
+      ]
+    }
+  },
+  "Label": {
+    "enums": {},
+    "methods": {},
+    "parent": "Text",
+    "properties": {
+      "background": "Item",
+      "bottomInset": "real",
+      "font": "font",
+      "implicitBackgroundHeight": "real",
+      "implicitBackgroundWidth": "real",
+      "leftInset": "real",
+      "rightInset": "real",
+      "topInset": "real"
+    },
+    "signals": {
+      "backgroundChanged": [],
+      "bottomInsetChanged": [],
+      "fontChanged": [],
+      "implicitBackgroundHeightChanged": [],
+      "implicitBackgroundWidthChanged": [],
+      "leftInsetChanged": [],
+      "rightInsetChanged": [],
+      "topInsetChanged": []
+    }
+  },
+  "Layout": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "alignment": "enumeration",
+      "bottomMargin": "real",
+      "column": "int",
+      "columnSpan": "int",
+      "fillHeight": "bool",
+      "fillWidth": "bool",
+      "leftMargin": "real",
+      "margins": "real",
+      "maximumHeight": "real",
+      "maximumWidth": "real",
+      "minimumHeight": "real",
+      "minimumWidth": "real",
+      "preferredHeight": "real",
+      "preferredWidth": "real",
+      "rightMargin": "real",
+      "row": "int",
+      "rowSpan": "int",
+      "topMargin": "real"
+    },
+    "signals": {}
+  },
+  "LayoutMirroring": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "childrenInherit": "bool",
+      "enabled": "bool"
+    },
+    "signals": {
+      "childrenInheritChanged": [],
+      "enabledChanged": []
+    }
+  },
+  "ListElement": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "ListModel": {
+    "enums": {},
+    "methods": {
+      "append": [
+        "V4Function"
+      ],
+      "clear": [],
+      "get": [
+        "int"
+      ],
+      "insert": [
+        "V4Function"
+      ],
+      "move": [
+        "int",
+        "int",
+        "int"
+      ],
+      "remove": [
+        "V4Function"
+      ],
+      "set": [
+        "int",
+        "var"
+      ],
+      "setProperty": [
+        "int",
+        "string",
+        "var"
+      ],
+      "sync": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "agent": "QtObject",
+      "count": "int",
+      "dynamicRoles": "bool"
+    },
+    "signals": {
+      "columnsAboutToBeInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsAboutToBeMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "columnsAboutToBeRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "columnsMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "columnsRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "countChanged": [],
+      "dataChanged": [
+        "var",
+        "var"
+      ],
+      "headerDataChanged": [
+        "enumeration",
+        "int",
+        "int"
+      ],
+      "layoutAboutToBeChanged": [],
+      "layoutChanged": [],
+      "modelAboutToBeReset": [],
+      "modelReset": [],
+      "rowsAboutToBeInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsAboutToBeMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "rowsAboutToBeRemoved": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsInserted": [
+        "var",
+        "int",
+        "int"
+      ],
+      "rowsMoved": [
+        "var",
+        "int",
+        "int",
+        "var",
+        "int"
+      ],
+      "rowsRemoved": [
+        "var",
+        "int",
+        "int"
+      ]
+    }
+  },
+  "ListView": {
+    "enums": {
+      "FooterPositioning": [
+        "InlineFooter",
+        "OverlayFooter",
+        "PullBackFooter"
+      ],
+      "HeaderPositioning": [
+        "InlineHeader",
+        "OverlayHeader",
+        "PullBackHeader"
+      ],
+      "Orientation": [
+        "Horizontal",
+        "Vertical"
+      ],
+      "SnapMode": [
+        "NoSnap",
+        "SnapToItem",
+        "SnapOneItem"
+      ]
+    },
+    "methods": {
+      "decrementCurrentIndex": [],
+      "incrementCurrentIndex": []
+    },
+    "parent": "ItemView",
+    "properties": {
+      "currentSection": "string",
+      "delayRemove": "bool",
+      "footerPositioning": "var",
+      "headerPositioning": "var",
+      "highlightMoveVelocity": "real",
+      "highlightResizeDuration": "int",
+      "highlightResizeVelocity": "real",
+      "isCurrentItem": "bool",
+      "nextSection": "string",
+      "orientation": "var",
+      "previousSection": "string",
+      "section": "ViewSection",
+      "snapMode": "var",
+      "spacing": "real",
+      "view": "ItemView"
+    },
+    "signals": {
+      "currentSectionChanged": [],
+      "footerPositioningChanged": [],
+      "headerPositioningChanged": [],
+      "highlightMoveVelocityChanged": [],
+      "highlightResizeDurationChanged": [],
+      "highlightResizeVelocityChanged": [],
+      "orientationChanged": [],
+      "snapModeChanged": [],
+      "spacingChanged": []
+    }
+  },
+  "Loader": {
+    "enums": {
+      "Status": [
+        "Null",
+        "Ready",
+        "Loading",
+        "Error"
+      ]
+    },
+    "methods": {
+      "setSource": [
+        "V4Function"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "active": "bool",
+      "asynchronous": "bool",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "item": "QtObject",
+      "progress": "real",
+      "source": "url",
+      "sourceComponent": "Component",
+      "status": "var"
+    },
+    "signals": {
+      "activeChanged": [],
+      "asynchronousChanged": [],
+      "itemChanged": [],
+      "loaded": [],
+      "progressChanged": [],
+      "sourceChanged": [],
+      "sourceComponentChanged": [],
+      "statusChanged": []
+    }
+  },
+  "Locale": {
+    "enums": {
+      "CurrencySymbolFormat": [
+        "CurrencyIsoCode",
+        "CurrencySymbol",
+        "CurrencyDisplayName"
+      ],
+      "DataSizeFormat": [
+        "DataSizeBase1000",
+        "DataSizeSIQuantifiers",
+        "DataSizeIecFormat",
+        "DataSizeTraditionalFormat",
+        "DataSizeSIFormat"
+      ],
+      "DayOfWeek": [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday"
+      ],
+      "FormatType": [
+        "LongFormat",
+        "ShortFormat",
+        "NarrowFormat"
+      ],
+      "MeasurementSystem": [
+        "MetricSystem",
+        "ImperialSystem",
+        "ImperialUSSystem",
+        "ImperialUKSystem"
+      ],
+      "NumberOptions": [
+        "DefaultNumberOptions",
+        "OmitGroupSeparator",
+        "RejectGroupSeparator",
+        "OmitLeadingZeroInExponent",
+        "RejectLeadingZeroInExponent",
+        "IncludeTrailingZeroesAfterDot",
+        "RejectTrailingZeroesAfterDot"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "LoggingCategory": {
+    "enums": {
+      "DefaultLogLevel": [
+        "Debug",
+        "Info",
+        "Warning",
+        "Critical",
+        "Fatal"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "defaultLogLevel": "var",
+      "name": "string"
+    },
+    "signals": {}
+  },
+  "Matrix4x4": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "matrix": "matrix4x4"
+    },
+    "signals": {
+      "matrixChanged": []
+    }
+  },
+  "Menu": {
+    "enums": {},
+    "methods": {
+      "actionAt": [
+        "int"
+      ],
+      "addAction": [
+        "Action"
+      ],
+      "addItem": [
+        "Item"
+      ],
+      "addMenu": [
+        "Menu"
+      ],
+      "dismiss": [],
+      "insertAction": [
+        "int",
+        "Action"
+      ],
+      "insertItem": [
+        "int",
+        "Item"
+      ],
+      "insertMenu": [
+        "int",
+        "Menu"
+      ],
+      "itemAt": [
+        "int"
+      ],
+      "menuAt": [
+        "int"
+      ],
+      "moveItem": [
+        "int",
+        "int"
+      ],
+      "popup": [
+        "V4Function"
+      ],
+      "removeAction": [
+        "Action"
+      ],
+      "removeItem": [
+        "Item"
+      ],
+      "removeMenu": [
+        "Menu"
+      ],
+      "takeAction": [
+        "int"
+      ],
+      "takeItem": [
+        "int"
+      ],
+      "takeMenu": [
+        "int"
+      ]
+    },
+    "parent": "Popup",
+    "properties": {
+      "cascade": "bool",
+      "contentData": "list",
+      "contentModel": "var",
+      "count": "int",
+      "currentIndex": "int",
+      "delegate": "Component",
+      "overlap": "real",
+      "title": "string"
+    },
+    "signals": {
+      "cascadeChanged": [
+        "bool"
+      ],
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "delegateChanged": [],
+      "overlapChanged": [],
+      "titleChanged": [
+        "string"
+      ]
+    }
+  },
+  "MenuBar": {
+    "enums": {},
+    "methods": {
+      "addMenu": [
+        "Menu"
+      ],
+      "insertMenu": [
+        "int",
+        "Menu"
+      ],
+      "menuAt": [
+        "int"
+      ],
+      "removeMenu": [
+        "Menu"
+      ],
+      "takeMenu": [
+        "int"
+      ]
+    },
+    "parent": "Container",
+    "properties": {
+      "contentData": "list",
+      "delegate": "Component",
+      "menus": "list"
+    },
+    "signals": {
+      "delegateChanged": [],
+      "menusChanged": []
+    }
+  },
+  "MenuBarItem": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "highlighted": "bool",
+      "menu": "Menu",
+      "menuBar": "MenuBar"
+    },
+    "signals": {
+      "highlightedChanged": [],
+      "menuBarChanged": [],
+      "menuChanged": [],
+      "triggered": []
+    }
+  },
+  "MenuItem": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "arrow": "Item",
+      "highlighted": "bool",
+      "menu": "Menu",
+      "subMenu": "Menu"
+    },
+    "signals": {
+      "arrowChanged": [],
+      "highlightedChanged": [],
+      "menuChanged": [],
+      "subMenuChanged": [],
+      "triggered": []
+    }
+  },
+  "MenuSeparator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {},
+    "signals": {}
+  },
+  "MessageDialog": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "buttons": "enumeration",
+      "data": "list",
+      "detailedText": "string",
+      "flags": "enumeration",
+      "informativeText": "string",
+      "modality": "enumeration",
+      "parentWindow": "QWindow",
+      "result": "var",
+      "text": "string",
+      "title": "string",
+      "visible": "bool"
+    },
+    "signals": {
+      "accepted": [],
+      "buttonClicked": [
+        "enumeration",
+        "enumeration"
+      ],
+      "buttonsChanged": [],
+      "detailedTextChanged": [],
+      "flagsChanged": [],
+      "informativeTextChanged": [],
+      "modalityChanged": [],
+      "parentWindowChanged": [],
+      "rejected": [],
+      "resultChanged": [],
+      "textChanged": [],
+      "titleChanged": [],
+      "visibleChanged": []
+    }
+  },
+  "MnemonicLabel": {
+    "enums": {},
+    "methods": {},
+    "parent": "Text",
+    "properties": {
+      "mnemonicVisible": "bool",
+      "text": "string"
+    },
+    "signals": {}
+  },
+  "MouseArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "containsMouse": "bool",
+      "containsPress": "bool",
+      "cursorShape": "enumeration",
+      "drag": "Drag",
+      "enabled": "bool",
+      "hoverEnabled": "bool",
+      "mouseX": "real",
+      "mouseY": "real",
+      "pressAndHoldInterval": "int",
+      "pressed": "bool",
+      "pressedButtons": "enumeration",
+      "preventStealing": "bool",
+      "propagateComposedEvents": "bool",
+      "scrollGestureEnabled": "bool"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "canceled": [],
+      "clicked": [
+        "MouseEvent"
+      ],
+      "containsPressChanged": [],
+      "cursorShapeChanged": [],
+      "doubleClicked": [
+        "MouseEvent"
+      ],
+      "enabledChanged": [],
+      "entered": [],
+      "exited": [],
+      "hoverEnabledChanged": [],
+      "hoveredChanged": [],
+      "mouseXChanged": [
+        "MouseEvent"
+      ],
+      "mouseYChanged": [
+        "MouseEvent"
+      ],
+      "positionChanged": [
+        "MouseEvent"
+      ],
+      "pressAndHold": [
+        "MouseEvent"
+      ],
+      "pressAndHoldIntervalChanged": [],
+      "pressed": [
+        "MouseEvent"
+      ],
+      "pressedButtonsChanged": [],
+      "pressedChanged": [],
+      "preventStealingChanged": [],
+      "propagateComposedEventsChanged": [],
+      "released": [
+        "MouseEvent"
+      ],
+      "scrollGestureEnabledChanged": [],
+      "wheel": [
+        "WheelEvent"
+      ]
+    }
+  },
+  "MultiPointTouchArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "maximumTouchPoints": "int",
+      "minimumTouchPoints": "int",
+      "mouseEnabled": "bool",
+      "touchPoints": "list"
+    },
+    "signals": {
+      "canceled": [
+        "list"
+      ],
+      "gestureStarted": [
+        "GrabGestureEvent"
+      ],
+      "maximumTouchPointsChanged": [],
+      "minimumTouchPointsChanged": [],
+      "mouseEnabledChanged": [],
+      "pressed": [
+        "list"
+      ],
+      "released": [
+        "list"
+      ],
+      "touchUpdated": [
+        "list"
+      ],
+      "updated": [
+        "list"
+      ]
+    }
+  },
+  "NumberAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "PropertyAnimation",
+    "properties": {
+      "from": "real",
+      "to": "real"
+    },
+    "signals": {}
+  },
+  "ObjectModel": {
+    "enums": {},
+    "methods": {
+      "append": [
+        "QtObject"
+      ],
+      "clear": [],
+      "get": [
+        "int"
+      ],
+      "insert": [
+        "int",
+        "QtObject"
+      ],
+      "move": [
+        "int",
+        "int"
+      ],
+      "remove": [
+        "int"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "children": "list",
+      "count": "int",
+      "index": "int"
+    },
+    "signals": {
+      "childrenChanged": [],
+      "countChanged": [],
+      "createdItem": [
+        "int",
+        "QtObject"
+      ],
+      "destroyingItem": [
+        "QtObject"
+      ],
+      "initItem": [
+        "int",
+        "QtObject"
+      ],
+      "itemPooled": [
+        "int",
+        "QtObject"
+      ],
+      "itemReused": [
+        "int",
+        "QtObject"
+      ],
+      "modelUpdated": [
+        "var",
+        "bool"
+      ]
+    }
+  },
+  "OpacityAnimator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animator",
+    "properties": {},
+    "signals": {}
+  },
+  "Overlay": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "modal": "Component",
+      "modeless": "Component",
+      "overlay": "Overlay"
+    },
+    "signals": {
+      "modalChanged": [],
+      "modelessChanged": [],
+      "pressed": [],
+      "released": []
+    }
+  },
+  "Package": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "data": "list",
+      "name": "string"
+    },
+    "signals": {}
+  },
+  "PaddedRectangle": {
+    "enums": {},
+    "methods": {},
+    "parent": "Rectangle",
+    "properties": {
+      "bottomPadding": "real",
+      "leftPadding": "real",
+      "padding": "real",
+      "rightPadding": "real",
+      "topPadding": "real"
+    },
+    "signals": {
+      "bottomPaddingChanged": [],
+      "leftPaddingChanged": [],
+      "paddingChanged": [],
+      "rightPaddingChanged": [],
+      "topPaddingChanged": []
+    }
+  },
+  "Page": {
+    "enums": {},
+    "methods": {},
+    "parent": "Pane",
+    "properties": {
+      "footer": "Item",
+      "header": "Item",
+      "implicitFooterHeight": "real",
+      "implicitFooterWidth": "real",
+      "implicitHeaderHeight": "real",
+      "implicitHeaderWidth": "real",
+      "title": "string"
+    },
+    "signals": {
+      "footerChanged": [],
+      "headerChanged": [],
+      "implicitFooterHeightChanged": [],
+      "implicitFooterWidthChanged": [],
+      "implicitHeaderHeightChanged": [],
+      "implicitHeaderWidthChanged": [],
+      "titleChanged": []
+    }
+  },
+  "PageIndicator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "count": "int",
+      "currentIndex": "int",
+      "delegate": "Component",
+      "interactive": "bool"
+    },
+    "signals": {
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "delegateChanged": [],
+      "interactiveChanged": []
+    }
+  },
+  "PaintedItem": {
+    "enums": {
+      "PerformanceHints": [
+        "FastFBOResizing"
+      ],
+      "RenderTarget": [
+        "Image",
+        "FramebufferObject",
+        "InvertedYFramebufferObject"
+      ]
+    },
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "contentsScale": "real",
+      "contentsSize": "size",
+      "fillColor": "color",
+      "renderTarget": "var",
+      "textureSize": "size"
+    },
+    "signals": {
+      "contentsScaleChanged": [],
+      "contentsSizeChanged": [],
+      "fillColorChanged": [],
+      "renderTargetChanged": [],
+      "textureSizeChanged": []
+    }
+  },
+  "Palette": {
+    "enums": {},
+    "methods": {
+      "setActive": [
+        "ColorGroup"
+      ],
+      "setDisabled": [
+        "ColorGroup"
+      ],
+      "setInactive": [
+        "ColorGroup"
+      ]
+    },
+    "parent": "ColorGroup",
+    "properties": {
+      "active": "ColorGroup",
+      "disabled": "ColorGroup",
+      "inactive": "ColorGroup"
+    },
+    "signals": {
+      "activeChanged": [],
+      "disabledChanged": [],
+      "inactiveChanged": []
+    }
+  },
+  "Pane": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "contentChildren": "list",
+      "contentData": "list",
+      "contentHeight": "real",
+      "contentWidth": "real"
+    },
+    "signals": {
+      "contentChildrenChanged": [],
+      "contentHeightChanged": [],
+      "contentWidthChanged": []
+    }
+  },
+  "ParallelAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "animations": "list"
+    },
+    "signals": {}
+  },
+  "ParentAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "animations": "list",
+      "newParent": "Item",
+      "target": "Item",
+      "via": "Item"
+    },
+    "signals": {
+      "newParentChanged": [],
+      "targetChanged": [],
+      "viaChanged": []
+    }
+  },
+  "ParentChange": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "height": "var",
+      "parent": "Item",
+      "rotation": "var",
+      "scale": "var",
+      "target": "Item",
+      "width": "var",
+      "x": "var",
+      "y": "var"
+    },
+    "signals": {}
+  },
+  "Path": {
+    "enums": {},
+    "methods": {
+      "pointAtPercent": [
+        "real"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "closed": "bool",
+      "pathElements": "list",
+      "scale": "size",
+      "startX": "real",
+      "startY": "real"
+    },
+    "signals": {
+      "changed": [],
+      "scaleChanged": [],
+      "startXChanged": [],
+      "startYChanged": []
+    }
+  },
+  "PathAngleArc": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "centerX": "real",
+      "centerY": "real",
+      "moveToStart": "bool",
+      "radiusX": "real",
+      "radiusY": "real",
+      "relativeX": "real",
+      "relativeY": "real",
+      "startAngle": "real",
+      "sweepAngle": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "centerXChanged": [],
+      "centerYChanged": [],
+      "changed": [],
+      "moveToStartChanged": [],
+      "radiusXChanged": [],
+      "radiusYChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "startAngleChanged": [],
+      "sweepAngleChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathAnimation": {
+    "enums": {
+      "Orientation": [
+        "Fixed",
+        "RightFirst",
+        "LeftFirst",
+        "BottomFirst",
+        "TopFirst"
+      ]
+    },
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "anchorPoint": "point",
+      "duration": "int",
+      "easing": "var",
+      "endRotation": "real",
+      "orientation": "var",
+      "orientationEntryDuration": "int",
+      "orientationExitDuration": "int",
+      "path": "Path",
+      "target": "Item"
+    },
+    "signals": {
+      "anchorPointChanged": [
+        "point"
+      ],
+      "durationChanged": [
+        "int"
+      ],
+      "easingChanged": [
+        "var"
+      ],
+      "endRotationChanged": [
+        "real"
+      ],
+      "orientationChanged": [
+        "var"
+      ],
+      "orientationEntryDurationChanged": [
+        "real"
+      ],
+      "orientationExitDurationChanged": [
+        "real"
+      ],
+      "pathChanged": [],
+      "targetChanged": []
+    }
+  },
+  "PathArc": {
+    "enums": {
+      "ArcDirection": [
+        "Clockwise",
+        "Counterclockwise"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "direction": "var",
+      "radiusX": "real",
+      "radiusY": "real",
+      "relativeX": "real",
+      "relativeY": "real",
+      "useLargeArc": "bool",
+      "x": "real",
+      "xAxisRotation": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "directionChanged": [],
+      "radiusXChanged": [],
+      "radiusYChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "useLargeArcChanged": [],
+      "xAxisRotationChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathAttribute": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "name": "string",
+      "value": "real"
+    },
+    "signals": {
+      "changed": [],
+      "nameChanged": [],
+      "valueChanged": []
+    }
+  },
+  "PathCubic": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "control1X": "real",
+      "control1Y": "real",
+      "control2X": "real",
+      "control2Y": "real",
+      "relativeControl1X": "real",
+      "relativeControl1Y": "real",
+      "relativeControl2X": "real",
+      "relativeControl2Y": "real",
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "control1XChanged": [],
+      "control1YChanged": [],
+      "control2XChanged": [],
+      "control2YChanged": [],
+      "relativeControl1XChanged": [],
+      "relativeControl1YChanged": [],
+      "relativeControl2XChanged": [],
+      "relativeControl2YChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathCurve": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathInterpolator": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "angle": "real",
+      "path": "Path",
+      "progress": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "angleChanged": [],
+      "pathChanged": [],
+      "progressChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathLine": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathMove": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathMultiline": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "paths": "var",
+      "relativeX": "real",
+      "relativeY": "real",
+      "start": "point",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "pathsChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "startChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathPercent": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "value": "real"
+    },
+    "signals": {
+      "changed": [],
+      "valueChanged": []
+    }
+  },
+  "PathPolyline": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "path": "var",
+      "relativeX": "real",
+      "relativeY": "real",
+      "start": "point",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "pathChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "startChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathQuad": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "controlX": "real",
+      "controlY": "real",
+      "relativeControlX": "real",
+      "relativeControlY": "real",
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "controlXChanged": [],
+      "controlYChanged": [],
+      "relativeControlXChanged": [],
+      "relativeControlYChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathSvg": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "path": "string",
+      "relativeX": "real",
+      "relativeY": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "pathChanged": [],
+      "relativeXChanged": [],
+      "relativeYChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathText": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "font": "font",
+      "height": "real",
+      "text": "string",
+      "width": "real",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "changed": [],
+      "fontChanged": [],
+      "textChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "PathView": {
+    "enums": {
+      "HighlightRangeMode": [
+        "NoHighlightRange",
+        "ApplyRange",
+        "StrictlyEnforceRange"
+      ],
+      "MovementDirection": [
+        "Shortest",
+        "Negative",
+        "Positive"
+      ],
+      "PositionMode": [
+        "Beginning",
+        "Center",
+        "End",
+        "Contain",
+        "SnapPosition"
+      ],
+      "SnapMode": [
+        "NoSnap",
+        "SnapToItem",
+        "SnapOneItem"
+      ]
+    },
+    "methods": {
+      "decrementCurrentIndex": [],
+      "incrementCurrentIndex": [],
+      "indexAt": [
+        "real",
+        "real"
+      ],
+      "itemAt": [
+        "real",
+        "real"
+      ],
+      "itemAtIndex": [
+        "int"
+      ],
+      "positionViewAtIndex": [
+        "int",
+        "int"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "cacheItemCount": "int",
+      "count": "int",
+      "currentIndex": "int",
+      "currentItem": "Item",
+      "delegate": "Component",
+      "dragMargin": "real",
+      "dragging": "bool",
+      "flickDeceleration": "real",
+      "flicking": "bool",
+      "highlight": "Component",
+      "highlightItem": "Item",
+      "highlightMoveDuration": "int",
+      "highlightRangeMode": "var",
+      "interactive": "bool",
+      "isCurrentItem": "bool",
+      "maximumFlickVelocity": "real",
+      "model": "var",
+      "movementDirection": "var",
+      "moving": "bool",
+      "offset": "real",
+      "onPath": "bool",
+      "path": "Path",
+      "pathItemCount": "int",
+      "preferredHighlightBegin": "real",
+      "preferredHighlightEnd": "real",
+      "snapMode": "var",
+      "view": "PathView"
+    },
+    "signals": {
+      "cacheItemCountChanged": [],
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "currentItemChanged": [],
+      "delegateChanged": [],
+      "dragEnded": [],
+      "dragMarginChanged": [],
+      "dragStarted": [],
+      "draggingChanged": [],
+      "flickDecelerationChanged": [],
+      "flickEnded": [],
+      "flickStarted": [],
+      "flickingChanged": [],
+      "highlightChanged": [],
+      "highlightItemChanged": [],
+      "highlightMoveDurationChanged": [],
+      "highlightRangeModeChanged": [],
+      "interactiveChanged": [],
+      "maximumFlickVelocityChanged": [],
+      "modelChanged": [],
+      "movementDirectionChanged": [],
+      "movementEnded": [],
+      "movementStarted": [],
+      "movingChanged": [],
+      "offsetChanged": [],
+      "pathChanged": [],
+      "pathItemCountChanged": [],
+      "preferredHighlightBeginChanged": [],
+      "preferredHighlightEndChanged": [],
+      "snapModeChanged": [],
+      "snapPositionChanged": []
+    }
+  },
+  "PauseAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "duration": "int"
+    },
+    "signals": {
+      "durationChanged": [
+        "int"
+      ]
+    }
+  },
+  "Pinch": {
+    "enums": {
+      "Axis": [
+        "NoDrag",
+        "XAxis",
+        "YAxis",
+        "XAndYAxis",
+        "XandYAxis"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "dragAxis": "var",
+      "maximumRotation": "real",
+      "maximumScale": "real",
+      "maximumX": "real",
+      "maximumY": "real",
+      "minimumRotation": "real",
+      "minimumScale": "real",
+      "minimumX": "real",
+      "minimumY": "real",
+      "target": "Item"
+    },
+    "signals": {
+      "activeChanged": [],
+      "dragAxisChanged": [],
+      "maximumRotationChanged": [],
+      "maximumScaleChanged": [],
+      "maximumXChanged": [],
+      "maximumYChanged": [],
+      "minimumRotationChanged": [],
+      "minimumScaleChanged": [],
+      "minimumXChanged": [],
+      "minimumYChanged": [],
+      "targetChanged": []
+    }
+  },
+  "PinchArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "enabled": "bool",
+      "pinch": "Pinch"
+    },
+    "signals": {
+      "enabledChanged": [],
+      "pinchFinished": [
+        "PinchEvent"
+      ],
+      "pinchStarted": [
+        "PinchEvent"
+      ],
+      "pinchUpdated": [
+        "PinchEvent"
+      ],
+      "smartZoom": [
+        "PinchEvent"
+      ]
+    }
+  },
+  "PinchHandler": {
+    "enums": {},
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "activeScale": "real",
+      "centroid": "var",
+      "maximumPointCount": "int",
+      "maximumRotation": "real",
+      "maximumScale": "real",
+      "minimumPointCount": "int",
+      "minimumRotation": "real",
+      "minimumScale": "real",
+      "rotation": "real",
+      "scale": "real",
+      "translation": "vector2d",
+      "xAxis": "DragAxis",
+      "yAxis": "DragAxis"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "centroidChanged": [],
+      "maximumPointCountChanged": [],
+      "maximumRotationChanged": [],
+      "maximumScaleChanged": [],
+      "minimumPointCountChanged": [],
+      "minimumRotationChanged": [],
+      "minimumScaleChanged": [],
+      "updated": []
+    }
+  },
+  "PlaceholderText": {
+    "enums": {},
+    "methods": {},
+    "parent": "Text",
+    "properties": {},
+    "signals": {}
+  },
+  "PlatformTheme": {
+    "enums": {},
+    "methods": {
+      "themeHint": [
+        "enumeration"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "PointHandler": {
+    "enums": {},
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "point": "var",
+      "translation": "vector2d"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "pointChanged": [],
+      "translationChanged": []
+    }
+  },
+  "PointerDevice": {
+    "enums": {
+      "GrabTransition": [
+        "GrabPassive",
+        "UngrabPassive",
+        "CancelGrabPassive",
+        "OverrideGrabPassive",
+        "GrabExclusive",
+        "UngrabExclusive",
+        "CancelGrabExclusive"
+      ],
+      "PointerTypes": [
+        "Unknown",
+        "Generic",
+        "Finger",
+        "Pen",
+        "Eraser",
+        "Cursor",
+        "AllPointerTypes"
+      ]
+    },
+    "methods": {},
+    "parent": "InputDevice",
+    "properties": {
+      "buttonCount": "int",
+      "maximumPoints": "int",
+      "pointerType": "var",
+      "uniqueId": "var"
+    },
+    "signals": {
+      "grabChanged": [
+        "QtObject",
+        "var",
+        "QPointerEvent",
+        "var"
+      ]
+    }
+  },
+  "PointerHandler": {
+    "enums": {
+      "GrabPermissions": [
+        "TakeOverForbidden",
+        "CanTakeOverFromHandlersOfSameType",
+        "CanTakeOverFromHandlersOfDifferentType",
+        "CanTakeOverFromItems",
+        "CanTakeOverFromAnything",
+        "ApprovesTakeOverByHandlersOfSameType",
+        "ApprovesTakeOverByHandlersOfDifferentType",
+        "ApprovesTakeOverByItems",
+        "ApprovesCancellation",
+        "ApprovesTakeOverByAnything"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "cursorShape": "enumeration",
+      "dragThreshold": "int",
+      "enabled": "bool",
+      "grabPermissions": "var",
+      "margin": "real",
+      "parent": "Item",
+      "target": "Item"
+    },
+    "signals": {
+      "activeChanged": [],
+      "canceled": [
+        "var"
+      ],
+      "cursorShapeChanged": [],
+      "dragThresholdChanged": [],
+      "enabledChanged": [],
+      "grabChanged": [
+        "enumeration",
+        "var"
+      ],
+      "grabPermissionChanged": [],
+      "marginChanged": [],
+      "parentChanged": [],
+      "targetChanged": []
+    }
+  },
+  "Popup": {
+    "enums": {
+      "ClosePolicy": [
+        "NoAutoClose",
+        "CloseOnPressOutside",
+        "CloseOnPressOutsideParent",
+        "CloseOnReleaseOutside",
+        "CloseOnReleaseOutsideParent",
+        "CloseOnEscape"
+      ],
+      "TransformOrigin": [
+        "TopLeft",
+        "Top",
+        "TopRight",
+        "Left",
+        "Center",
+        "Right",
+        "BottomLeft",
+        "Bottom",
+        "BottomRight"
+      ]
+    },
+    "methods": {
+      "close": [],
+      "forceActiveFocus": [],
+      "open": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "activeFocus": "bool",
+      "anchors": "PopupAnchors",
+      "availableHeight": "real",
+      "availableWidth": "real",
+      "background": "Item",
+      "bottomInset": "real",
+      "bottomMargin": "real",
+      "bottomPadding": "real",
+      "clip": "bool",
+      "closePolicy": "var",
+      "contentChildren": "list",
+      "contentData": "list",
+      "contentHeight": "real",
+      "contentItem": "Item",
+      "contentWidth": "real",
+      "dim": "bool",
+      "enabled": "bool",
+      "enter": "Transition",
+      "exit": "Transition",
+      "focus": "bool",
+      "font": "font",
+      "height": "real",
+      "horizontalPadding": "real",
+      "implicitBackgroundHeight": "real",
+      "implicitBackgroundWidth": "real",
+      "implicitContentHeight": "real",
+      "implicitContentWidth": "real",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "leftInset": "real",
+      "leftMargin": "real",
+      "leftPadding": "real",
+      "locale": "var",
+      "margins": "real",
+      "mirrored": "bool",
+      "modal": "bool",
+      "opacity": "real",
+      "opened": "bool",
+      "padding": "real",
+      "palette": "Palette",
+      "parent": "Item",
+      "rightInset": "real",
+      "rightMargin": "real",
+      "rightPadding": "real",
+      "scale": "real",
+      "spacing": "real",
+      "topInset": "real",
+      "topMargin": "real",
+      "topPadding": "real",
+      "transformOrigin": "var",
+      "verticalPadding": "real",
+      "visible": "bool",
+      "width": "real",
+      "x": "real",
+      "y": "real",
+      "z": "real"
+    },
+    "signals": {
+      "aboutToHide": [],
+      "aboutToShow": [],
+      "activeFocusChanged": [],
+      "availableHeightChanged": [],
+      "availableWidthChanged": [],
+      "backgroundChanged": [],
+      "bottomInsetChanged": [],
+      "bottomMarginChanged": [],
+      "bottomPaddingChanged": [],
+      "clipChanged": [],
+      "closePolicyChanged": [],
+      "closed": [],
+      "contentChildrenChanged": [],
+      "contentHeightChanged": [],
+      "contentItemChanged": [],
+      "contentWidthChanged": [],
+      "dimChanged": [],
+      "enabledChanged": [],
+      "enterChanged": [],
+      "exitChanged": [],
+      "focusChanged": [],
+      "fontChanged": [],
+      "heightChanged": [],
+      "horizontalPaddingChanged": [],
+      "implicitBackgroundHeightChanged": [],
+      "implicitBackgroundWidthChanged": [],
+      "implicitContentHeightChanged": [],
+      "implicitContentWidthChanged": [],
+      "implicitHeightChanged": [],
+      "implicitWidthChanged": [],
+      "leftInsetChanged": [],
+      "leftMarginChanged": [],
+      "leftPaddingChanged": [],
+      "localeChanged": [],
+      "marginsChanged": [],
+      "mirroredChanged": [],
+      "modalChanged": [],
+      "opacityChanged": [],
+      "opened": [],
+      "openedChanged": [],
+      "paddingChanged": [],
+      "paletteChanged": [],
+      "paletteCreated": [],
+      "parentChanged": [],
+      "rightInsetChanged": [],
+      "rightMarginChanged": [],
+      "rightPaddingChanged": [],
+      "scaleChanged": [],
+      "spacingChanged": [],
+      "topInsetChanged": [],
+      "topMarginChanged": [],
+      "topPaddingChanged": [],
+      "verticalPaddingChanged": [],
+      "visibleChanged": [],
+      "widthChanged": [],
+      "windowChanged": [
+        "Window"
+      ],
+      "xChanged": [],
+      "yChanged": [],
+      "zChanged": []
+    }
+  },
+  "Positioner": {
+    "enums": {},
+    "methods": {
+      "forceLayout": []
+    },
+    "parent": "Item",
+    "properties": {
+      "add": "Transition",
+      "bottomPadding": "real",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "index": "int",
+      "isFirstItem": "bool",
+      "isLastItem": "bool",
+      "leftPadding": "real",
+      "move": "Transition",
+      "padding": "real",
+      "populate": "Transition",
+      "rightPadding": "real",
+      "spacing": "real",
+      "topPadding": "real"
+    },
+    "signals": {
+      "addChanged": [],
+      "bottomPaddingChanged": [],
+      "leftPaddingChanged": [],
+      "moveChanged": [],
+      "paddingChanged": [],
+      "populateChanged": [],
+      "positioningComplete": [],
+      "rightPaddingChanged": [],
+      "spacingChanged": [],
+      "topPaddingChanged": []
+    }
+  },
+  "ProgressBar": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "from": "real",
+      "indeterminate": "bool",
+      "position": "real",
+      "to": "real",
+      "value": "real",
+      "visualPosition": "real"
+    },
+    "signals": {
+      "fromChanged": [],
+      "indeterminateChanged": [],
+      "positionChanged": [],
+      "toChanged": [],
+      "valueChanged": [],
+      "visualPositionChanged": []
+    }
+  },
+  "PropertyAction": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "exclude": "list",
+      "properties": "string",
+      "property": "string",
+      "target": "QtObject",
+      "targets": "list",
+      "value": "var"
+    },
+    "signals": {
+      "propertiesChanged": [
+        "string"
+      ],
+      "propertyChanged": [],
+      "targetChanged": [],
+      "valueChanged": [
+        "var"
+      ]
+    }
+  },
+  "PropertyAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "duration": "int",
+      "easing": "var",
+      "exclude": "list",
+      "from": "var",
+      "properties": "string",
+      "property": "string",
+      "target": "QtObject",
+      "targets": "list",
+      "to": "var"
+    },
+    "signals": {
+      "durationChanged": [
+        "int"
+      ],
+      "easingChanged": [
+        "var"
+      ],
+      "fromChanged": [],
+      "propertiesChanged": [
+        "string"
+      ],
+      "propertyChanged": [],
+      "targetChanged": [],
+      "toChanged": []
+    }
+  },
+  "PropertyChanges": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "explicit": "bool",
+      "restoreEntryValues": "bool",
+      "target": "QtObject"
+    },
+    "signals": {}
+  },
+  "Qt": {
+    "enums": {
+      "LoadingMode": [
+        "Asynchronous",
+        "Synchronous"
+      ]
+    },
+    "methods": {
+      "alpha": [
+        "var",
+        "real"
+      ],
+      "atob": [
+        "string"
+      ],
+      "binding": [
+        "var"
+      ],
+      "btoa": [
+        "string"
+      ],
+      "color": [
+        "string"
+      ],
+      "colorEqual": [
+        "var",
+        "var"
+      ],
+      "createComponent": [
+        "url"
+      ],
+      "createQmlObject": [
+        "string",
+        "QtObject"
+      ],
+      "darker": [
+        "var"
+      ],
+      "exit": [
+        "int"
+      ],
+      "font": [
+        "var"
+      ],
+      "fontFamilies": [],
+      "formatDate": [
+        "var"
+      ],
+      "formatDateTime": [
+        "var"
+      ],
+      "formatTime": [
+        "string"
+      ],
+      "hsla": [
+        "real",
+        "real",
+        "real"
+      ],
+      "hsva": [
+        "real",
+        "real",
+        "real"
+      ],
+      "include": [
+        "string"
+      ],
+      "isQtObject": [
+        "var"
+      ],
+      "lighter": [
+        "var"
+      ],
+      "locale": [
+        "string"
+      ],
+      "matrix4x4": [
+        "var"
+      ],
+      "md5": [
+        "string"
+      ],
+      "openUrlExternally": [
+        "url"
+      ],
+      "point": [
+        "real",
+        "real"
+      ],
+      "quaternion": [
+        "real",
+        "real",
+        "real",
+        "real"
+      ],
+      "quit": [],
+      "rect": [
+        "real",
+        "real",
+        "real",
+        "real"
+      ],
+      "resolvedUrl": [
+        "url",
+        "QtObject"
+      ],
+      "rgba": [
+        "real",
+        "real",
+        "real"
+      ],
+      "size": [
+        "real",
+        "real"
+      ],
+      "tint": [
+        "var",
+        "var"
+      ],
+      "url": [
+        "url"
+      ],
+      "vector2d": [
+        "real",
+        "real"
+      ],
+      "vector3d": [
+        "real",
+        "real",
+        "real"
+      ],
+      "vector4d": [
+        "real",
+        "real",
+        "real",
+        "real"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "application": "Application",
+      "callLater": "var",
+      "inputMethod": "QtObject",
+      "platform": "Platform",
+      "styleHints": "QtObject",
+      "uiLanguage": "string"
+    },
+    "signals": {}
+  },
+  "QtObject": {
+    "enums": {},
+    "methods": {
+      "destroy": [],
+      "toString": []
+    },
+    "parent": null,
+    "properties": {
+      "objectName": "string"
+    },
+    "signals": {
+      "objectNameChanged": [
+        "string"
+      ]
+    }
+  },
+  "RadioButton": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {},
+    "signals": {}
+  },
+  "RadioDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "ItemDelegate",
+    "properties": {},
+    "signals": {}
+  },
+  "RangeSlider": {
+    "enums": {
+      "SnapMode": [
+        "NoSnap",
+        "SnapAlways",
+        "SnapOnRelease"
+      ]
+    },
+    "methods": {
+      "setValues": [
+        "real",
+        "real"
+      ],
+      "valueAt": [
+        "real"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "first": "RangeSliderNode",
+      "from": "real",
+      "horizontal": "bool",
+      "live": "bool",
+      "orientation": "enumeration",
+      "second": "RangeSliderNode",
+      "snapMode": "var",
+      "stepSize": "real",
+      "to": "real",
+      "touchDragThreshold": "real",
+      "vertical": "bool"
+    },
+    "signals": {
+      "fromChanged": [],
+      "liveChanged": [],
+      "orientationChanged": [],
+      "snapModeChanged": [],
+      "stepSizeChanged": [],
+      "toChanged": [],
+      "touchDragThresholdChanged": []
+    }
+  },
+  "Rectangle": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "border": "Pen",
+      "color": "color",
+      "gradient": "var",
+      "radius": "real"
+    },
+    "signals": {
+      "colorChanged": [],
+      "radiusChanged": []
+    }
+  },
+  "RegularExpressionValidator": {
+    "enums": {},
+    "methods": {
+      "setRegularExpression": [
+        "var"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "regularExpression": "var"
+    },
+    "signals": {
+      "changed": [],
+      "regularExpressionChanged": [
+        "var"
+      ]
+    }
+  },
+  "Repeater": {
+    "enums": {},
+    "methods": {
+      "itemAt": [
+        "int"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "count": "int",
+      "delegate": "Component",
+      "model": "var"
+    },
+    "signals": {
+      "countChanged": [],
+      "delegateChanged": [],
+      "itemAdded": [
+        "int",
+        "Item"
+      ],
+      "itemRemoved": [
+        "int",
+        "Item"
+      ],
+      "modelChanged": []
+    }
+  },
+  "Rotation": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "angle": "real",
+      "axis": "vector3d",
+      "origin": "vector3d"
+    },
+    "signals": {
+      "angleChanged": [],
+      "axisChanged": [],
+      "originChanged": []
+    }
+  },
+  "RotationAnimation": {
+    "enums": {
+      "RotationDirection": [
+        "Numerical",
+        "Shortest",
+        "Clockwise",
+        "Counterclockwise"
+      ]
+    },
+    "methods": {},
+    "parent": "PropertyAnimation",
+    "properties": {
+      "direction": "var",
+      "from": "real",
+      "to": "real"
+    },
+    "signals": {
+      "directionChanged": []
+    }
+  },
+  "RotationAnimator": {
+    "enums": {
+      "RotationDirection": [
+        "Numerical",
+        "Shortest",
+        "Clockwise",
+        "Counterclockwise"
+      ]
+    },
+    "methods": {},
+    "parent": "Animator",
+    "properties": {
+      "direction": "var"
+    },
+    "signals": {
+      "directionChanged": [
+        "var"
+      ]
+    }
+  },
+  "RoundButton": {
+    "enums": {},
+    "methods": {},
+    "parent": "Button",
+    "properties": {
+      "radius": "real"
+    },
+    "signals": {
+      "radiusChanged": []
+    }
+  },
+  "Row": {
+    "enums": {},
+    "methods": {},
+    "parent": "Positioner",
+    "properties": {
+      "effectiveLayoutDirection": "enumeration",
+      "layoutDirection": "enumeration"
+    },
+    "signals": {
+      "effectiveLayoutDirectionChanged": [],
+      "layoutDirectionChanged": []
+    }
+  },
+  "RowLayout": {
+    "enums": {},
+    "methods": {},
+    "parent": "Layout",
+    "properties": {
+      "layoutDirection": "enumeration",
+      "spacing": "real"
+    },
+    "signals": {
+      "layoutDirectionChanged": [],
+      "spacingChanged": []
+    }
+  },
+  "Scale": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "origin": "vector3d",
+      "xScale": "real",
+      "yScale": "real",
+      "zScale": "real"
+    },
+    "signals": {
+      "originChanged": [],
+      "scaleChanged": [],
+      "xScaleChanged": [],
+      "yScaleChanged": [],
+      "zScaleChanged": []
+    }
+  },
+  "ScaleAnimator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animator",
+    "properties": {},
+    "signals": {}
+  },
+  "Screen": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "ScreenInfo": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "desktopAvailableHeight": "int",
+      "desktopAvailableWidth": "int",
+      "devicePixelRatio": "real",
+      "height": "int",
+      "logicalPixelDensity": "real",
+      "manufacturer": "string",
+      "model": "string",
+      "name": "string",
+      "orientation": "enumeration",
+      "pixelDensity": "real",
+      "primaryOrientation": "enumeration",
+      "serialNumber": "string",
+      "virtualX": "int",
+      "virtualY": "int",
+      "width": "int"
+    },
+    "signals": {
+      "desktopGeometryChanged": [],
+      "devicePixelRatioChanged": [],
+      "heightChanged": [],
+      "logicalPixelDensityChanged": [],
+      "manufacturerChanged": [],
+      "modelChanged": [],
+      "nameChanged": [],
+      "orientationChanged": [],
+      "pixelDensityChanged": [],
+      "primaryOrientationChanged": [],
+      "serialNumberChanged": [],
+      "virtualXChanged": [],
+      "virtualYChanged": [],
+      "widthChanged": []
+    }
+  },
+  "ScriptAction": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "script": "var",
+      "scriptName": "string"
+    },
+    "signals": {}
+  },
+  "ScrollBar": {
+    "enums": {
+      "Policy": [
+        "AsNeeded",
+        "AlwaysOff",
+        "AlwaysOn"
+      ],
+      "SnapMode": [
+        "NoSnap",
+        "SnapAlways",
+        "SnapOnRelease"
+      ]
+    },
+    "methods": {
+      "decrease": [],
+      "increase": [],
+      "setPosition": [
+        "real"
+      ],
+      "setSize": [
+        "real"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "__decreaseVisual": "IndicatorButton",
+      "__increaseVisual": "IndicatorButton",
+      "active": "bool",
+      "horizontal": "bool",
+      "interactive": "bool",
+      "minimumSize": "real",
+      "orientation": "enumeration",
+      "policy": "var",
+      "position": "real",
+      "pressed": "bool",
+      "size": "real",
+      "snapMode": "var",
+      "stepSize": "real",
+      "vertical": "bool",
+      "visualPosition": "real",
+      "visualSize": "real"
+    },
+    "signals": {
+      "activeChanged": [],
+      "interactiveChanged": [],
+      "minimumSizeChanged": [],
+      "orientationChanged": [],
+      "policyChanged": [],
+      "positionChanged": [],
+      "pressedChanged": [],
+      "sizeChanged": [],
+      "snapModeChanged": [],
+      "stepSizeChanged": [],
+      "visualPositionChanged": [],
+      "visualSizeChanged": []
+    }
+  },
+  "ScrollIndicator": {
+    "enums": {},
+    "methods": {
+      "setPosition": [
+        "real"
+      ],
+      "setSize": [
+        "real"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "active": "bool",
+      "horizontal": "bool",
+      "minimumSize": "real",
+      "orientation": "enumeration",
+      "position": "real",
+      "size": "real",
+      "vertical": "bool",
+      "visualPosition": "real",
+      "visualSize": "real"
+    },
+    "signals": {
+      "activeChanged": [],
+      "minimumSizeChanged": [],
+      "orientationChanged": [],
+      "positionChanged": [],
+      "sizeChanged": [],
+      "visualPositionChanged": [],
+      "visualSizeChanged": []
+    }
+  },
+  "ScrollView": {
+    "enums": {},
+    "methods": {},
+    "parent": "Pane",
+    "properties": {},
+    "signals": {}
+  },
+  "SelectionRectangle": {
+    "enums": {
+      "SelectionMode": [
+        "Drag",
+        "PressAndHold",
+        "Auto"
+      ]
+    },
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "active": "bool",
+      "bottomRightHandle": "Component",
+      "control": "SelectionRectangle",
+      "dragging": "bool",
+      "selectionMode": "var",
+      "target": "Item",
+      "topLeftHandle": "Component"
+    },
+    "signals": {
+      "activeChanged": [],
+      "bottomRightHandleChanged": [],
+      "draggingChanged": [],
+      "selectionModeChanged": [],
+      "targetChanged": [],
+      "topLeftHandleChanged": []
+    }
+  },
+  "SequentialAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animation",
+    "properties": {
+      "animations": "list"
+    },
+    "signals": {}
+  },
+  "ShaderEffect": {
+    "enums": {
+      "CullMode": [
+        "NoCulling",
+        "BackFaceCulling",
+        "FrontFaceCulling"
+      ],
+      "Status": [
+        "Compiled",
+        "Uncompiled",
+        "Error"
+      ]
+    },
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "blending": "bool",
+      "cullMode": "var",
+      "fragmentShader": "url",
+      "log": "string",
+      "mesh": "var",
+      "status": "var",
+      "supportsAtlasTextures": "bool",
+      "vertexShader": "url"
+    },
+    "signals": {
+      "blendingChanged": [],
+      "cullModeChanged": [],
+      "fragmentShaderChanged": [],
+      "logChanged": [],
+      "meshChanged": [],
+      "statusChanged": [],
+      "supportsAtlasTexturesChanged": [],
+      "vertexShaderChanged": []
+    }
+  },
+  "ShaderEffectMesh": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {
+      "geometryChanged": []
+    }
+  },
+  "ShaderEffectSource": {
+    "enums": {
+      "Format": [
+        "Alpha",
+        "RGB",
+        "RGBA"
+      ],
+      "TextureMirroring": [
+        "NoMirroring",
+        "MirrorHorizontally",
+        "MirrorVertically"
+      ],
+      "WrapMode": [
+        "ClampToEdge",
+        "RepeatHorizontally",
+        "RepeatVertically",
+        "Repeat"
+      ]
+    },
+    "methods": {
+      "scheduleUpdate": []
+    },
+    "parent": "Item",
+    "properties": {
+      "format": "var",
+      "hideSource": "bool",
+      "live": "bool",
+      "mipmap": "bool",
+      "recursive": "bool",
+      "samples": "int",
+      "sourceItem": "Item",
+      "sourceRect": "rect",
+      "textureMirroring": "var",
+      "textureSize": "size",
+      "wrapMode": "var"
+    },
+    "signals": {
+      "formatChanged": [],
+      "hideSourceChanged": [],
+      "liveChanged": [],
+      "mipmapChanged": [],
+      "recursiveChanged": [],
+      "samplesChanged": [],
+      "scheduledUpdateCompleted": [],
+      "sourceItemChanged": [],
+      "sourceRectChanged": [],
+      "textureMirroringChanged": [],
+      "textureSizeChanged": [],
+      "wrapModeChanged": []
+    }
+  },
+  "Shortcut": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "autoRepeat": "bool",
+      "context": "enumeration",
+      "enabled": "bool",
+      "nativeText": "string",
+      "portableText": "string",
+      "sequence": "var",
+      "sequences": "var"
+    },
+    "signals": {
+      "activated": [],
+      "activatedAmbiguously": [],
+      "autoRepeatChanged": [],
+      "contextChanged": [],
+      "enabledChanged": [],
+      "sequenceChanged": [],
+      "sequencesChanged": []
+    }
+  },
+  "Slider": {
+    "enums": {
+      "SnapMode": [
+        "NoSnap",
+        "SnapAlways",
+        "SnapOnRelease"
+      ]
+    },
+    "methods": {
+      "decrease": [],
+      "increase": [],
+      "valueAt": [
+        "real"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "from": "real",
+      "handle": "Item",
+      "horizontal": "bool",
+      "implicitHandleHeight": "real",
+      "implicitHandleWidth": "real",
+      "live": "bool",
+      "orientation": "enumeration",
+      "position": "real",
+      "pressed": "bool",
+      "snapMode": "var",
+      "stepSize": "real",
+      "to": "real",
+      "touchDragThreshold": "real",
+      "value": "real",
+      "vertical": "bool",
+      "visualPosition": "real"
+    },
+    "signals": {
+      "fromChanged": [],
+      "handleChanged": [],
+      "implicitHandleHeightChanged": [],
+      "implicitHandleWidthChanged": [],
+      "liveChanged": [],
+      "moved": [],
+      "orientationChanged": [],
+      "positionChanged": [],
+      "pressedChanged": [],
+      "snapModeChanged": [],
+      "stepSizeChanged": [],
+      "toChanged": [],
+      "touchDragThresholdChanged": [],
+      "valueChanged": [],
+      "visualPositionChanged": []
+    }
+  },
+  "SmoothedAnimation": {
+    "enums": {
+      "ReversingMode": [
+        "Eased",
+        "Immediate",
+        "Sync"
+      ]
+    },
+    "methods": {},
+    "parent": "NumberAnimation",
+    "properties": {
+      "maximumEasingTime": "real",
+      "reversingMode": "var",
+      "velocity": "real"
+    },
+    "signals": {
+      "maximumEasingTimeChanged": [],
+      "reversingModeChanged": [],
+      "velocityChanged": []
+    }
+  },
+  "SpinBox": {
+    "enums": {},
+    "methods": {
+      "decrease": [],
+      "increase": []
+    },
+    "parent": "Control",
+    "properties": {
+      "displayText": "string",
+      "down": "IndicatorButton",
+      "editable": "bool",
+      "from": "int",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
+      "stepSize": "int",
+      "textFromValue": "var",
+      "to": "int",
+      "up": "IndicatorButton",
+      "validator": "QValidator",
+      "value": "int",
+      "valueFromText": "var",
+      "wrap": "bool"
+    },
+    "signals": {
+      "displayTextChanged": [],
+      "editableChanged": [],
+      "fromChanged": [],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
+      "stepSizeChanged": [],
+      "textFromValueChanged": [],
+      "toChanged": [],
+      "validatorChanged": [],
+      "valueChanged": [],
+      "valueFromTextChanged": [],
+      "valueModified": [],
+      "wrapChanged": []
+    }
+  },
+  "SplitHandle": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "hovered": "bool",
+      "pressed": "bool"
+    },
+    "signals": {
+      "hoveredChanged": [],
+      "pressedChanged": []
+    }
+  },
+  "SplitView": {
+    "enums": {},
+    "methods": {
+      "restoreState": [
+        "var"
+      ],
+      "saveState": []
+    },
+    "parent": "Container",
+    "properties": {
+      "fillHeight": "bool",
+      "fillWidth": "bool",
+      "handle": "Component",
+      "maximumHeight": "real",
+      "maximumWidth": "real",
+      "minimumHeight": "real",
+      "minimumWidth": "real",
+      "orientation": "enumeration",
+      "preferredHeight": "real",
+      "preferredWidth": "real",
+      "resizing": "bool",
+      "view": "SplitView"
+    },
+    "signals": {
+      "handleChanged": [],
+      "orientationChanged": [],
+      "resizingChanged": []
+    }
+  },
+  "SpringAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "NumberAnimation",
+    "properties": {
+      "damping": "real",
+      "epsilon": "real",
+      "mass": "real",
+      "modulus": "real",
+      "spring": "real",
+      "velocity": "real"
+    },
+    "signals": {
+      "massChanged": [],
+      "modulusChanged": [],
+      "syncChanged": []
+    }
+  },
+  "Sprite": {
+    "enums": {},
+    "methods": {
+      "setFrameCount": [
+        "int"
+      ],
+      "setFrameDuration": [
+        "int"
+      ],
+      "setFrameDurationVariation": [
+        "int"
+      ],
+      "setFrameHeight": [
+        "int"
+      ],
+      "setFrameRate": [
+        "real"
+      ],
+      "setFrameRateVariation": [
+        "real"
+      ],
+      "setFrameSync": [
+        "bool"
+      ],
+      "setFrameWidth": [
+        "int"
+      ],
+      "setFrameX": [
+        "int"
+      ],
+      "setFrameY": [
+        "int"
+      ],
+      "setFrames": [
+        "int"
+      ],
+      "setReverse": [
+        "bool"
+      ],
+      "setSource": [
+        "url"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "duration": "int",
+      "durationVariation": "int",
+      "frameCount": "int",
+      "frameDuration": "int",
+      "frameDurationVariation": "int",
+      "frameHeight": "int",
+      "frameRate": "real",
+      "frameRateVariation": "real",
+      "frameSync": "bool",
+      "frameWidth": "int",
+      "frameX": "int",
+      "frameY": "int",
+      "frames": "int",
+      "name": "string",
+      "randomStart": "bool",
+      "reverse": "bool",
+      "source": "url",
+      "to": "var"
+    },
+    "signals": {
+      "durationChanged": [
+        "int"
+      ],
+      "durationVariationChanged": [
+        "int"
+      ],
+      "entered": [],
+      "frameCountChanged": [
+        "int"
+      ],
+      "frameDurationChanged": [
+        "int"
+      ],
+      "frameDurationVariationChanged": [
+        "int"
+      ],
+      "frameHeightChanged": [
+        "int"
+      ],
+      "frameRateChanged": [
+        "real"
+      ],
+      "frameRateVariationChanged": [
+        "real"
+      ],
+      "frameSyncChanged": [
+        "bool"
+      ],
+      "frameWidthChanged": [
+        "int"
+      ],
+      "frameXChanged": [
+        "int"
+      ],
+      "frameYChanged": [
+        "int"
+      ],
+      "nameChanged": [
+        "string"
+      ],
+      "randomStartChanged": [
+        "bool"
+      ],
+      "reverseChanged": [
+        "bool"
+      ],
+      "sourceChanged": [
+        "url"
+      ],
+      "toChanged": [
+        "var"
+      ]
+    }
+  },
+  "SpriteSequence": {
+    "enums": {},
+    "methods": {
+      "jumpTo": [
+        "string"
+      ],
+      "setGoalSprite": [
+        "string"
+      ],
+      "setInterpolate": [
+        "bool"
+      ],
+      "setRunning": [
+        "bool"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "currentSprite": "string",
+      "goalSprite": "string",
+      "interpolate": "bool",
+      "running": "bool",
+      "sprites": "list"
+    },
+    "signals": {
+      "currentSpriteChanged": [
+        "string"
+      ],
+      "goalSpriteChanged": [
+        "string"
+      ],
+      "interpolateChanged": [
+        "bool"
+      ],
+      "runningChanged": [
+        "bool"
+      ]
+    }
+  },
+  "StackLayout": {
+    "enums": {},
+    "methods": {
+      "itemAt": [
+        "int"
+      ]
+    },
+    "parent": "Layout",
+    "properties": {
+      "count": "int",
+      "currentIndex": "int",
+      "index": "int",
+      "isCurrentItem": "bool",
+      "layout": "StackLayout"
+    },
+    "signals": {
+      "countChanged": [],
+      "currentIndexChanged": []
+    }
+  },
+  "StackView": {
+    "enums": {
+      "LoadBehavior": [
+        "DontLoad",
+        "ForceLoad"
+      ],
+      "Operation": [
+        "Transition",
+        "Immediate",
+        "PushTransition",
+        "ReplaceTransition",
+        "PopTransition"
+      ],
+      "Status": [
+        "Inactive",
+        "Deactivating",
+        "Activating",
+        "Active"
+      ]
+    },
+    "methods": {
+      "clear": [],
+      "find": [
+        "var"
+      ],
+      "get": [
+        "int"
+      ],
+      "pop": [
+        "V4Function"
+      ],
+      "push": [
+        "V4Function"
+      ],
+      "replace": [
+        "V4Function"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "busy": "bool",
+      "currentItem": "Item",
+      "depth": "int",
+      "empty": "bool",
+      "index": "int",
+      "initialItem": "var",
+      "popEnter": "Transition",
+      "popExit": "Transition",
+      "pushEnter": "Transition",
+      "pushExit": "Transition",
+      "replaceEnter": "Transition",
+      "replaceExit": "Transition",
+      "status": "enumeration",
+      "view": "StackView",
+      "visible": "bool"
+    },
+    "signals": {
+      "busyChanged": [],
+      "currentItemChanged": [],
+      "depthChanged": [],
+      "emptyChanged": [],
+      "popEnterChanged": [],
+      "popExitChanged": [],
+      "pushEnterChanged": [],
+      "pushExitChanged": [],
+      "replaceEnterChanged": [],
+      "replaceExitChanged": []
+    }
+  },
+  "StandardKey": {
+    "enums": {
+      "StandardKey": [
+        "UnknownKey",
+        "HelpContents",
+        "WhatsThis",
+        "Open",
+        "Close",
+        "Save",
+        "New",
+        "Delete",
+        "Cut",
+        "Copy",
+        "Paste",
+        "Undo",
+        "Redo",
+        "Back",
+        "Forward",
+        "Refresh",
+        "ZoomIn",
+        "ZoomOut",
+        "Print",
+        "AddTab",
+        "NextChild",
+        "PreviousChild",
+        "Find",
+        "FindNext",
+        "FindPrevious",
+        "Replace",
+        "SelectAll",
+        "Bold",
+        "Italic",
+        "Underline",
+        "MoveToNextChar",
+        "MoveToPreviousChar",
+        "MoveToNextWord",
+        "MoveToPreviousWord",
+        "MoveToNextLine",
+        "MoveToPreviousLine",
+        "MoveToNextPage",
+        "MoveToPreviousPage",
+        "MoveToStartOfLine",
+        "MoveToEndOfLine",
+        "MoveToStartOfBlock",
+        "MoveToEndOfBlock",
+        "MoveToStartOfDocument",
+        "MoveToEndOfDocument",
+        "SelectNextChar",
+        "SelectPreviousChar",
+        "SelectNextWord",
+        "SelectPreviousWord",
+        "SelectNextLine",
+        "SelectPreviousLine",
+        "SelectNextPage",
+        "SelectPreviousPage",
+        "SelectStartOfLine",
+        "SelectEndOfLine",
+        "SelectStartOfBlock",
+        "SelectEndOfBlock",
+        "SelectStartOfDocument",
+        "SelectEndOfDocument",
+        "DeleteStartOfWord",
+        "DeleteEndOfWord",
+        "DeleteEndOfLine",
+        "InsertParagraphSeparator",
+        "InsertLineSeparator",
+        "SaveAs",
+        "Preferences",
+        "Quit",
+        "FullScreen",
+        "Deselect",
+        "DeleteCompleteLine",
+        "Backspace",
+        "Cancel"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "State": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "changes": "list",
+      "extend": "string",
+      "name": "string",
+      "when": "bool"
+    },
+    "signals": {
+      "completed": []
+    }
+  },
+  "StateChangeScript": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "name": "string",
+      "script": "var"
+    },
+    "signals": {}
+  },
+  "StateGroup": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "state": "string",
+      "states": "list",
+      "transitions": "list"
+    },
+    "signals": {
+      "stateChanged": [
+        "string"
+      ]
+    }
+  },
+  "SwipeDelegate": {
+    "enums": {
+      "Side": [
+        "Left",
+        "Right"
+      ]
+    },
+    "methods": {},
+    "parent": "ItemDelegate",
+    "properties": {
+      "pressed": "bool",
+      "swipe": "Swipe"
+    },
+    "signals": {}
+  },
+  "SwipeView": {
+    "enums": {},
+    "methods": {},
+    "parent": "Container",
+    "properties": {
+      "horizontal": "bool",
+      "index": "int",
+      "interactive": "bool",
+      "isCurrentItem": "bool",
+      "isNextItem": "bool",
+      "isPreviousItem": "bool",
+      "orientation": "enumeration",
+      "vertical": "bool",
+      "view": "SwipeView"
+    },
+    "signals": {
+      "interactiveChanged": [],
+      "orientationChanged": []
+    }
+  },
+  "Switch": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "position": "real",
+      "visualPosition": "real"
+    },
+    "signals": {
+      "positionChanged": [],
+      "visualPositionChanged": []
+    }
+  },
+  "SwitchDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "ItemDelegate",
+    "properties": {
+      "position": "real",
+      "visualPosition": "real"
+    },
+    "signals": {
+      "positionChanged": [],
+      "visualPositionChanged": []
+    }
+  },
+  "SystemPalette": {
+    "enums": {
+      "ColorGroup": [
+        "Active",
+        "Inactive",
+        "Disabled"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "alternateBase": "color",
+      "base": "color",
+      "button": "color",
+      "buttonText": "color",
+      "colorGroup": "enumeration",
+      "dark": "color",
+      "highlight": "color",
+      "highlightedText": "color",
+      "light": "color",
+      "mid": "color",
+      "midlight": "color",
+      "placeholderText": "color",
+      "shadow": "color",
+      "text": "color",
+      "window": "color",
+      "windowText": "color"
+    },
+    "signals": {
+      "paletteChanged": []
+    }
+  },
+  "TabBar": {
+    "enums": {
+      "Position": [
+        "Header",
+        "Footer"
+      ]
+    },
+    "methods": {},
+    "parent": "Container",
+    "properties": {
+      "index": "int",
+      "position": "var",
+      "tabBar": "TabBar"
+    },
+    "signals": {
+      "positionChanged": []
+    }
+  },
+  "TabButton": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {},
+    "signals": {}
+  },
+  "TableView": {
+    "enums": {},
+    "methods": {
+      "cellAtPos": [
+        "real",
+        "real"
+      ],
+      "columnWidth": [
+        "int"
+      ],
+      "forceLayout": [],
+      "implicitColumnWidth": [
+        "int"
+      ],
+      "implicitRowHeight": [
+        "int"
+      ],
+      "isColumnLoaded": [
+        "int"
+      ],
+      "isRowLoaded": [
+        "int"
+      ],
+      "itemAtCell": [
+        "int",
+        "int"
+      ],
+      "positionViewAtCell": [
+        "int",
+        "int",
+        "enumeration"
+      ],
+      "positionViewAtColumn": [
+        "int",
+        "enumeration"
+      ],
+      "positionViewAtRow": [
+        "int",
+        "enumeration"
+      ],
+      "rowHeight": [
+        "int"
+      ]
+    },
+    "parent": "Flickable",
+    "properties": {
+      "bottomRow": "int",
+      "columnSpacing": "real",
+      "columnWidthProvider": "var",
+      "columns": "int",
+      "contentHeight": "real",
+      "contentWidth": "real",
+      "delegate": "Component",
+      "leftColumn": "int",
+      "model": "var",
+      "reuseItems": "bool",
+      "rightColumn": "int",
+      "rowHeightProvider": "var",
+      "rowSpacing": "real",
+      "rows": "int",
+      "selectionModel": "QItemSelectionModel",
+      "syncDirection": "enumeration",
+      "syncView": "TableView",
+      "topRow": "int",
+      "view": "TableView"
+    },
+    "signals": {
+      "bottomRowChanged": [],
+      "columnSpacingChanged": [],
+      "columnWidthProviderChanged": [],
+      "columnsChanged": [],
+      "delegateChanged": [],
+      "leftColumnChanged": [],
+      "modelChanged": [],
+      "reuseItemsChanged": [],
+      "rightColumnChanged": [],
+      "rowHeightProviderChanged": [],
+      "rowSpacingChanged": [],
+      "rowsChanged": [],
+      "selectionModelChanged": [],
+      "syncDirectionChanged": [],
+      "syncViewChanged": [],
+      "topRowChanged": []
+    }
+  },
+  "TapHandler": {
+    "enums": {
+      "GesturePolicy": [
+        "DragThreshold",
+        "WithinBounds",
+        "ReleaseWithinBounds",
+        "DragWithinBounds"
+      ]
+    },
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "gesturePolicy": "var",
+      "longPressThreshold": "real",
+      "point": "var",
+      "pressed": "bool",
+      "tapCount": "int",
+      "timeHeld": "real"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "doubleTapped": [
+        "var",
+        "enumeration"
+      ],
+      "gesturePolicyChanged": [],
+      "longPressThresholdChanged": [],
+      "longPressed": [],
+      "pointChanged": [],
+      "pressedChanged": [],
+      "singleTapped": [
+        "var",
+        "enumeration"
+      ],
+      "tapCountChanged": [],
+      "tapped": [
+        "var",
+        "enumeration"
+      ],
+      "timeHeldChanged": []
+    }
+  },
+  "Text": {
+    "enums": {
+      "FontSizeMode": [
+        "FixedSize",
+        "HorizontalFit",
+        "VerticalFit",
+        "Fit"
+      ],
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter",
+        "AlignJustify"
+      ],
+      "LineHeightMode": [
+        "ProportionalHeight",
+        "FixedHeight"
+      ],
+      "RenderType": [
+        "QtRendering",
+        "NativeRendering"
+      ],
+      "RenderTypeQuality": [
+        "DefaultRenderTypeQuality",
+        "LowRenderTypeQuality",
+        "NormalRenderTypeQuality",
+        "HighRenderTypeQuality",
+        "VeryHighRenderTypeQuality"
+      ],
+      "TextElideMode": [
+        "ElideLeft",
+        "ElideRight",
+        "ElideMiddle",
+        "ElideNone"
+      ],
+      "TextFormat": [
+        "PlainText",
+        "RichText",
+        "MarkdownText",
+        "AutoText",
+        "StyledText"
+      ],
+      "TextStyle": [
+        "Normal",
+        "Outline",
+        "Raised",
+        "Sunken"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ],
+      "WrapMode": [
+        "NoWrap",
+        "WordWrap",
+        "WrapAnywhere",
+        "WrapAtWordBoundaryOrAnywhere",
+        "Wrap"
+      ]
+    },
+    "methods": {
+      "forceLayout": [],
+      "linkAt": [
+        "real",
+        "real"
+      ]
+    },
+    "parent": "Item",
+    "properties": {
+      "advance": "size",
+      "baseUrl": "url",
+      "bottomPadding": "real",
+      "color": "color",
+      "contentHeight": "real",
+      "contentWidth": "real",
+      "effectiveHorizontalAlignment": "var",
+      "elide": "var",
+      "font": "font",
+      "fontInfo": "var",
+      "fontSizeMode": "var",
+      "horizontalAlignment": "var",
+      "hoveredLink": "string",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "leftPadding": "real",
+      "lineCount": "int",
+      "lineHeight": "real",
+      "lineHeightMode": "var",
+      "linkColor": "color",
+      "maximumLineCount": "int",
+      "minimumPixelSize": "int",
+      "minimumPointSize": "int",
+      "padding": "real",
+      "paintedHeight": "real",
+      "paintedWidth": "real",
+      "renderType": "var",
+      "renderTypeQuality": "int",
+      "rightPadding": "real",
+      "style": "var",
+      "styleColor": "color",
+      "text": "string",
+      "textFormat": "var",
+      "topPadding": "real",
+      "truncated": "bool",
+      "verticalAlignment": "var",
+      "wrapMode": "var"
+    },
+    "signals": {
+      "baseUrlChanged": [],
+      "bottomPaddingChanged": [],
+      "colorChanged": [],
+      "contentHeightChanged": [
+        "real"
+      ],
+      "contentSizeChanged": [],
+      "contentWidthChanged": [
+        "real"
+      ],
+      "effectiveHorizontalAlignmentChanged": [],
+      "elideModeChanged": [
+        "enumeration"
+      ],
+      "fontChanged": [
+        "font"
+      ],
+      "fontInfoChanged": [],
+      "fontSizeModeChanged": [],
+      "horizontalAlignmentChanged": [
+        "enumeration"
+      ],
+      "leftPaddingChanged": [],
+      "lineCountChanged": [],
+      "lineHeightChanged": [
+        "real"
+      ],
+      "lineHeightModeChanged": [
+        "var"
+      ],
+      "lineLaidOut": [
+        "TextLine"
+      ],
+      "linkActivated": [
+        "string"
+      ],
+      "linkColorChanged": [],
+      "linkHovered": [
+        "string"
+      ],
+      "maximumLineCountChanged": [],
+      "minimumPixelSizeChanged": [],
+      "minimumPointSizeChanged": [],
+      "paddingChanged": [],
+      "renderTypeChanged": [],
+      "renderTypeQualityChanged": [],
+      "rightPaddingChanged": [],
+      "styleChanged": [
+        "enumeration"
+      ],
+      "styleColorChanged": [],
+      "textChanged": [
+        "string"
+      ],
+      "textFormatChanged": [
+        "enumeration"
+      ],
+      "topPaddingChanged": [],
+      "truncatedChanged": [],
+      "verticalAlignmentChanged": [
+        "enumeration"
+      ],
+      "wrapModeChanged": []
+    }
+  },
+  "TextArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "TextEdit",
+    "properties": {
+      "background": "Item",
+      "bottomInset": "real",
+      "flickable": "TextArea",
+      "focusReason": "enumeration",
+      "font": "font",
+      "hoverEnabled": "bool",
+      "hovered": "bool",
+      "implicitBackgroundHeight": "real",
+      "implicitBackgroundWidth": "real",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "leftInset": "real",
+      "placeholderText": "string",
+      "placeholderTextColor": "color",
+      "rightInset": "real",
+      "topInset": "real"
+    },
+    "signals": {
+      "backgroundChanged": [],
+      "bottomInsetChanged": [],
+      "focusReasonChanged": [],
+      "fontChanged": [],
+      "hoverEnabledChanged": [],
+      "hoveredChanged": [],
+      "implicitBackgroundHeightChanged": [],
+      "implicitBackgroundWidthChanged": [],
+      "implicitHeightChanged3": [],
+      "implicitWidthChanged3": [],
+      "leftInsetChanged": [],
+      "placeholderTextChanged": [],
+      "placeholderTextColorChanged": [],
+      "pressAndHold": [
+        "MouseEvent"
+      ],
+      "pressed": [
+        "MouseEvent"
+      ],
+      "released": [
+        "MouseEvent"
+      ],
+      "rightInsetChanged": [],
+      "topInsetChanged": []
+    }
+  },
+  "TextEdit": {
+    "enums": {
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter",
+        "AlignJustify"
+      ],
+      "RenderType": [
+        "QtRendering",
+        "NativeRendering"
+      ],
+      "SelectionMode": [
+        "SelectCharacters",
+        "SelectWords"
+      ],
+      "TextFormat": [
+        "PlainText",
+        "RichText",
+        "AutoText",
+        "MarkdownText"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ],
+      "WrapMode": [
+        "NoWrap",
+        "WordWrap",
+        "WrapAnywhere",
+        "WrapAtWordBoundaryOrAnywhere",
+        "Wrap"
+      ]
+    },
+    "methods": {
+      "append": [
+        "string"
+      ],
+      "clear": [],
+      "copy": [],
+      "cut": [],
+      "deselect": [],
+      "getFormattedText": [
+        "int",
+        "int"
+      ],
+      "getText": [
+        "int",
+        "int"
+      ],
+      "inputMethodQuery": [
+        "enumeration",
+        "var"
+      ],
+      "insert": [
+        "int",
+        "string"
+      ],
+      "isRightToLeft": [
+        "int",
+        "int"
+      ],
+      "linkAt": [
+        "real",
+        "real"
+      ],
+      "moveCursorSelection": [
+        "int",
+        "var"
+      ],
+      "paste": [],
+      "positionAt": [
+        "real",
+        "real"
+      ],
+      "positionToRectangle": [
+        "int"
+      ],
+      "redo": [],
+      "remove": [
+        "int",
+        "int"
+      ],
+      "select": [
+        "int",
+        "int"
+      ],
+      "selectAll": [],
+      "selectWord": [],
+      "undo": []
+    },
+    "parent": "Item",
+    "properties": {
+      "activeFocusOnPress": "bool",
+      "baseUrl": "url",
+      "bottomPadding": "real",
+      "canPaste": "bool",
+      "canRedo": "bool",
+      "canUndo": "bool",
+      "color": "color",
+      "contentHeight": "real",
+      "contentWidth": "real",
+      "cursorDelegate": "Component",
+      "cursorPosition": "int",
+      "cursorRectangle": "rect",
+      "cursorVisible": "bool",
+      "effectiveHorizontalAlignment": "var",
+      "font": "font",
+      "horizontalAlignment": "var",
+      "hoveredLink": "string",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
+      "leftPadding": "real",
+      "length": "int",
+      "lineCount": "int",
+      "mouseSelectionMode": "var",
+      "overwriteMode": "bool",
+      "padding": "real",
+      "paintedHeight": "real",
+      "paintedWidth": "real",
+      "persistentSelection": "bool",
+      "preeditText": "string",
+      "readOnly": "bool",
+      "renderType": "var",
+      "rightPadding": "real",
+      "selectByKeyboard": "bool",
+      "selectByMouse": "bool",
+      "selectedText": "string",
+      "selectedTextColor": "color",
+      "selectionColor": "color",
+      "selectionEnd": "int",
+      "selectionStart": "int",
+      "tabStopDistance": "real",
+      "text": "string",
+      "textDocument": "TextDocument",
+      "textFormat": "var",
+      "textMargin": "real",
+      "topPadding": "real",
+      "verticalAlignment": "var",
+      "wrapMode": "var"
+    },
+    "signals": {
+      "activeFocusOnPressChanged": [
+        "bool"
+      ],
+      "baseUrlChanged": [],
+      "bottomPaddingChanged": [],
+      "canPasteChanged": [],
+      "canRedoChanged": [],
+      "canUndoChanged": [],
+      "colorChanged": [
+        "color"
+      ],
+      "contentSizeChanged": [],
+      "cursorDelegateChanged": [],
+      "cursorPositionChanged": [],
+      "cursorRectangleChanged": [],
+      "cursorVisibleChanged": [
+        "bool"
+      ],
+      "editingFinished": [],
+      "effectiveHorizontalAlignmentChanged": [],
+      "fontChanged": [
+        "font"
+      ],
+      "horizontalAlignmentChanged": [
+        "enumeration"
+      ],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
+      "leftPaddingChanged": [],
+      "lineCountChanged": [],
+      "linkActivated": [
+        "string"
+      ],
+      "linkHovered": [
+        "string"
+      ],
+      "mouseSelectionModeChanged": [
+        "enumeration"
+      ],
+      "overwriteModeChanged": [
+        "bool"
+      ],
+      "paddingChanged": [],
+      "persistentSelectionChanged": [
+        "bool"
+      ],
+      "preeditTextChanged": [],
+      "readOnlyChanged": [
+        "bool"
+      ],
+      "renderTypeChanged": [],
+      "rightPaddingChanged": [],
+      "selectByKeyboardChanged": [
+        "bool"
+      ],
+      "selectByMouseChanged": [
+        "bool"
+      ],
+      "selectedTextChanged": [],
+      "selectedTextColorChanged": [
+        "color"
+      ],
+      "selectionColorChanged": [
+        "color"
+      ],
+      "selectionEndChanged": [],
+      "selectionStartChanged": [],
+      "tabStopDistanceChanged": [
+        "real"
+      ],
+      "textChanged": [],
+      "textFormatChanged": [
+        "enumeration"
+      ],
+      "textMarginChanged": [
+        "real"
+      ],
+      "topPaddingChanged": [],
+      "verticalAlignmentChanged": [
+        "enumeration"
+      ],
+      "wrapModeChanged": []
+    }
+  },
+  "TextField": {
+    "enums": {},
+    "methods": {},
+    "parent": "TextInput",
+    "properties": {
+      "background": "Item",
+      "bottomInset": "real",
+      "focusReason": "enumeration",
+      "font": "font",
+      "hoverEnabled": "bool",
+      "hovered": "bool",
+      "implicitBackgroundHeight": "real",
+      "implicitBackgroundWidth": "real",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "leftInset": "real",
+      "placeholderText": "string",
+      "placeholderTextColor": "color",
+      "rightInset": "real",
+      "topInset": "real"
+    },
+    "signals": {
+      "backgroundChanged": [],
+      "bottomInsetChanged": [],
+      "focusReasonChanged": [],
+      "fontChanged": [],
+      "hoverEnabledChanged": [],
+      "hoveredChanged": [],
+      "implicitBackgroundHeightChanged": [],
+      "implicitBackgroundWidthChanged": [],
+      "implicitHeightChanged3": [],
+      "implicitWidthChanged3": [],
+      "leftInsetChanged": [],
+      "placeholderTextChanged": [],
+      "placeholderTextColorChanged": [],
+      "pressAndHold": [
+        "MouseEvent"
+      ],
+      "pressed": [
+        "MouseEvent"
+      ],
+      "released": [
+        "MouseEvent"
+      ],
+      "rightInsetChanged": [],
+      "topInsetChanged": []
+    }
+  },
+  "TextInput": {
+    "enums": {
+      "CursorPosition": [
+        "CursorBetweenCharacters",
+        "CursorOnCharacter"
+      ],
+      "EchoMode": [
+        "Normal",
+        "NoEcho",
+        "Password",
+        "PasswordEchoOnEdit"
+      ],
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter"
+      ],
+      "RenderType": [
+        "QtRendering",
+        "NativeRendering"
+      ],
+      "SelectionMode": [
+        "SelectCharacters",
+        "SelectWords"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ],
+      "WrapMode": [
+        "NoWrap",
+        "WordWrap",
+        "WrapAnywhere",
+        "WrapAtWordBoundaryOrAnywhere",
+        "Wrap"
+      ]
+    },
+    "methods": {
+      "clear": [],
+      "copy": [],
+      "cut": [],
+      "deselect": [],
+      "ensureVisible": [
+        "int"
+      ],
+      "getText": [
+        "int",
+        "int"
+      ],
+      "inputMethodQuery": [
+        "enumeration",
+        "var"
+      ],
+      "insert": [
+        "int",
+        "string"
+      ],
+      "isRightToLeft": [
+        "int",
+        "int"
+      ],
+      "moveCursorSelection": [
+        "int",
+        "var"
+      ],
+      "paste": [],
+      "positionAt": [
+        "V4Function"
+      ],
+      "positionToRectangle": [
+        "int"
+      ],
+      "redo": [],
+      "remove": [
+        "int",
+        "int"
+      ],
+      "select": [
+        "int",
+        "int"
+      ],
+      "selectAll": [],
+      "selectWord": [],
+      "undo": []
+    },
+    "parent": "Item",
+    "properties": {
+      "acceptableInput": "bool",
+      "activeFocusOnPress": "bool",
+      "autoScroll": "bool",
+      "bottomPadding": "real",
+      "canPaste": "bool",
+      "canRedo": "bool",
+      "canUndo": "bool",
+      "color": "color",
+      "contentHeight": "real",
+      "contentWidth": "real",
+      "cursorDelegate": "Component",
+      "cursorPosition": "int",
+      "cursorRectangle": "rect",
+      "cursorVisible": "bool",
+      "displayText": "string",
+      "echoMode": "var",
+      "effectiveHorizontalAlignment": "var",
+      "font": "font",
+      "horizontalAlignment": "var",
+      "implicitHeight": "real",
+      "implicitWidth": "real",
+      "inputMask": "string",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
+      "leftPadding": "real",
+      "length": "int",
+      "maximumLength": "int",
+      "mouseSelectionMode": "var",
+      "overwriteMode": "bool",
+      "padding": "real",
+      "passwordCharacter": "string",
+      "passwordMaskDelay": "int",
+      "persistentSelection": "bool",
+      "preeditText": "string",
+      "readOnly": "bool",
+      "renderType": "var",
+      "rightPadding": "real",
+      "selectByMouse": "bool",
+      "selectedText": "string",
+      "selectedTextColor": "color",
+      "selectionColor": "color",
+      "selectionEnd": "int",
+      "selectionStart": "int",
+      "text": "string",
+      "topPadding": "real",
+      "validator": "QValidator",
+      "verticalAlignment": "var",
+      "wrapMode": "var"
+    },
+    "signals": {
+      "acceptableInputChanged": [],
+      "accepted": [],
+      "activeFocusOnPressChanged": [
+        "bool"
+      ],
+      "autoScrollChanged": [
+        "bool"
+      ],
+      "bottomPaddingChanged": [],
+      "canPasteChanged": [],
+      "canRedoChanged": [],
+      "canUndoChanged": [],
+      "colorChanged": [],
+      "contentSizeChanged": [],
+      "cursorDelegateChanged": [],
+      "cursorPositionChanged": [],
+      "cursorRectangleChanged": [],
+      "cursorVisibleChanged": [
+        "bool"
+      ],
+      "displayTextChanged": [],
+      "echoModeChanged": [
+        "enumeration"
+      ],
+      "editingFinished": [],
+      "effectiveHorizontalAlignmentChanged": [],
+      "fontChanged": [
+        "font"
+      ],
+      "horizontalAlignmentChanged": [
+        "enumeration"
+      ],
+      "inputMaskChanged": [
+        "string"
+      ],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
+      "leftPaddingChanged": [],
+      "maximumLengthChanged": [
+        "int"
+      ],
+      "mouseSelectionModeChanged": [
+        "enumeration"
+      ],
+      "overwriteModeChanged": [
+        "bool"
+      ],
+      "paddingChanged": [],
+      "passwordCharacterChanged": [],
+      "passwordMaskDelayChanged": [
+        "int"
+      ],
+      "persistentSelectionChanged": [],
+      "preeditTextChanged": [],
+      "readOnlyChanged": [
+        "bool"
+      ],
+      "renderTypeChanged": [],
+      "rightPaddingChanged": [],
+      "selectByMouseChanged": [
+        "bool"
+      ],
+      "selectedTextChanged": [],
+      "selectedTextColorChanged": [],
+      "selectionColorChanged": [],
+      "selectionEndChanged": [],
+      "selectionStartChanged": [],
+      "textChanged": [],
+      "textEdited": [],
+      "topPaddingChanged": [],
+      "validatorChanged": [],
+      "verticalAlignmentChanged": [
+        "enumeration"
+      ],
+      "wrapModeChanged": []
+    }
+  },
+  "TextMetrics": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "advanceWidth": "real",
+      "boundingRect": "rect",
+      "elide": "enumeration",
+      "elideWidth": "real",
+      "elidedText": "string",
+      "font": "font",
+      "height": "real",
+      "renderType": "enumeration",
+      "text": "string",
+      "tightBoundingRect": "rect",
+      "width": "real"
+    },
+    "signals": {
+      "elideChanged": [],
+      "elideWidthChanged": [],
+      "fontChanged": [],
+      "metricsChanged": [],
+      "renderTypeChanged": [],
+      "textChanged": []
+    }
+  },
+  "Timer": {
+    "enums": {},
+    "methods": {
+      "restart": [],
+      "start": [],
+      "stop": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "interval": "int",
+      "parent": "QtObject",
+      "repeat": "bool",
+      "running": "bool",
+      "triggeredOnStart": "bool"
+    },
+    "signals": {
+      "intervalChanged": [],
+      "repeatChanged": [],
+      "runningChanged": [],
+      "triggered": [],
+      "triggeredOnStartChanged": []
+    }
+  },
+  "ToolBar": {
+    "enums": {
+      "Position": [
+        "Header",
+        "Footer"
+      ]
+    },
+    "methods": {},
+    "parent": "Pane",
+    "properties": {
+      "position": "var"
+    },
+    "signals": {
+      "positionChanged": []
+    }
+  },
+  "ToolButton": {
+    "enums": {},
+    "methods": {},
+    "parent": "Button",
+    "properties": {},
+    "signals": {}
+  },
+  "ToolSeparator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "horizontal": "bool",
+      "orientation": "enumeration",
+      "vertical": "bool"
+    },
+    "signals": {
+      "orientationChanged": []
+    }
+  },
+  "ToolTip": {
+    "enums": {},
+    "methods": {
+      "hide": [],
+      "show": [
+        "string"
+      ]
+    },
+    "parent": "Popup",
+    "properties": {
+      "delay": "int",
+      "text": "string",
+      "timeout": "int",
+      "toolTip": "ToolTip",
+      "visible": "bool"
+    },
+    "signals": {
+      "delayChanged": [],
+      "textChanged": [],
+      "timeoutChanged": []
+    }
+  },
+  "TouchPoint": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "area": "rect",
+      "ellipseDiameters": "size",
+      "pointId": "int",
+      "pressed": "bool",
+      "pressure": "real",
+      "previousX": "real",
+      "previousY": "real",
+      "rotation": "real",
+      "sceneX": "real",
+      "sceneY": "real",
+      "startX": "real",
+      "startY": "real",
+      "uniqueId": "var",
+      "velocity": "vector2d",
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "areaChanged": [],
+      "ellipseDiametersChanged": [],
+      "pointIdChanged": [],
+      "pressedChanged": [],
+      "pressureChanged": [],
+      "previousXChanged": [],
+      "previousYChanged": [],
+      "rotationChanged": [],
+      "sceneXChanged": [],
+      "sceneYChanged": [],
+      "startXChanged": [],
+      "startYChanged": [],
+      "uniqueIdChanged": [],
+      "velocityChanged": [],
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "Transition": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "animations": "list",
+      "enabled": "bool",
+      "from": "string",
+      "reversible": "bool",
+      "running": "bool",
+      "to": "string"
+    },
+    "signals": {
+      "enabledChanged": [],
+      "fromChanged": [],
+      "reversibleChanged": [],
+      "runningChanged": [],
+      "toChanged": []
+    }
+  },
+  "Translate": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "x": "real",
+      "y": "real"
+    },
+    "signals": {
+      "xChanged": [],
+      "yChanged": []
+    }
+  },
+  "TreeView": {
+    "enums": {},
+    "methods": {
+      "cellAtIndex": [
+        "var"
+      ],
+      "collapse": [
+        "int"
+      ],
+      "columnAtIndex": [
+        "var"
+      ],
+      "depth": [
+        "int"
+      ],
+      "expand": [
+        "int"
+      ],
+      "isExpanded": [
+        "int"
+      ],
+      "modelIndex": [
+        "point"
+      ],
+      "rowAtIndex": [
+        "var"
+      ],
+      "toggleExpanded": [
+        "int"
+      ]
+    },
+    "parent": "TableView",
+    "properties": {},
+    "signals": {
+      "collapsed": [
+        "int"
+      ],
+      "expanded": [
+        "int"
+      ]
+    }
+  },
+  "TreeViewDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractButton",
+    "properties": {
+      "depth": "int",
+      "expanded": "bool",
+      "hasChildren": "bool",
+      "indentation": "real",
+      "isTreeNode": "bool",
+      "leftMargin": "real",
+      "rightMargin": "real",
+      "treeView": "TreeView"
+    },
+    "signals": {
+      "depthChanged": [],
+      "expandedChanged": [],
+      "hasChildrenChanged": [],
+      "indentationChanged": [],
+      "indicatorChanged": [],
+      "isTreeNodeChanged": [],
+      "leftMarginChanged": [],
+      "rightMarginChanged": [],
+      "treeviewChanged": []
+    }
+  },
+  "Tumbler": {
+    "enums": {
+      "PositionMode": [
+        "Beginning",
+        "Center",
+        "End",
+        "Visible",
+        "Contain",
+        "SnapPosition"
+      ]
+    },
+    "methods": {
+      "positionViewAtIndex": [
+        "int",
+        "var"
+      ]
+    },
+    "parent": "Control",
+    "properties": {
+      "count": "int",
+      "currentIndex": "int",
+      "currentItem": "Item",
+      "delegate": "Component",
+      "displacement": "real",
+      "model": "var",
+      "moving": "bool",
+      "tumbler": "Tumbler",
+      "visibleItemCount": "int",
+      "wrap": "bool"
+    },
+    "signals": {
+      "countChanged": [],
+      "currentIndexChanged": [],
+      "currentItemChanged": [],
+      "delegateChanged": [],
+      "modelChanged": [],
+      "movingChanged": [],
+      "visibleItemCountChanged": [],
+      "wrapChanged": []
+    }
+  },
+  "TumblerView": {
+    "enums": {},
+    "methods": {},
+    "parent": "Item",
+    "properties": {
+      "delegate": "Component",
+      "model": "var",
+      "path": "Path"
+    },
+    "signals": {
+      "delegateChanged": [],
+      "modelChanged": [],
+      "pathChanged": []
+    }
+  },
+  "TypeNotAvailable": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {},
+    "signals": {}
+  },
+  "UniformAnimator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animator",
+    "properties": {
+      "uniform": "string"
+    },
+    "signals": {
+      "uniformChanged": [
+        "string"
+      ]
+    }
+  },
+  "Vector3dAnimation": {
+    "enums": {},
+    "methods": {},
+    "parent": "PropertyAnimation",
+    "properties": {
+      "from": "vector3d",
+      "to": "vector3d"
+    },
+    "signals": {}
+  },
+  "VerticalHeaderView": {
+    "enums": {},
+    "methods": {},
+    "parent": "TableView",
+    "properties": {
+      "textRole": "string"
+    },
+    "signals": {
+      "textRoleChanged": []
+    }
+  },
+  "ViewSection": {
+    "enums": {
+      "LabelPositioning": [
+        "InlineLabels",
+        "CurrentLabelAtStart",
+        "NextLabelAtEnd"
+      ],
+      "SectionCriteria": [
+        "FullString",
+        "FirstCharacter"
+      ]
+    },
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "criteria": "var",
+      "delegate": "Component",
+      "labelPositioning": "int",
+      "property": "string"
+    },
+    "signals": {
+      "criteriaChanged": [],
+      "delegateChanged": [],
+      "labelPositioningChanged": [],
+      "propertyChanged": [],
+      "sectionsChanged": []
+    }
+  },
+  "ViewTransition": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "destination": "point",
+      "index": "int",
+      "item": "Item",
+      "targetIndexes": "list",
+      "targetItems": "list"
+    },
+    "signals": {
+      "destinationChanged": [],
+      "indexChanged": [],
+      "itemChanged": [],
+      "targetIndexesChanged": [],
+      "targetItemsChanged": []
+    }
+  },
+  "WheelHandler": {
+    "enums": {},
+    "methods": {},
+    "parent": "PointerHandler",
+    "properties": {
+      "acceptedButtons": "enumeration",
+      "acceptedDevices": "enumeration",
+      "acceptedModifiers": "enumeration",
+      "acceptedPointerTypes": "enumeration",
+      "activeTimeout": "real",
+      "blocking": "bool",
+      "invertible": "bool",
+      "orientation": "enumeration",
+      "point": "var",
+      "property": "string",
+      "rotation": "real",
+      "rotationScale": "real",
+      "targetScaleMultiplier": "real",
+      "targetTransformAroundCursor": "bool"
+    },
+    "signals": {
+      "acceptedButtonsChanged": [],
+      "acceptedDevicesChanged": [],
+      "acceptedModifiersChanged": [],
+      "acceptedPointerTypesChanged": [],
+      "activeTimeoutChanged": [],
+      "blockingChanged": [],
+      "invertibleChanged": [],
+      "orientationChanged": [],
+      "pointChanged": [],
+      "propertyChanged": [],
+      "rotationChanged": [],
+      "rotationScaleChanged": [],
+      "targetScaleMultiplierChanged": [],
+      "targetTransformAroundCursorChanged": [],
+      "wheel": [
+        "WheelEvent"
+      ]
+    }
+  },
+  "Window": {
+    "enums": {
+      "CreateTextureOptions": [
+        "TextureHasAlphaChannel",
+        "TextureHasMipmaps",
+        "TextureOwnsGLTexture",
+        "TextureCanUseAtlas",
+        "TextureIsOpaque"
+      ],
+      "SceneGraphError": [
+        "ContextNotAvailable"
+      ],
+      "TextRenderType": [
+        "QtTextRendering",
+        "NativeTextRendering"
+      ]
+    },
+    "methods": {
+      "releaseResources": [],
+      "update": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "active": "bool",
+      "activeFocusItem": "Item",
+      "color": "color",
+      "contentItem": "Item",
+      "contentOrientation": "enumeration",
+      "data": "list",
+      "flags": "enumeration",
+      "height": "int",
+      "maximumHeight": "int",
+      "maximumWidth": "int",
+      "minimumHeight": "int",
+      "minimumWidth": "int",
+      "modality": "enumeration",
+      "opacity": "real",
+      "palette": "Palette",
+      "title": "string",
+      "transientParent": "QWindow",
+      "visibility": "var",
+      "visible": "bool",
+      "width": "int",
+      "x": "int",
+      "y": "int"
+    },
+    "signals": {
+      "activeChanged": [],
+      "activeFocusItemChanged": [],
+      "afterAnimating": [],
+      "afterFrameEnd": [],
+      "afterRenderPassRecording": [],
+      "afterRendering": [],
+      "afterSynchronizing": [],
+      "beforeFrameBegin": [],
+      "beforeRenderPassRecording": [],
+      "beforeRendering": [],
+      "beforeSynchronizing": [],
+      "closing": [
+        "CloseEvent"
+      ],
+      "colorChanged": [
+        "color"
+      ],
+      "contentOrientationChanged": [
+        "enumeration"
+      ],
+      "focusObjectChanged": [
+        "QtObject"
+      ],
+      "frameSwapped": [],
+      "heightChanged": [
+        "int"
+      ],
+      "maximumHeightChanged": [
+        "int"
+      ],
+      "maximumWidthChanged": [
+        "int"
+      ],
+      "minimumHeightChanged": [
+        "int"
+      ],
+      "minimumWidthChanged": [
+        "int"
+      ],
+      "modalityChanged": [
+        "enumeration"
+      ],
+      "opacityChanged": [
+        "real"
+      ],
+      "paletteChanged": [],
+      "paletteCreated": [],
+      "sceneGraphAboutToStop": [],
+      "sceneGraphError": [
+        "enumeration",
+        "string"
+      ],
+      "sceneGraphInitialized": [],
+      "sceneGraphInvalidated": [],
+      "screenChanged": [
+        "QScreen"
+      ],
+      "transientParentChanged": [
+        "QWindow"
+      ],
+      "visibilityChanged": [
+        "enumeration"
+      ],
+      "visibleChanged": [
+        "bool"
+      ],
+      "widthChanged": [
+        "int"
+      ],
+      "windowStateChanged": [
+        "enumeration"
+      ],
+      "windowTitleChanged": [
+        "string"
+      ],
+      "xChanged": [
+        "int"
+      ],
+      "yChanged": [
+        "int"
+      ]
+    }
+  },
+  "XAnimator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animator",
+    "properties": {},
+    "signals": {}
+  },
+  "YAnimator": {
+    "enums": {},
+    "methods": {},
+    "parent": "Animator",
+    "properties": {},
+    "signals": {}
+  },
+  "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually — re-run the generator instead.",
+  "_version": "6.3.2",
+  "color": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "font": {
+    "enums": {
+      "Capitalization": [
+        "MixedCase",
+        "AllUppercase",
+        "AllLowercase",
+        "SmallCaps",
+        "Capitalize"
+      ],
+      "HintingPreference": [
+        "PreferDefaultHinting",
+        "PreferNoHinting",
+        "PreferVerticalHinting",
+        "PreferFullHinting"
+      ],
+      "ResolveProperties": [
+        "NoPropertiesResolved",
+        "FamilyResolved",
+        "SizeResolved",
+        "StyleHintResolved",
+        "StyleStrategyResolved",
+        "WeightResolved",
+        "StyleResolved",
+        "UnderlineResolved",
+        "OverlineResolved",
+        "StrikeOutResolved",
+        "FixedPitchResolved",
+        "StretchResolved",
+        "KerningResolved",
+        "CapitalizationResolved",
+        "LetterSpacingResolved",
+        "WordSpacingResolved",
+        "HintingPreferenceResolved",
+        "StyleNameResolved",
+        "FamiliesResolved",
+        "AllPropertiesResolved"
+      ],
+      "SpacingType": [
+        "PercentageSpacing",
+        "AbsoluteSpacing"
+      ],
+      "Stretch": [
+        "AnyStretch",
+        "UltraCondensed",
+        "ExtraCondensed",
+        "Condensed",
+        "SemiCondensed",
+        "Unstretched",
+        "SemiExpanded",
+        "Expanded",
+        "ExtraExpanded",
+        "UltraExpanded"
+      ],
+      "Style": [
+        "StyleNormal",
+        "StyleItalic",
+        "StyleOblique"
+      ],
+      "StyleHint": [
+        "Helvetica",
+        "SansSerif",
+        "Times",
+        "Serif",
+        "Courier",
+        "TypeWriter",
+        "OldEnglish",
+        "Decorative",
+        "System",
+        "AnyStyle",
+        "Cursive",
+        "Monospace",
+        "Fantasy"
+      ],
+      "StyleStrategy": [
+        "PreferDefault",
+        "PreferBitmap",
+        "PreferDevice",
+        "PreferOutline",
+        "ForceOutline",
+        "PreferMatch",
+        "PreferQuality",
+        "PreferAntialias",
+        "NoAntialias",
+        "NoSubpixelAntialias",
+        "PreferNoShaping",
+        "NoFontMerging"
+      ],
+      "Weight": [
+        "Thin",
+        "ExtraLight",
+        "Light",
+        "Normal",
+        "Medium",
+        "DemiBold",
+        "Bold",
+        "ExtraBold",
+        "Black"
+      ]
+    },
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "matrix4x4": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "point": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "pointingDeviceUniqueId": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {
+      "numericId": "int"
+    },
+    "signals": {}
+  },
+  "quaternion": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "rect": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "size": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "vector2d": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "vector3d": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "vector4d": {
+    "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  }
+}

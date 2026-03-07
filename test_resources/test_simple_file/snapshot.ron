@@ -1,0 +1,12 @@
+(
+    name: "SimpleItem",
+    base_type: "Item",
+    id: Some("root"),
+    imports: [
+        "import QtQuick",
+    ],
+    signals: [],
+    properties: [],
+    functions: [],
+    children: [],
+)
