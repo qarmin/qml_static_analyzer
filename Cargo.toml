@@ -2,6 +2,11 @@
 name = "qml_static_analyzer"
 version = "0.1.0"
 edition = "2024"
+license = "GPL-3.0-only"
+authors = ["Rafał Mikrut <mikrutrafal@protonmail.com>"]
+description = "A static analyzer for QML files"
+repository = "https://github.com/qarmin/qml_static_analyzer"
+homepage = "https://github.com/qarmin/qml_static_analyzer"
 
 [dependencies]
 ron = "0.12.0"
