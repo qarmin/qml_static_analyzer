@@ -3,8 +3,9 @@
 
 use super::error::ParseError;
 use super::expression::{
-    collect_arrow_params, collect_names_from_expression, is_js_keyword, try_parse_catch_param, try_parse_for_vars,
-    try_parse_member_assignment, try_parse_method_shorthand_params, try_parse_object_key, try_parse_var_decl,
+    collect_arrow_params, collect_function_keyword_params, collect_names_from_expression, is_js_keyword,
+    try_parse_catch_param, try_parse_for_vars, try_parse_member_assignment, try_parse_method_shorthand_params,
+    try_parse_object_key, try_parse_var_decl,
 };
 use super::helpers::{
     extract_loader_source_types, is_signal_handler_block, parse_function_header, parse_property_decl,
@@ -359,6 +360,86 @@ impl<'src> Parser<'src> {
             vec![]
         };
 
+        if rest.is_empty() {
+            // Handler body begins on the next line, e.g.:
+            //   onCurrentItemChanged:
+            //       if (cond) { ... }
+            let Some((_, next_raw)) = self.peek() else {
+                return Ok(Function {
+                    name,
+                    is_signal_handler,
+                    parameters: vec![],
+                    used_names: vec![],
+                    declared_locals: vec![],
+                    member_assignments: vec![],
+                    line: lineno,
+                });
+            };
+            let next_line = strip_comment(next_raw).trim().to_string();
+            self.advance();
+            return if next_line.ends_with('{') {
+                let paren_depth: i32 = next_line.chars().fold(0i32, |d, c| match c {
+                    '(' => d + 1,
+                    ')' => d - 1,
+                    _ => d,
+                });
+                if paren_depth == 0 {
+                    let body = self.collect_function_body_names()?;
+                    Ok(Function {
+                        name,
+                        is_signal_handler,
+                        parameters: vec![],
+                        used_names: body.used_names,
+                        declared_locals: body.declared_locals,
+                        member_assignments: body.member_assignments,
+                        line: lineno,
+                    })
+                } else {
+                    // `{` is inside unclosed parens — consume until balanced
+                    let mut pdepth = paren_depth;
+                    let mut bdepth: i32 = next_line.chars().fold(0i32, |d, c| match c {
+                        '{' => d + 1,
+                        '}' => d - 1,
+                        _ => d,
+                    });
+                    while pdepth > 0 || bdepth > 0 {
+                        let Some((_, raw)) = self.advance() else { break };
+                        for ch in strip_comment(raw).chars() {
+                            match ch {
+                                '(' => pdepth += 1,
+                                ')' => pdepth -= 1,
+                                '{' => bdepth += 1,
+                                '}' => bdepth -= 1,
+                                _ => {}
+                            }
+                        }
+                    }
+                    let used_names = collect_names_from_expression(&next_line);
+                    Ok(Function {
+                        name,
+                        is_signal_handler,
+                        parameters: vec![],
+                        used_names,
+                        declared_locals: vec![],
+                        member_assignments: vec![],
+                        line: lineno,
+                    })
+                }
+            } else {
+                // Single expression on next line: `onXxx:\n    doSomething()`
+                let used_names = collect_names_from_expression(&next_line);
+                Ok(Function {
+                    name,
+                    is_signal_handler,
+                    parameters: vec![],
+                    used_names,
+                    declared_locals: vec![],
+                    member_assignments: vec![],
+                    line: lineno,
+                })
+            };
+        }
+
         if rest == "{" || rest.ends_with('{') {
             // Check if `{` is at the top level or inside an unclosed `(`.
             // e.g. `onClicked: showDialog(arg, {` — the `{` is inside a call, not the handler body.
@@ -658,7 +739,7 @@ impl<'src> Parser<'src> {
         let mut depth = 1usize;
 
         loop {
-            let Some((_, raw_line)) = self.advance() else {
+            let Some((lineno, raw_line)) = self.advance() else {
                 return Err(self.err("Unexpected end of input inside function body"));
             };
 
@@ -684,16 +765,27 @@ impl<'src> Parser<'src> {
             // Arrow function params: `(a, b) => ...`
             declared_locals.extend(collect_arrow_params(line));
 
+            // `function(params)` callback params: `.then(function (points) {`
+            declared_locals.extend(collect_function_keyword_params(line));
+
             // Catch clause parameter: `catch (e)` or `} catch(_) {`
             if let Some(catch_var) = try_parse_catch_param(line) {
                 declared_locals.push(catch_var);
             }
 
+            // Helper: annotate a slice of FunctionUsedName with the current line number.
+            let annotate = |mut names: Vec<FunctionUsedName>| -> Vec<FunctionUsedName> {
+                for n in &mut names {
+                    n.line = lineno;
+                }
+                names
+            };
+
             // Variable declaration: `let`/`const`/`var name = expr`
             if let Some((name, rhs)) = try_parse_var_decl(line) {
                 declared_locals.push(name.to_string());
                 if !rhs.is_empty() {
-                    used_names.extend(collect_names_from_expression(rhs));
+                    used_names.extend(annotate(collect_names_from_expression(rhs)));
                 }
                 continue;
             }
@@ -703,7 +795,7 @@ impl<'src> Parser<'src> {
                 let for_vars = try_parse_for_vars(line);
                 if !for_vars.is_empty() {
                     declared_locals.extend(for_vars);
-                    used_names.extend(collect_names_from_expression(line));
+                    used_names.extend(annotate(collect_names_from_expression(line)));
                     continue;
                 }
             }
@@ -713,6 +805,7 @@ impl<'src> Parser<'src> {
                 used_names.push(FunctionUsedName {
                     name: assignment.object.clone(),
                     accessed_item: Some(assignment.member.clone()),
+                    line: lineno,
                 });
                 member_assignments.push(assignment);
                 continue;
@@ -720,7 +813,7 @@ impl<'src> Parser<'src> {
 
             // JS object literal property: `key: expr`
             if let Some(value_part) = try_parse_object_key(line) {
-                used_names.extend(collect_names_from_expression(value_part));
+                used_names.extend(annotate(collect_names_from_expression(value_part)));
                 continue;
             }
 
@@ -735,7 +828,7 @@ impl<'src> Parser<'src> {
             }
 
             // Normal line
-            used_names.extend(collect_names_from_expression(line));
+            used_names.extend(annotate(collect_names_from_expression(line)));
         }
     }
 }

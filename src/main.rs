@@ -243,6 +243,18 @@ fn cmd_check(args: &[String]) {
         process::exit(1);
     });
 
+    if !opts.path.exists() {
+        eprintln!("error: --path {:?} does not exist", opts.path);
+        process::exit(1);
+    }
+
+    if let Some(ref p) = opts.config_file {
+        if !p.exists() {
+            eprintln!("error: --config {:?} does not exist", p);
+            process::exit(1);
+        }
+    }
+
     let config = opts
         .config_file
         .as_ref()
@@ -282,7 +294,23 @@ fn cmd_check(args: &[String]) {
 
     let db = load_qt_db(&opts);
 
-    let qml_files: Vec<PathBuf> = collect_qml_files(&opts.path)
+    let all_qml_files = collect_qml_files(&opts.path);
+
+    // Warn about ignore paths that don't match any file — most likely a wrong path relative to --path.
+    for ignore_path in &config.ignore.paths {
+        let matched = all_qml_files.iter().any(|p| {
+            let relative = p.strip_prefix(&opts.path).unwrap_or(p);
+            relative.starts_with(Path::new(ignore_path.as_str()))
+        });
+        if !matched {
+            eprintln!(
+                "warning: [ignore] path `{ignore_path}` does not match any .qml file \
+                 (paths must be relative to --path)"
+            );
+        }
+    }
+
+    let qml_files: Vec<PathBuf> = all_qml_files
         .into_iter()
         .filter(|p| !is_ignored(p, &opts.path, &config.ignore.paths))
         .collect();
@@ -399,6 +427,19 @@ fn cmd_check(args: &[String]) {
                     if entry.len() > before {
                         changed = true;
                     }
+                }
+            }
+            // Also propagate through base-type relationships:
+            // if EnterPinFlyingDialog gets scope from main, its base type FlyingDialog
+            // should also receive that scope (since FlyingDialog's methods run in the
+            // same context as the subclass that instantiated it).
+            let base = &parent_file.base_type;
+            if file_members.contains_key(base) {
+                let entry = parent_scopes.entry(base.clone()).or_default();
+                let before = entry.len();
+                entry.extend(additional.iter().cloned());
+                if entry.len() > before {
+                    changed = true;
                 }
             }
         }

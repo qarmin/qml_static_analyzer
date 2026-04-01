@@ -1,0 +1,27 @@
+test_project_ai/ChildPanel.qml:8: Property `height` redefines existing property from `base type` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:11: Property `title` declared as `string` but assigned `int` literal [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:14: Property `active` declared as `bool` but assigned `double` literal [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:17: Property `retryCount` declared as `int` but assigned `bool` literal [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:20: Property `errorCode` declared as `int` but assigned `string` literal [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:23: Property `rate` declared as `string` but assigned `double` literal [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:29: Property `isCounterBool` declared as `bool` but assigned property `counter` of type `int` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:38: Undefined name `undeclaredNameABC` used in property `vis` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:41: Signal handler `onItemSelecttted` has no corresponding signal or property [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:52: Undefined name `unknownVar3456` used in function `doWork` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:35: Assignment to unknown property `unknownProp9876` [Dashboard -> ChildPanel]
+test_project_ai/Dashboard.qml:41: Undefined name `unknownRef` used in function `refresh`
+test_project_ai/Dashboard.qml:48: Signal handler `onDataLoaded` has no corresponding signal or property
+test_project_ai/Dashboard.qml:34: Assignment to unknown property `fakeWindowProperty`
+test_project_ai/Dashboard.qml:29: Unknown type `GhostWidget3000`
+test_project_ai/DataView.qml:22: Undefined name `undefinedModelCount` used in property `isEmpty` [Dashboard -> DataView]
+test_project_ai/DataView.qml:12: Signal handler `onCountTChanged` has no corresponding signal or property [Dashboard -> DataView]
+test_project_ai/DataView.qml:42: [delegateRoot] Assignment to unknown property `nonExistentTextProp` on `labelItem` [Dashboard -> DataView]
+test_project_ai/DataView.qml:40: [delegateRoot] Assignment to unknown property `nonExistentDelegateProp` [Dashboard -> DataView]
+test_project_ai/InputForm.qml:22: Signal handler `onConnectedChanged` has no corresponding signal or property [Dashboard -> InputForm]
+test_project_ai/InputForm.qml:30: Unknown member `pressure` on C++ object `sensorManager` [Dashboard -> InputForm]
+test_project_ai/InputForm.qml:31: Undefined name `undefinedHelper` used in function `processInput` [Dashboard -> InputForm]
+test_project_ai/InputForm.qml:47: Assignment to unknown property `nonExistentField` on `textField` [Dashboard -> InputForm]
+test_project_ai/InputForm.qml:47: `textField.readOnly` expects `bool` but got `int` [Dashboard -> InputForm]
+test_project_ai/InputForm.qml:18: Unknown member `voltage` on C++ object `sensorManager` [Dashboard -> InputForm]
+
+Found 25 errors, 0 files not checked

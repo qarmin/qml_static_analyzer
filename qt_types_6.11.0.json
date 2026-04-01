@@ -369,6 +369,8 @@
       "focused": "bool",
       "id": "string",
       "ignored": "bool",
+      "labelFor": "Item",
+      "labelledBy": "Item",
       "multiLine": "bool",
       "name": "string",
       "passwordEdit": "bool",
@@ -407,6 +409,8 @@
       "idChanged": [],
       "ignoredChanged": [],
       "increaseAction": [],
+      "labelForChanged": [],
+      "labelledByChanged": [],
       "multiLineChanged": [
         "bool"
       ],
@@ -653,7 +657,7 @@
         "int"
       ],
       "finishBehaviorChanged": [
-        "var"
+        "enumeration"
       ],
       "finished": [],
       "frameCountChanged": [
@@ -826,15 +830,19 @@
     "properties": {
       "activeFocusControl": "Item",
       "background": "Item",
+      "bottomPadding": "real",
       "contentData": "list",
       "contentItem": "Item",
       "font": "font",
       "footer": "Item",
       "header": "Item",
+      "leftPadding": "real",
       "locale": "var",
       "menuBar": "Item",
       "palette": "Palette",
-      "screen": "QtObject",
+      "rightPadding": "real",
+      "screen": "ScreenInfo",
+      "topPadding": "real",
       "visibility": "enumeration",
       "visible": "bool",
       "window": "ApplicationWindow"
@@ -842,12 +850,16 @@
     "signals": {
       "activeFocusControlChanged": [],
       "backgroundChanged": [],
+      "bottomPaddingChanged": [],
       "fontChanged": [],
       "footerChanged": [],
       "headerChanged": [],
+      "leftPaddingChanged": [],
       "localeChanged": [],
       "menuBarChanged": [],
+      "rightPaddingChanged": [],
       "screenChanged": [],
+      "topPaddingChanged": [],
       "visibilityChanged": [
         "enumeration"
       ],
@@ -898,7 +910,12 @@
       "when": "bool"
     },
     "signals": {
-      "restoreModeChanged": []
+      "delayedChanged": [],
+      "objectChanged": [],
+      "propertyChanged": [],
+      "restoreModeChanged": [],
+      "valueChanged": [],
+      "whenChanged": []
     }
   },
   "BorderImage": {
@@ -1211,6 +1228,7 @@
       "modality": "enumeration",
       "options": "enumeration",
       "parentWindow": "QWindow",
+      "popupType": "enumeration",
       "result": "int",
       "selectedColor": "color",
       "title": "string",
@@ -1222,6 +1240,7 @@
       "modalityChanged": [],
       "optionsChanged": [],
       "parentWindowChanged": [],
+      "popupTypeChanged": [],
       "rejected": [],
       "resultChanged": [],
       "selectedColorChanged": [],
@@ -1542,6 +1561,20 @@
       "currentItemChanged": []
     }
   },
+  "ContextMenu": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "menu": "Menu"
+    },
+    "signals": {
+      "menuChanged": [],
+      "requested": [
+        "point"
+      ]
+    }
+  },
   "Control": {
     "enums": {},
     "methods": {},
@@ -1626,8 +1659,46 @@
       "transitionChanged": []
     }
   },
-  "DelegateModel": {
+  "DelegateChoice": {
     "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "column": "int",
+      "delegate": "Component",
+      "index": "int",
+      "roleValue": "var",
+      "row": "int"
+    },
+    "signals": {
+      "changed": [],
+      "columnChanged": [],
+      "delegateChanged": [],
+      "indexChanged": [],
+      "roleValueChanged": [],
+      "rowChanged": []
+    }
+  },
+  "DelegateChooser": {
+    "enums": {},
+    "methods": {},
+    "parent": "AbstractDelegateComponent",
+    "properties": {
+      "choices": "list",
+      "role": "string"
+    },
+    "signals": {
+      "roleChanged": []
+    }
+  },
+  "DelegateModel": {
+    "enums": {
+      "DelegateModelAccess": [
+        "Qt5ReadWrite",
+        "ReadOnly",
+        "ReadWrite"
+      ]
+    },
     "methods": {
       "modelIndex": [
         "int"
@@ -1638,6 +1709,7 @@
     "properties": {
       "count": "int",
       "delegate": "Component",
+      "delegateModelAccess": "var",
       "filterOnGroup": "string",
       "groups": "list",
       "inItems": "bool",
@@ -1659,6 +1731,7 @@
       ],
       "defaultGroupsChanged": [],
       "delegateChanged": [],
+      "delegateModelAccessChanged": [],
       "destroyingItem": [
         "QtObject"
       ],
@@ -1675,6 +1748,7 @@
         "int",
         "QtObject"
       ],
+      "modelChanged": [],
       "modelUpdated": [
         "var",
         "bool"
@@ -1853,6 +1927,8 @@
       "buttonBox": "DialogButtonBox",
       "buttonLayout": "enumeration",
       "buttonRole": "enumeration",
+      "defaultButton": "AbstractButton",
+      "defaultStandardButton": "enumeration",
       "delegate": "Component",
       "position": "var",
       "standardButtons": "enumeration"
@@ -1865,6 +1941,8 @@
       "clicked": [
         "AbstractButton"
       ],
+      "defaultButtonChanged": [],
+      "defaultStandardButtonChanged": [],
       "delegateChanged": [],
       "discarded": [],
       "helpRequested": [],
@@ -1872,6 +1950,44 @@
       "rejected": [],
       "reset": [],
       "standardButtonsChanged": []
+    }
+  },
+  "DoubleSpinBox": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "decimals": "int",
+      "displayText": "string",
+      "down": "IndicatorButton",
+      "editable": "bool",
+      "from": "real",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
+      "stepSize": "real",
+      "textFromValue": "var",
+      "to": "real",
+      "up": "IndicatorButton",
+      "validator": "QValidator",
+      "value": "real",
+      "valueFromText": "var",
+      "wrap": "bool"
+    },
+    "signals": {
+      "decimalsChanged": [],
+      "displayTextChanged": [],
+      "editableChanged": [],
+      "fromChanged": [],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
+      "stepSizeChanged": [],
+      "textFromValueChanged": [],
+      "toChanged": [],
+      "validatorChanged": [],
+      "valueChanged": [],
+      "valueFromTextChanged": [],
+      "valueModified": [],
+      "wrapChanged": []
     }
   },
   "DoubleValidator": {
@@ -2141,8 +2257,13 @@
         "Bezier"
       ]
     },
-    "methods": {},
-    "parent": null,
+    "methods": {
+      "valueForProgress": [
+        "enumeration",
+        "real"
+      ]
+    },
+    "parent": "QtObject",
     "properties": {},
     "signals": {}
   },
@@ -2187,6 +2308,7 @@
       "nameFilters": "var",
       "options": "enumeration",
       "parentWindow": "QWindow",
+      "popupType": "enumeration",
       "rejectLabel": "string",
       "result": "int",
       "selectedFile": "url",
@@ -2208,6 +2330,7 @@
       "nameFiltersChanged": [],
       "optionsChanged": [],
       "parentWindowChanged": [],
+      "popupTypeChanged": [],
       "rejectLabelChanged": [],
       "rejected": [],
       "resultChanged": [],
@@ -2215,6 +2338,99 @@
       "selectedFilesChanged": [],
       "titleChanged": [],
       "visibleChanged": []
+    }
+  },
+  "FilterBase": {
+    "enums": {},
+    "methods": {
+      "invalidate": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "column": "int",
+      "enabled": "bool",
+      "inverted": "bool"
+    },
+    "signals": {
+      "columnChanged": [],
+      "enabledChanged": [],
+      "invalidateCache": [
+        "FilterBase"
+      ],
+      "invalidateModel": [],
+      "invertedChanged": []
+    }
+  },
+  "FlexboxLayout": {
+    "enums": {
+      "FlexboxAlignment": [
+        "AlignAuto",
+        "AlignStart",
+        "AlignCenter",
+        "AlignEnd",
+        "AlignStretch",
+        "AlignBaseline",
+        "AlignSpaceBetween",
+        "AlignSpaceAround",
+        "AlignSpaceEvenly"
+      ],
+      "FlexboxDirection": [
+        "Column",
+        "ColumnReverse",
+        "Row",
+        "RowReverse"
+      ],
+      "FlexboxEdge": [
+        "EdgeLeft",
+        "EdgeRight",
+        "EdgeTop",
+        "EdgeBottom",
+        "EdgeAll",
+        "EdgeMax"
+      ],
+      "FlexboxGap": [
+        "GapRow",
+        "GapColumn",
+        "GapAll",
+        "GapMax"
+      ],
+      "FlexboxJustify": [
+        "JustifyStart",
+        "JustifyCenter",
+        "JustifyEnd",
+        "JustifySpaceBetween",
+        "JustifySpaceAround",
+        "JustifySpaceEvenly"
+      ],
+      "FlexboxWrap": [
+        "NoWrap",
+        "Wrap",
+        "WrapReverse"
+      ]
+    },
+    "methods": {},
+    "parent": "Layout",
+    "properties": {
+      "alignContent": "var",
+      "alignItems": "var",
+      "alignSelf": "enumeration",
+      "columnGap": "real",
+      "direction": "var",
+      "gap": "real",
+      "justifyContent": "var",
+      "rowGap": "real",
+      "wrap": "var"
+    },
+    "signals": {
+      "alignContentChanged": [],
+      "alignItemsChanged": [],
+      "columnGapChanged": [],
+      "countChanged": [],
+      "directionChanged": [],
+      "gapChanged": [],
+      "justifyContentChanged": [],
+      "rowGapChanged": [],
+      "wrapChanged": []
     }
   },
   "Flickable": {
@@ -2234,6 +2450,17 @@
         "VerticalFlick",
         "HorizontalAndVerticalFlick",
         "AutoFlickIfNeeded"
+      ],
+      "PositionMode": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter",
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter",
+        "AlignCenter",
+        "Visible",
+        "Contain"
       ]
     },
     "methods": {
@@ -2241,6 +2468,17 @@
       "flick": [
         "real",
         "real"
+      ],
+      "flickTo": [
+        "point"
+      ],
+      "flickToChild": [
+        "Item",
+        "var"
+      ],
+      "positionViewAtChild": [
+        "Item",
+        "var"
       ],
       "resizeContent": [
         "real",
@@ -2251,6 +2489,7 @@
     },
     "parent": "Item",
     "properties": {
+      "acceptedButtons": "enumeration",
       "atXBeginning": "bool",
       "atXEnd": "bool",
       "atYBeginning": "bool",
@@ -2294,6 +2533,7 @@
       "visibleArea": "FlickableVisibleArea"
     },
     "signals": {
+      "acceptedButtonsChanged": [],
       "atXBeginningChanged": [],
       "atXEndChanged": [],
       "atYBeginningChanged": [],
@@ -2399,6 +2639,7 @@
       "modality": "enumeration",
       "options": "enumeration",
       "parentWindow": "QWindow",
+      "popupType": "enumeration",
       "rejectLabel": "string",
       "result": "int",
       "selectedFolder": "url",
@@ -2413,6 +2654,7 @@
       "modalityChanged": [],
       "optionsChanged": [],
       "parentWindowChanged": [],
+      "popupTypeChanged": [],
       "rejectLabelChanged": [],
       "rejected": [],
       "resultChanged": [],
@@ -2446,6 +2688,11 @@
         "PreferNoHinting",
         "PreferVerticalHinting",
         "PreferFullHinting"
+      ],
+      "Style": [
+        "StyleNormal",
+        "StyleItalic",
+        "StyleOblique"
       ]
     },
     "methods": {},
@@ -2464,6 +2711,7 @@
       "modality": "enumeration",
       "options": "enumeration",
       "parentWindow": "QWindow",
+      "popupType": "enumeration",
       "result": "int",
       "selectedFont": "font",
       "title": "string",
@@ -2476,11 +2724,33 @@
       "modalityChanged": [],
       "optionsChanged": [],
       "parentWindowChanged": [],
+      "popupTypeChanged": [],
       "rejected": [],
       "resultChanged": [],
       "selectedFontChanged": [],
       "titleChanged": [],
       "visibleChanged": []
+    }
+  },
+  "FontInfo": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "bold": "bool",
+      "family": "string",
+      "fixedPitch": "bool",
+      "font": "font",
+      "italic": "bool",
+      "pixelSize": "int",
+      "pointSize": "real",
+      "style": "enumeration",
+      "styleName": "string",
+      "variableAxes": "list",
+      "weight": "int"
+    },
+    "signals": {
+      "fontChanged": []
     }
   },
   "FontLoader": {
@@ -2529,6 +2799,7 @@
     "properties": {
       "ascent": "real",
       "averageCharacterWidth": "real",
+      "capitalHeight": "real",
       "descent": "real",
       "font": "font",
       "height": "real",
@@ -2584,6 +2855,20 @@
       "smoothFrameTimeChanged": [],
       "triggered": []
     }
+  },
+  "FunctionFilter": {
+    "enums": {},
+    "methods": {},
+    "parent": "FilterBase",
+    "properties": {},
+    "signals": {}
+  },
+  "FunctionSorter": {
+    "enums": {},
+    "methods": {},
+    "parent": "SorterBase",
+    "properties": {},
+    "signals": {}
   },
   "GestureEvent": {
     "enums": {},
@@ -2727,18 +3012,18 @@
       "columnSpacingChanged": [],
       "columnsChanged": [],
       "effectiveHorizontalAlignmentChanged": [
-        "var"
+        "enumeration"
       ],
       "effectiveLayoutDirectionChanged": [],
       "flowChanged": [],
       "horizontalAlignmentChanged": [
-        "var"
+        "enumeration"
       ],
       "layoutDirectionChanged": [],
       "rowSpacingChanged": [],
       "rowsChanged": [],
       "verticalAlignmentChanged": [
-        "var"
+        "enumeration"
       ]
     }
   },
@@ -2839,6 +3124,21 @@
       "titleChanged": []
     }
   },
+  "HeaderViewDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "TableViewDelegate",
+    "properties": {
+      "headerView": "HeaderViewBase",
+      "model": "var",
+      "orientation": "enumeration"
+    },
+    "signals": {
+      "headerViewChanged": [],
+      "modelChanged": [],
+      "orientationChanged": []
+    }
+  },
   "HorizontalHeaderView": {
     "enums": {},
     "methods": {},
@@ -2903,6 +3203,7 @@
       "alignment": "enumeration",
       "bottomPadding": "real",
       "color": "color",
+      "defaultIconColor": "color",
       "display": "var",
       "font": "font",
       "icon": "var",
@@ -2913,7 +3214,9 @@
       "text": "string",
       "topPadding": "real"
     },
-    "signals": {}
+    "signals": {
+      "defaultIconColorChanged": []
+    }
   },
   "Image": {
     "enums": {
@@ -2954,14 +3257,14 @@
       "autoTransformChanged": [],
       "fillModeChanged": [],
       "horizontalAlignmentChanged": [
-        "var"
+        "enumeration"
       ],
       "mipmapChanged": [
         "bool"
       ],
       "paintedGeometryChanged": [],
       "verticalAlignmentChanged": [
-        "var"
+        "enumeration"
       ]
     }
   },
@@ -3079,6 +3382,9 @@
     "signals": {
       "availableVirtualGeometryChanged": [
         "rect"
+      ],
+      "capabilitiesChanged": [
+        "var"
       ]
     }
   },
@@ -3134,6 +3440,7 @@
       "asynchronous": "bool",
       "count": "int",
       "delegate": "Component",
+      "delegateModelAccess": "enumeration",
       "model": "var",
       "object": "QtObject"
     },
@@ -3142,6 +3449,7 @@
       "asynchronousChanged": [],
       "countChanged": [],
       "delegateChanged": [],
+      "delegateModelAccessChanged": [],
       "modelChanged": [],
       "objectAdded": [
         "int",
@@ -3196,7 +3504,9 @@
         "ItemRotationHasChanged",
         "ItemAntialiasingHasChanged",
         "ItemDevicePixelRatioHasChanged",
-        "ItemEnabledHasChanged"
+        "ItemEnabledHasChanged",
+        "ItemScaleHasChanged",
+        "ItemTransformHasChanged"
       ],
       "TransformOrigin": [
         "TopLeft",
@@ -3507,6 +3817,7 @@
       "currentIndex": "int",
       "currentItem": "Item",
       "delegate": "Component",
+      "delegateModelAccess": "enumeration",
       "displaced": "Transition",
       "displayMarginBeginning": "int",
       "displayMarginEnd": "int",
@@ -3542,6 +3853,7 @@
       "currentIndexChanged": [],
       "currentItemChanged": [],
       "delegateChanged": [],
+      "delegateModelAccessChanged": [],
       "displacedTransitionChanged": [],
       "displayMarginBeginningChanged": [],
       "displayMarginEndChanged": [],
@@ -4062,7 +4374,7 @@
         "int"
       ],
       "popup": [
-        "var"
+        "point"
       ],
       "removeAction": [
         "Action"
@@ -4199,6 +4511,7 @@
       "informativeText": "string",
       "modality": "enumeration",
       "parentWindow": "QWindow",
+      "popupType": "enumeration",
       "result": "int",
       "text": "string",
       "title": "string",
@@ -4216,6 +4529,7 @@
       "informativeTextChanged": [],
       "modalityChanged": [],
       "parentWindowChanged": [],
+      "popupTypeChanged": [],
       "rejected": [],
       "resultChanged": [],
       "textChanged": [],
@@ -4656,10 +4970,12 @@
     "methods": {
       "pointAtPercent": [
         "real"
-      ]
+      ],
+      "processPath": []
     },
     "parent": "QtObject",
     "properties": {
+      "asynchronous": "bool",
       "closed": "bool",
       "pathElements": "list",
       "scale": "size",
@@ -4668,6 +4984,7 @@
       "startY": "real"
     },
     "signals": {
+      "asynchronousChanged": [],
       "changed": [],
       "scaleChanged": [],
       "simplifyChanged": [],
@@ -4744,7 +5061,7 @@
         "real"
       ],
       "orientationChanged": [
-        "var"
+        "enumeration"
       ],
       "orientationEntryDurationChanged": [
         "real"
@@ -4997,21 +5314,29 @@
     "methods": {},
     "parent": "QtObject",
     "properties": {
+      "bevel": "bool",
+      "bottomLeftBevel": "bool",
       "bottomLeftRadius": "real",
+      "bottomRightBevel": "bool",
       "bottomRightRadius": "real",
       "height": "real",
       "radius": "real",
       "relativeX": "real",
       "relativeY": "real",
       "strokeAdjustment": "real",
+      "topLeftBevel": "bool",
       "topLeftRadius": "real",
+      "topRightBevel": "bool",
       "topRightRadius": "real",
       "width": "real",
       "x": "real",
       "y": "real"
     },
     "signals": {
+      "bevelChanged": [],
+      "bottomLeftBevelChanged": [],
       "bottomLeftRadiusChanged": [],
+      "bottomRightBevelChanged": [],
       "bottomRightRadiusChanged": [],
       "changed": [],
       "heightChanged": [],
@@ -5019,7 +5344,9 @@
       "relativeXChanged": [],
       "relativeYChanged": [],
       "strokeAdjustmentChanged": [],
+      "topLeftBevelChanged": [],
       "topLeftRadiusChanged": [],
+      "topRightBevelChanged": [],
       "topRightRadiusChanged": [],
       "widthChanged": [],
       "xChanged": [],
@@ -5753,13 +6080,13 @@
         "real"
       ],
       "atob": [
-        "string"
+        "var"
       ],
       "binding": [
         "var"
       ],
       "btoa": [
-        "string"
+        "var"
       ],
       "callLater": [
         "var"
@@ -5781,6 +6108,18 @@
       ],
       "darker": [
         "var"
+      ],
+      "enumStringToValue": [
+        "var",
+        "string"
+      ],
+      "enumValueToString": [
+        "var",
+        "real"
+      ],
+      "enumValueToStrings": [
+        "var",
+        "real"
       ],
       "exit": [
         "int"
@@ -5890,7 +6229,9 @@
       "styleHints": "QtObject",
       "uiLanguage": "string"
     },
-    "signals": {}
+    "signals": {
+      "uiLanguageChanged": []
+    }
   },
   "QtObject": {
     "enums": {},
@@ -6015,11 +6356,13 @@
     "properties": {
       "count": "int",
       "delegate": "Component",
+      "delegateModelAccess": "enumeration",
       "model": "var"
     },
     "signals": {
       "countChanged": [],
       "delegateChanged": [],
+      "delegateModelAccessChanged": [],
       "itemAdded": [
         "int",
         "Item"
@@ -6031,6 +6374,28 @@
       "modelChanged": []
     }
   },
+  "RoleFilter": {
+    "enums": {},
+    "methods": {},
+    "parent": "FilterBase",
+    "properties": {
+      "roleName": "string"
+    },
+    "signals": {
+      "roleNameChanged": []
+    }
+  },
+  "RoleSorter": {
+    "enums": {},
+    "methods": {},
+    "parent": "SorterBase",
+    "properties": {
+      "roleName": "string"
+    },
+    "signals": {
+      "roleNameChanged": []
+    }
+  },
   "Rotation": {
     "enums": {},
     "methods": {},
@@ -6038,11 +6403,13 @@
     "properties": {
       "angle": "real",
       "axis": "vector3d",
+      "distanceToPlane": "real",
       "origin": "vector3d"
     },
     "signals": {
       "angleChanged": [],
       "axisChanged": [],
+      "distanceToPlaneChanged": [],
       "originChanged": []
     }
   },
@@ -6082,7 +6449,7 @@
     },
     "signals": {
       "directionChanged": [
-        "var"
+        "enumeration"
       ]
     }
   },
@@ -6123,6 +6490,19 @@
       "layoutDirectionChanged": [],
       "spacingChanged": [],
       "uniformCellSizesChanged": []
+    }
+  },
+  "SafeArea": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "additionalMargins": "var",
+      "margins": "var"
+    },
+    "signals": {
+      "additionalMarginsChanged": [],
+      "marginsChanged": []
     }
   },
   "Scale": {
@@ -6307,6 +6687,48 @@
       "effectiveScrollBarWidthChanged": []
     }
   },
+  "SearchField": {
+    "enums": {},
+    "methods": {},
+    "parent": "Control",
+    "properties": {
+      "clearIndicator": "IndicatorButton",
+      "currentIndex": "int",
+      "delegate": "Component",
+      "delegateModel": "InstanceModel",
+      "highlightedIndex": "int",
+      "live": "bool",
+      "popup": "Popup",
+      "searchIndicator": "IndicatorButton",
+      "suggestionCount": "int",
+      "suggestionModel": "var",
+      "text": "string",
+      "textRole": "string"
+    },
+    "signals": {
+      "accepted": [],
+      "activated": [
+        "int"
+      ],
+      "clearButtonPressed": [],
+      "currentIndexChanged": [],
+      "delegateChanged": [],
+      "delegateModelChanged": [],
+      "highlighted": [
+        "int"
+      ],
+      "highlightedIndexChanged": [],
+      "liveChanged": [],
+      "popupChanged": [],
+      "searchButtonPressed": [],
+      "searchTriggered": [],
+      "suggestionCountChanged": [],
+      "suggestionModelChanged": [],
+      "textChanged": [],
+      "textEdited": [],
+      "textRoleChanged": []
+    }
+  },
   "SelectionRectangle": {
     "enums": {
       "SelectionMode": [
@@ -6443,6 +6865,25 @@
       "wrapModeChanged": []
     }
   },
+  "Shear": {
+    "enums": {},
+    "methods": {},
+    "parent": "QtObject",
+    "properties": {
+      "origin": "vector3d",
+      "xAngle": "real",
+      "xFactor": "real",
+      "yAngle": "real",
+      "yFactor": "real"
+    },
+    "signals": {
+      "originChanged": [],
+      "xAngleChanged": [],
+      "xFactorChanged": [],
+      "yAngleChanged": [],
+      "yFactorChanged": []
+    }
+  },
   "Shortcut": {
     "enums": {},
     "methods": {},
@@ -6462,6 +6903,8 @@
       "autoRepeatChanged": [],
       "contextChanged": [],
       "enabledChanged": [],
+      "nativeTextChanged": [],
+      "portableTextChanged": [],
       "sequenceChanged": [],
       "sequencesChanged": []
     }
@@ -6539,12 +6982,68 @@
       "velocityChanged": []
     }
   },
-  "SpinBox": {
+  "SortFilterProxyModel": {
     "enums": {},
     "methods": {
-      "decrease": [],
-      "increase": []
+      "invalidate": [],
+      "invalidateSorter": [],
+      "mapFromSource": [
+        "var"
+      ],
+      "mapToSource": [
+        "var"
+      ],
+      "setPrimarySorter": [
+        "SorterBase"
+      ]
     },
+    "parent": "AbstractItemModel",
+    "properties": {
+      "autoAcceptChildRows": "bool",
+      "dynamicSortFilter": "bool",
+      "filters": "list",
+      "model": "var",
+      "recursiveFiltering": "bool",
+      "sorters": "list",
+      "sourceModel": "QAbstractItemModel"
+    },
+    "signals": {
+      "autoAcceptChildRowsChanged": [],
+      "dynamicSortFilterChanged": [],
+      "filtersChanged": [],
+      "modelChanged": [],
+      "primarySorterChanged": [],
+      "recursiveFilteringChanged": [],
+      "sortersChanged": [],
+      "sourceModelChanged": []
+    }
+  },
+  "SorterBase": {
+    "enums": {},
+    "methods": {
+      "invalidate": []
+    },
+    "parent": "QtObject",
+    "properties": {
+      "column": "int",
+      "enabled": "bool",
+      "priority": "int",
+      "sortOrder": "enumeration"
+    },
+    "signals": {
+      "columnChanged": [],
+      "enabledChanged": [],
+      "invalidateCache": [
+        "SorterBase"
+      ],
+      "invalidateModel": [],
+      "priorityChanged": [],
+      "sortOrderChanged": []
+    }
+  },
+  "SpinBox": {
+    "enums": {},
+    "methods": {},
     "parent": "Control",
     "properties": {
       "displayText": "string",
@@ -7032,6 +7531,23 @@
       ]
     }
   },
+  "StringSorter": {
+    "enums": {},
+    "methods": {},
+    "parent": "RoleSorter",
+    "properties": {
+      "caseSensitivity": "enumeration",
+      "ignorePunctuation": "bool",
+      "locale": "var",
+      "numericMode": "bool"
+    },
+    "signals": {
+      "caseSensitivityChanged": [],
+      "ignorePunctuationChanged": [],
+      "localeChanged": [],
+      "numericModeChanged": []
+    }
+  },
   "SwipeDelegate": {
     "enums": {
       "Side": [
@@ -7161,17 +7677,6 @@
         "EditKeyPressed",
         "AnyKeyPressed"
       ],
-      "PositionMode": [
-        "AlignLeft",
-        "AlignRight",
-        "AlignHCenter",
-        "AlignTop",
-        "AlignBottom",
-        "AlignVCenter",
-        "AlignCenter",
-        "Visible",
-        "Contain"
-      ],
       "SelectionBehavior": [
         "SelectionDisabled",
         "SelectCells",
@@ -7254,19 +7759,19 @@
       "positionViewAtCell": [
         "int",
         "int",
-        "var"
+        "enumeration"
       ],
       "positionViewAtColumn": [
         "int",
-        "var"
+        "enumeration"
       ],
       "positionViewAtIndex": [
         "var",
-        "var"
+        "enumeration"
       ],
       "positionViewAtRow": [
         "int",
-        "var"
+        "enumeration"
       ],
       "rowAtIndex": [
         "var"
@@ -7296,6 +7801,7 @@
       "currentColumn": "int",
       "currentRow": "int",
       "delegate": "Component",
+      "delegateModelAccess": "enumeration",
       "editDelegate": "Component",
       "editTriggers": "var",
       "keyNavigationEnabled": "bool",
@@ -7332,6 +7838,7 @@
       "currentColumnChanged": [],
       "currentRowChanged": [],
       "delegateChanged": [],
+      "delegateModelAccessChanged": [],
       "editTriggersChanged": [],
       "keyNavigationEnabledChanged": [],
       "layoutChanged": [],
@@ -7356,6 +7863,23 @@
       "syncDirectionChanged": [],
       "syncViewChanged": [],
       "topRowChanged": []
+    }
+  },
+  "TableViewDelegate": {
+    "enums": {},
+    "methods": {},
+    "parent": "ItemDelegate",
+    "properties": {
+      "current": "bool",
+      "editing": "bool",
+      "selected": "bool",
+      "tableView": "TableView"
+    },
+    "signals": {
+      "currentChanged": [],
+      "editingChanged": [],
+      "selectedChanged": [],
+      "tableViewChanged": []
     }
   },
   "TapHandler": {
@@ -7552,7 +8076,7 @@
         "real"
       ],
       "lineHeightModeChanged": [
-        "var"
+        "enumeration"
       ],
       "lineLaidOut": [
         "TextLine"
@@ -7592,50 +8116,177 @@
   "TextArea": {
     "enums": {},
     "methods": {},
-    "parent": "TextEdit",
+    "parent": "Item",
     "properties": {
+      "activeFocusOnPress": "bool",
       "background": "Item",
+      "baseUrl": "url",
       "bottomInset": "real",
+      "bottomPadding": "real",
+      "canPaste": "bool",
+      "canRedo": "bool",
+      "canUndo": "bool",
+      "color": "color",
+      "contentHeight": "real",
+      "contentWidth": "real",
+      "cursorDelegate": "Component",
+      "cursorPosition": "int",
+      "cursorRectangle": "rect",
+      "cursorSelection": "TextSelection",
+      "cursorVisible": "bool",
+      "effectiveHorizontalAlignment": "var",
       "flickable": "TextArea",
       "focusReason": "enumeration",
       "font": "font",
+      "horizontalAlignment": "var",
       "hoverEnabled": "bool",
       "hovered": "bool",
+      "hoveredLink": "string",
       "implicitBackgroundHeight": "real",
       "implicitBackgroundWidth": "real",
       "implicitHeight": "real",
       "implicitWidth": "real",
+      "inputMethodComposing": "bool",
+      "inputMethodHints": "enumeration",
       "leftInset": "real",
+      "leftPadding": "real",
+      "length": "int",
+      "lineCount": "int",
+      "mouseSelectionMode": "var",
+      "overwriteMode": "bool",
+      "padding": "real",
+      "paintedHeight": "real",
+      "paintedWidth": "real",
+      "persistentSelection": "bool",
       "placeholderText": "string",
       "placeholderTextColor": "color",
+      "preeditText": "string",
+      "readOnly": "bool",
+      "renderType": "var",
       "rightInset": "real",
-      "topInset": "real"
+      "rightPadding": "real",
+      "selectByKeyboard": "bool",
+      "selectByMouse": "bool",
+      "selectedText": "string",
+      "selectedTextColor": "color",
+      "selectionColor": "color",
+      "selectionEnd": "int",
+      "selectionStart": "int",
+      "tabStopDistance": "real",
+      "text": "string",
+      "textDocument": "TextDocument",
+      "textFormat": "var",
+      "textMargin": "real",
+      "topInset": "real",
+      "topPadding": "real",
+      "verticalAlignment": "var",
+      "wrapMode": "var"
     },
     "signals": {
+      "activeFocusOnPressChanged": [
+        "bool"
+      ],
       "backgroundChanged": [],
+      "baseUrlChanged": [],
       "bottomInsetChanged": [],
+      "bottomPaddingChanged": [],
+      "canPasteChanged": [],
+      "canRedoChanged": [],
+      "canUndoChanged": [],
+      "colorChanged": [
+        "color"
+      ],
+      "contentSizeChanged": [],
+      "cursorDelegateChanged": [],
+      "cursorPositionChanged": [],
+      "cursorRectangleChanged": [],
+      "cursorVisibleChanged": [
+        "bool"
+      ],
+      "editingFinished": [],
+      "effectiveHorizontalAlignmentChanged": [],
       "focusReasonChanged": [],
       "fontChanged": [],
+      "horizontalAlignmentChanged": [
+        "enumeration"
+      ],
       "hoverEnabledChanged": [],
       "hoveredChanged": [],
       "implicitBackgroundHeightChanged": [],
       "implicitBackgroundWidthChanged": [],
       "implicitHeightChanged3": [],
       "implicitWidthChanged3": [],
+      "inputMethodComposingChanged": [],
+      "inputMethodHintsChanged": [],
       "leftInsetChanged": [],
+      "leftPaddingChanged": [],
+      "lineCountChanged": [],
+      "linkActivated": [
+        "string"
+      ],
+      "linkHovered": [
+        "string"
+      ],
+      "mouseSelectionModeChanged": [
+        "enumeration"
+      ],
+      "overwriteModeChanged": [
+        "bool"
+      ],
+      "paddingChanged": [],
+      "persistentSelectionChanged": [
+        "bool"
+      ],
       "placeholderTextChanged": [],
       "placeholderTextColorChanged": [],
+      "preeditTextChanged": [],
       "pressAndHold": [
         "MouseEvent"
       ],
       "pressed": [
         "MouseEvent"
       ],
+      "readOnlyChanged": [
+        "bool"
+      ],
       "released": [
         "MouseEvent"
       ],
+      "renderTypeChanged": [],
       "rightInsetChanged": [],
-      "topInsetChanged": []
+      "rightPaddingChanged": [],
+      "selectByKeyboardChanged": [
+        "bool"
+      ],
+      "selectByMouseChanged": [
+        "bool"
+      ],
+      "selectedTextChanged": [],
+      "selectedTextColorChanged": [
+        "color"
+      ],
+      "selectionColorChanged": [
+        "color"
+      ],
+      "selectionEndChanged": [],
+      "selectionStartChanged": [],
+      "tabStopDistanceChanged": [
+        "real"
+      ],
+      "textChanged": [],
+      "textEdited": [],
+      "textFormatChanged": [
+        "enumeration"
+      ],
+      "textMarginChanged": [
+        "real"
+      ],
+      "topInsetChanged": [],
+      "topPaddingChanged": [],
+      "verticalAlignmentChanged": [
+        "enumeration"
+      ],
+      "wrapModeChanged": []
     }
   },
   "TextDocument": {
@@ -7673,98 +8324,8 @@
     }
   },
   "TextEdit": {
-    "enums": {
-      "HAlignment": [
-        "AlignLeft",
-        "AlignRight",
-        "AlignHCenter",
-        "AlignJustify"
-      ],
-      "RenderType": [
-        "QtRendering",
-        "NativeRendering",
-        "CurveRendering"
-      ],
-      "SelectionMode": [
-        "SelectCharacters",
-        "SelectWords"
-      ],
-      "TextFormat": [
-        "PlainText",
-        "RichText",
-        "AutoText",
-        "MarkdownText"
-      ],
-      "VAlignment": [
-        "AlignTop",
-        "AlignBottom",
-        "AlignVCenter"
-      ],
-      "WrapMode": [
-        "NoWrap",
-        "WordWrap",
-        "WrapAnywhere",
-        "WrapAtWordBoundaryOrAnywhere",
-        "Wrap"
-      ]
-    },
-    "methods": {
-      "append": [
-        "string"
-      ],
-      "clear": [],
-      "copy": [],
-      "cut": [],
-      "deselect": [],
-      "getFormattedText": [
-        "int",
-        "int"
-      ],
-      "getText": [
-        "int",
-        "int"
-      ],
-      "inputMethodQuery": [
-        "enumeration",
-        "var"
-      ],
-      "insert": [
-        "int",
-        "string"
-      ],
-      "isRightToLeft": [
-        "int",
-        "int"
-      ],
-      "linkAt": [
-        "real",
-        "real"
-      ],
-      "moveCursorSelection": [
-        "int",
-        "var"
-      ],
-      "paste": [],
-      "positionAt": [
-        "real",
-        "real"
-      ],
-      "positionToRectangle": [
-        "int"
-      ],
-      "redo": [],
-      "remove": [
-        "int",
-        "int"
-      ],
-      "select": [
-        "int",
-        "int"
-      ],
-      "selectAll": [],
-      "selectWord": [],
-      "undo": []
-    },
+    "enums": {},
+    "methods": {},
     "parent": "Item",
     "properties": {
       "activeFocusOnPress": "bool",
@@ -7890,6 +8451,7 @@
         "real"
       ],
       "textChanged": [],
+      "textEdited": [],
       "textFormatChanged": [
         "enumeration"
       ],
@@ -8226,6 +8788,68 @@
       "textChanged": []
     }
   },
+  "TextSelection": {
+    "enums": {
+      "MoveOperation": [
+        "NoMove",
+        "Start",
+        "Up",
+        "StartOfLine",
+        "StartOfBlock",
+        "StartOfWord",
+        "PreviousBlock",
+        "PreviousCharacter",
+        "PreviousWord",
+        "Left",
+        "WordLeft",
+        "End",
+        "Down",
+        "EndOfLine",
+        "EndOfWord",
+        "EndOfBlock",
+        "NextBlock",
+        "NextCharacter",
+        "NextWord",
+        "Right",
+        "WordRight",
+        "NextCell",
+        "PreviousCell",
+        "NextRow",
+        "PreviousRow"
+      ]
+    },
+    "methods": {
+      "duplicate": [],
+      "linkTo": [
+        "url"
+      ],
+      "moveSelectionEnd": [
+        "var"
+      ],
+      "moveSelectionStart": [
+        "var"
+      ]
+    },
+    "parent": "QtObject",
+    "properties": {
+      "alignment": "enumeration",
+      "color": "color",
+      "document": "TextDocument",
+      "font": "font",
+      "selectionEnd": "int",
+      "selectionStart": "int",
+      "text": "string"
+    },
+    "signals": {
+      "alignmentChanged": [],
+      "colorChanged": [],
+      "documentChanged": [],
+      "fontChanged": [],
+      "selectionEndChanged": [],
+      "selectionStartChanged": [],
+      "textChanged": []
+    }
+  },
   "Timer": {
     "enums": {},
     "methods": {
@@ -8484,6 +9108,7 @@
       "currentItem": "Item",
       "delegate": "Component",
       "displacement": "real",
+      "flickDeceleration": "real",
       "model": "var",
       "moving": "bool",
       "tumbler": "Tumbler",
@@ -8495,6 +9120,7 @@
       "currentIndexChanged": [],
       "currentItemChanged": [],
       "delegateChanged": [],
+      "flickDecelerationChanged": [],
       "modelChanged": [],
       "movingChanged": [],
       "visibleItemCountChanged": [],
@@ -8534,6 +9160,17 @@
       "uniformChanged": [
         "string"
       ]
+    }
+  },
+  "ValueFilter": {
+    "enums": {},
+    "methods": {},
+    "parent": "RoleFilter",
+    "properties": {
+      "value": "var"
+    },
+    "signals": {
+      "valueChanged": []
     }
   },
   "Vector3dAnimation": {
@@ -8694,6 +9331,7 @@
       "contentItem": "Item",
       "contentOrientation": "enumeration",
       "data": "list",
+      "devicePixelRatio": "real",
       "flags": "enumeration",
       "height": "int",
       "maximumHeight": "int",
@@ -8732,6 +9370,10 @@
       "contentOrientationChanged": [
         "enumeration"
       ],
+      "devicePixelRatioChanged": [],
+      "flagsChanged": [
+        "enumeration"
+      ],
       "focusObjectChanged": [
         "QtObject"
       ],
@@ -8759,6 +9401,9 @@
       ],
       "paletteChanged": [],
       "paletteCreated": [],
+      "safeAreaMarginsChanged": [
+        "var"
+      ],
       "sceneGraphAboutToStop": [],
       "sceneGraphError": [
         "enumeration",
@@ -8825,7 +9470,7 @@
     "signals": {}
   },
   "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually — re-run the generator instead.",
-  "_version": "6.8.3",
+  "_version": "6.11.0",
   "bool": {
     "enums": {},
     "methods": {},
@@ -8849,6 +9494,65 @@
   },
   "double": {
     "enums": {},
+    "methods": {},
+    "parent": null,
+    "properties": {},
+    "signals": {}
+  },
+  "easingCurve": {
+    "enums": {
+      "Type": [
+        "Linear",
+        "InQuad",
+        "OutQuad",
+        "InOutQuad",
+        "OutInQuad",
+        "InCubic",
+        "OutCubic",
+        "InOutCubic",
+        "OutInCubic",
+        "InQuart",
+        "OutQuart",
+        "InOutQuart",
+        "OutInQuart",
+        "InQuint",
+        "OutQuint",
+        "InOutQuint",
+        "OutInQuint",
+        "InSine",
+        "OutSine",
+        "InOutSine",
+        "OutInSine",
+        "InExpo",
+        "OutExpo",
+        "InOutExpo",
+        "OutInExpo",
+        "InCirc",
+        "OutCirc",
+        "InOutCirc",
+        "OutInCirc",
+        "InElastic",
+        "OutElastic",
+        "InOutElastic",
+        "OutInElastic",
+        "InBack",
+        "OutBack",
+        "InOutBack",
+        "OutInBack",
+        "InBounce",
+        "OutBounce",
+        "InOutBounce",
+        "OutInBounce",
+        "InCurve",
+        "OutCurve",
+        "SineCurve",
+        "CosineCurve",
+        "BezierSpline",
+        "TCBSpline",
+        "Custom",
+        "NCurveTypes"
+      ]
+    },
     "methods": {},
     "parent": null,
     "properties": {},

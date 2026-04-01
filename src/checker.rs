@@ -473,8 +473,8 @@ impl Checker<'_> {
                 );
             }
             // Check names in the value expression against scope.
-            // Skip complex values that start with `{` (standalone JS object literal).
-            if !value_expr.trim_start().starts_with('{') {
+            // Skip standalone object literals `{…}` and inline type instantiations `TypeName {…}`.
+            if !is_inline_type_instantiation(value_expr) {
                 let mut seen_names: HashSet<String> = HashSet::new();
                 let mut seen_cpp: HashSet<(String, String)> = HashSet::new();
                 for (base_name, member) in collect_dotted_accesses_from_expression(value_expr) {
@@ -515,7 +515,7 @@ impl Checker<'_> {
 
         // 4. Sprawdź dzieci
         for child in &file.children {
-            self.check_child(child, file_scope, errors, &[]);
+            self.check_child(child, file_scope, errors, &[], &child_id_map);
         }
     }
 
@@ -637,6 +637,13 @@ impl Checker<'_> {
             (PropertyType::Bool | PropertyType::String, PropertyValue::Int(_)) => Some("int".into()),
             // assigned a double where a bool or int was expected
             (PropertyType::Bool | PropertyType::Int, PropertyValue::Double(_)) => Some("double".into()),
+            // assigned a string literal where a numeric or bool type was expected
+            (
+                PropertyType::Int | PropertyType::Bool | PropertyType::Double | PropertyType::Real,
+                PropertyValue::String(_),
+            ) => Some("string".into()),
+            // assigned a double literal where string was expected
+            (PropertyType::String, PropertyValue::Double(_)) => Some("double".into()),
             _ => None,
         }
     }
@@ -729,6 +736,8 @@ impl Checker<'_> {
         let mut seen_cpp_members: HashSet<(String, String)> = HashSet::new();
         for used in &func.used_names {
             let name = used.name.as_str();
+            // Use the per-name line if available, otherwise fall back to the function start line.
+            let err_line = if used.line > 0 { used.line } else { func.line };
 
             if let Some(accessed) = &used.accessed_item {
                 // Check C++ object member access if the object has known members.
@@ -742,7 +751,7 @@ impl Checker<'_> {
                         object: name.to_string(),
                         member: accessed.clone(),
                     })
-                    .with_line(func.line);
+                    .with_line(err_line);
                     if let Some(c) = context {
                         e = e.with_context(c);
                     }
@@ -752,12 +761,12 @@ impl Checker<'_> {
                 // (e.g. `nnnonono_existent.state` → `nnnonono_existent` must be defined).
                 if !seen_bases.contains(name) {
                     seen_bases.insert(name);
-                    if !strict_scope.contains(name) {
+                    if !strict_scope.contains(name) && !self.db.has_type(name) {
                         let mut e = AnalysisError::new(ErrorKind::UndefinedName {
                             name: name.to_string(),
                             function: func.name.clone(),
                         })
-                        .with_line(func.line);
+                        .with_line(err_line);
                         if let Some(c) = context {
                             e = e.with_context(c);
                         }
@@ -772,12 +781,12 @@ impl Checker<'_> {
             }
             seen_bases.insert(name);
 
-            if !strict_scope.contains(name) {
+            if !strict_scope.contains(name) && !self.db.has_type(name) {
                 let mut e = AnalysisError::new(ErrorKind::UndefinedName {
                     name: name.to_string(),
                     function: func.name.clone(),
                 })
-                .with_line(func.line);
+                .with_line(err_line);
                 if let Some(c) = context {
                     e = e.with_context(c);
                 }
@@ -866,6 +875,7 @@ impl Checker<'_> {
         parent_scope: &HashSet<String>,
         errors: &mut Vec<AnalysisError>,
         elem_path: &[String],
+        file_id_map: &HashMap<String, ChildInfo>,
     ) {
         let ctx = child.id.as_deref().unwrap_or(&child.type_name).to_string();
 
@@ -917,7 +927,6 @@ impl Checker<'_> {
             .iter()
             .map(|p| (p.name.clone(), &p.prop_type))
             .collect();
-        let grandchild_id_map = build_child_id_map(&child.children);
 
         // Track errors generated at this level so we can attach element_path in --complex mode.
         let level_start = errors.len();
@@ -941,7 +950,7 @@ impl Checker<'_> {
                 &qt_props,
                 &qt_signals,
                 &[],
-                &grandchild_id_map,
+                file_id_map, // file-wide id map: QML ids are file-scoped
                 errors,
                 Some(&ctx),
             );
@@ -962,8 +971,8 @@ impl Checker<'_> {
                 );
             }
             // Check names used in the value expression against scope.
-            // Skip standalone object literals `{ … }` — they're not expressions with names.
-            if !value_expr.trim_start().starts_with('{') {
+            // Skip standalone object literals `{ … }` and inline type instantiations `TypeName { … }`.
+            if !is_inline_type_instantiation(value_expr) {
                 let mut seen_names: HashSet<String> = HashSet::new();
                 let mut seen_cpp: HashSet<(String, String)> = HashSet::new();
                 for (base_name, member) in collect_dotted_accesses_from_expression(value_expr) {
@@ -1015,7 +1024,7 @@ impl Checker<'_> {
         }
 
         for grandchild in &child.children {
-            self.check_child(grandchild, &child_scope, errors, &my_elem_path);
+            self.check_child(grandchild, &child_scope, errors, &my_elem_path, file_id_map);
         }
     }
 }
@@ -1075,6 +1084,26 @@ fn types_compatible(a: &PropertyType, b: &PropertyType) -> bool {
 
 fn is_js_global(name: &str) -> bool {
     JS_GLOBALS.contains(&name)
+}
+
+/// Returns `true` when `expr` is an inline QML type instantiation like `Rotation { … }` or
+/// `Scale { … }` — an uppercase-starting identifier immediately followed by `{`.
+/// Properties inside are not free variable references, so the caller should skip name-checking.
+fn is_inline_type_instantiation(expr: &str) -> bool {
+    let t = expr.trim_start();
+    if t.starts_with('{') {
+        return true; // pure JS object literal — already handled by callers, kept for convenience
+    }
+    let mut chars = t.chars();
+    let Some(first) = chars.next() else { return false };
+    if !first.is_uppercase() {
+        return false;
+    }
+    let rest = chars.as_str();
+    let name_end = rest
+        .find(|c: char| !c.is_alphanumeric() && c != '_')
+        .unwrap_or(rest.len());
+    rest[name_end..].trim_start().starts_with('{')
 }
 
 /// QML-specyficzne zmienne dostępne w kontekście delegatów modeli.

@@ -86,13 +86,25 @@ impl PartialEq for Property {
 }
 
 /// A name/access pair used inside a function body, e.g. `item.something`.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionUsedName {
     /// The base identifier, e.g. `item` in `item.something`
     pub name: String,
     /// The member being accessed, e.g. `something` in `item.something`
     pub accessed_item: Option<String>,
+    /// Source line number (1-based). Not serialized — used for error reporting only.
+    #[serde(skip, default)]
+    pub line: usize,
 }
+
+impl PartialEq for FunctionUsedName {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.accessed_item == other.accessed_item
+        // `line` intentionally excluded — it is not persisted in snapshots
+    }
+}
+
+impl Eq for FunctionUsedName {}
 
 /// A simple assignment to a child's property inside a function body,
 /// e.g. `element.property = value` where value is a literal.

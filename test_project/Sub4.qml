@@ -12,6 +12,9 @@ SwitchWrapper {
     property var complexSub4Value: {"very": {"nested": {"object": 5}}, "other": [{"Verry": "nested"}, {"object": 5}]}
     property var complexAgain: complexSub4Value?.address || complexSub4Value?.address // No problem, complexSub4Value is defined and we don't care about parameters, so we don't check if address is a valid property of complexSub4Value
     visible: (complexSub4Value?.address ?? "").length > 0 // No problem, complexSub4Value is defined and we don't care about parameters
+    property var susValue: susItem.visible; // No problem, susItem is defined as id of Item, and visible is a valid property of Item
+
+    non_exixiiisiissiissis: 5 // qml-ignore - No problem, disabled by qml ignore comment
 
     Component.onCompleted: {
         nonnnnn_existend_property = 5; // Problem, nonnnnn_existend_property is not defined anywhere, so it should print error
@@ -30,6 +33,16 @@ SwitchWrapper {
                 //
             },
         });
+
+        // No problem - points/element are arguments of the functions, so we don't need to check if they exist
+        BaseFunctions.getManualKineticPoints()
+            .then(function (points) {
+            points.forEach(function (element) {
+                element.name = element.name2
+            })
+            non_existenddddddddddddddddddddddddddd = 12 // Problem, non_existenddddddddddddddddddddddddddd is not defined anywhere, so it should print error
+            non_existenddddddd2 = 12 // qml-ignore - No problem, disabled by qml ignore comment
+        })
     }
     Item {
         Item {
@@ -50,21 +63,32 @@ SwitchWrapper {
 
     Behavior on height { // No problem, needs to be only validated that height is a valid property of Switch
         SmoothedAnimation {
-            duration: animationTime
+            duration: animationTime // Problem animationTime is not defined anywhere, so it should print error
         }
     }
 
     Loader {
         Item {
             TabBar {
+                visible: !susItem.visible // No problem, inside file, accessing any valid id is allowed, so we don't need to follow parent chain visibility here
+                enabled: susItem.non_exxxsi
                 Component.onCompleted: {
                     currentIndex = 1; // No problem, currentIndex is a valid property of TabBar
                     currentIndex222 = 1; // Problem is that currentIndex222 is not a valid property of TabBar, so it should print error2
+                    susItem.visible = true; // No problem, inside file, accessing any valid id is allowed, so we don't need to follow parent chain visibility here
+                    susItem.non_eexxxiss = false // Problem, non_eexxxiss is not valid susItem property, so it should print error
                 }
-
             }
         }
     }
 
-    Sub5 { }
+    Item {
+        Item {
+            id: susItem
+        }
+    }
+
+    Sub5 {
+
+    }
 }

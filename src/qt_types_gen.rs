@@ -100,29 +100,41 @@ fn find_metatypes_dir(qt_dir: &Path) -> Option<PathBuf> {
 
 /// Returns `cpp_class_name → class JSON object` from all relevant metatype files.
 fn load_all_classes(metatypes_dir: &Path) -> HashMap<String, Value> {
-    // Files to load, in priority order (core first for inheritance walking,
+    // Module names to load, in priority order (core first for inheritance walking,
     // then QML-visible types). Missing files are silently skipped.
-    const FILES: &[&str] = &[
-        "qt6core_relwithdebinfo_metatypes.json",
-        "qt6gui_relwithdebinfo_metatypes.json",
+    // Qt 6.8 and earlier ship `qt6<name>_relwithdebinfo_metatypes.json`;
+    // Qt 6.11+ ships `qt6<name>_metatypes.json` (no build-type suffix).
+    const MODULES: &[&str] = &[
+        "qt6core",
+        "qt6gui",
         // QML engine types: Component, Binding, Connections, Timer, etc.
         // qt6qmlmeta is needed for Qt 6.8+ where Timer and others moved there.
-        "qt6qml_relwithdebinfo_metatypes.json",
-        "qt6qmlmeta_relwithdebinfo_metatypes.json",
-        "qt6qmlmodels_relwithdebinfo_metatypes.json",
-        "qt6quick_relwithdebinfo_metatypes.json",
-        "qt6quicktemplates2_relwithdebinfo_metatypes.json",
-        "qt6quickcontrols2_relwithdebinfo_metatypes.json",
-        "qt6quickcontrols2impl_relwithdebinfo_metatypes.json",
-        "qt6quicklayouts_relwithdebinfo_metatypes.json",
-        "qt6quickdialogs2_relwithdebinfo_metatypes.json",
-        "qt6quickdialogs2utils_relwithdebinfo_metatypes.json",
+        "qt6qml",
+        "qt6qmlmeta",
+        "qt6qmlmodels",
+        "qt6quick",
+        "qt6quicktemplates2",
+        "qt6quickcontrols2",
+        "qt6quickcontrols2impl",
+        "qt6quicklayouts",
+        "qt6quickdialogs2",
+        "qt6quickdialogs2utils",
     ];
 
     let mut all_classes: HashMap<String, Value> = HashMap::new();
 
-    for file_name in FILES {
-        let path = metatypes_dir.join(file_name);
+    for module in MODULES {
+        // Try relwithdebinfo variant first (Qt ≤ 6.8), then plain (Qt 6.11+)
+        let candidates = [
+            format!("{}_relwithdebinfo_metatypes.json", module),
+            format!("{}_metatypes.json", module),
+        ];
+        let path = candidates
+            .iter()
+            .map(|f| metatypes_dir.join(f))
+            .find(|p| p.exists())
+            .unwrap_or_else(|| metatypes_dir.join(&candidates[0]));
+
         let Ok(content) = std::fs::read_to_string(&path) else {
             continue;
         };

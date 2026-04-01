@@ -61,12 +61,16 @@ buildall:
 
 # Builds
 build_with_qt:
-    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json" cargo build
+    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json,qt_types_6.11.0.json" cargo build
 
 # Generate Qt types JSON from an installed Qt (run once per Qt version)
 gen-qt VER:
     cargo build
     target/debug/qml_static_analyzer generate-qt-types --qt-path $HOME/Qt/{{VER}}/gcc_64
+
+ai VERSION="6.3.2":
+    just build_with_qt
+    target/debug/qml_static_analyzer check --path test_project_ai --config test_project_ai/config.toml --builtin-qt-version {{VERSION}} 2>&1 | tee snap_ai.txt
 
 proj VERSION="6.3.2":
     just build_with_qt
@@ -83,14 +87,15 @@ testp VERSION="6.3.2":
     target/debug/qml_static_analyzer check --path test --builtin-qt-version {{VERSION}} 2>&1 | tee snap_test.txt
 
 install:
-    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json" cargo install --path . --locked
+    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json,qt_types_6.11.0.json" cargo install --path . --locked
 
 list-builtins:
     cargo run -- list-builtins
 
 
 zigbuild:
-    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json" cargo zigbuild --release --target x86_64-unknown-linux-musl
+    rm qml_static_analyzer || true
+    INCLUDED_QT_TYPES="qt_types_6.3.2.json,qt_types_6.8.3.json,qt_types_6.11.0.json" cargo zigbuild --release --target x86_64-unknown-linux-musl
     cp target/x86_64-unknown-linux-musl/release/qml_static_analyzer .
 
 ### GUI-related helper
@@ -105,10 +110,13 @@ test_inside:
 # Run checker on gui/src using a pre-generated JSON
 gui VERSION="6.3.2":
     just build_with_qt
-    target/debug/qml_static_analyzer check --path gui/src --config config_gui --builtin-qt-version {{VERSION}} 2>&1 | tee snap_gui.txt
+    cd gui;../target/debug/qml_static_analyzer check --path src --config config_gui --builtin-qt-version {{VERSION}} 2>&1 | tee snap_gui.txt
 
 # Like gui but with --complex: show full element hierarchy in error paths
 guic VERSION="6.3.2":
     just build_with_qt
-    target/debug/qml_static_analyzer check --path gui/src --config config_gui --builtin-qt-version {{VERSION}} --complex 2>&1 | tee snap_gui.txt
+    cd gui;../target/debug/qml_static_analyzer check --path src --config config_gui --builtin-qt-version {{VERSION}} --complex 2>&1 | tee snap_gui.txt
 
+syncgui:
+    rm -rf gui
+    cp -r ~/Projekty/ap-600/gui .

@@ -59,7 +59,26 @@ fn extract_q_properties(source: &str, members: &mut HashSet<String>) {
         if let Some(name) = extract_property_name(content) {
             members.insert(name);
         }
+        // Also expose the MEMBER backing field (e.g. `m_selectedDiskIndex`).
+        // Some code reads the field directly for non-reactive access.
+        if let Some(member_field) = extract_member_field(content) {
+            members.insert(member_field);
+        }
         pos = content_end + 1;
+    }
+}
+
+/// Extract the `MEMBER <name>` backing field from Q_PROPERTY content.
+///
+/// For `Q_PROPERTY(int selectedDiskIndex MEMBER m_selectedDiskIndex NOTIFY …)` → `m_selectedDiskIndex`.
+fn extract_member_field(content: &str) -> Option<String> {
+    let tokens = tokenize_q_property_content(content);
+    let member_pos = tokens.iter().position(|t| t == "MEMBER")?;
+    let name = tokens.get(member_pos + 1)?;
+    if is_plain_identifier(name) && !is_cpp_type_keyword(name) && !Q_PROPERTY_KEYWORDS.contains(&name.as_str()) {
+        Some(name.clone())
+    } else {
+        None
     }
 }
 
@@ -303,7 +322,9 @@ public slots:
 ";
         let members = parse_cpp_header(src);
         assert!(members.contains("portableDisks"), "{members:?}");
+        assert!(members.contains("m_diskList"), "{members:?}"); // MEMBER backing field
         assert!(members.contains("selectedDiskIndex"), "{members:?}");
+        assert!(members.contains("m_selectedDiskIndex"), "{members:?}"); // MEMBER backing field
         assert!(members.contains("isProcessingDevices"), "{members:?}");
         assert!(members.contains("diskListChanged"), "{members:?}");
         assert!(members.contains("selectedDiskIndexChanged"), "{members:?}");

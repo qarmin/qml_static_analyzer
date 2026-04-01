@@ -205,6 +205,7 @@ pub fn collect_names_from_expression(expr: &str) -> Vec<FunctionUsedName> {
             result.push(FunctionUsedName {
                 name: tok.clone(),
                 accessed_item: Some(member),
+                line: 0,
             });
             prev_tok = "id";
             i += if is_dot_chain { 3 } else { 4 };
@@ -241,6 +242,7 @@ pub fn collect_names_from_expression(expr: &str) -> Vec<FunctionUsedName> {
             result.push(FunctionUsedName {
                 name: tok.clone(),
                 accessed_item: None,
+                line: 0,
             });
             prev_tok = "id";
             i += 1;
@@ -590,6 +592,57 @@ pub fn find_matching_open_paren(s: &str, close_pos: usize) -> Option<usize> {
     None
 }
 
+/// Extract parameter names from `function(params)` or `function name(params)` patterns in `line`.
+///
+/// Used inside function bodies to register callback parameters as declared locals so they
+/// aren't flagged as undefined variable references.
+///
+/// Handles:
+/// - `.then(function (points) {`  → `["points"]`
+/// - `arr.forEach(function(element) {` → `["element"]`
+/// - `(function named(a, b) {` → `["a", "b"]`
+pub fn collect_function_keyword_params(line: &str) -> Vec<String> {
+    let mut params = Vec::new();
+    let mut rest = line;
+    while let Some(kw_pos) = rest.find("function") {
+        // Make sure "function" is a whole word (not part of another identifier like "functionName")
+        let before_ok = kw_pos == 0 || {
+            let c = rest.as_bytes()[kw_pos - 1];
+            !c.is_ascii_alphanumeric() && c != b'_'
+        };
+        let after_kw = &rest[kw_pos + 8..];
+        let after_kw_ok = after_kw
+            .chars()
+            .next()
+            .map_or(true, |c| !c.is_alphanumeric() && c != '_');
+        rest = after_kw;
+        if !before_ok || !after_kw_ok {
+            continue;
+        }
+        let trimmed = after_kw.trim_start();
+        // Skip optional function name (named function expression)
+        let trimmed = if trimmed.starts_with(|c: char| c.is_alphabetic() || c == '_') {
+            let end = trimmed
+                .find(|c: char| !c.is_alphanumeric() && c != '_')
+                .unwrap_or(trimmed.len());
+            trimmed[end..].trim_start()
+        } else {
+            trimmed
+        };
+        if let Some(after_open) = trimmed.strip_prefix('(') {
+            if let Some(close) = after_open.find(')') {
+                for p in after_open[..close].split(',') {
+                    let name = p.trim();
+                    if !name.is_empty() && is_identifier(name) && !is_js_keyword(name) {
+                        params.push(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+    params
+}
+
 /// Extract parameter names from `(params) =>` patterns in `line`.
 ///
 /// Handles all forms:
@@ -774,15 +827,18 @@ pub fn try_parse_var_decl(line: &str) -> Option<(&str, &str)> {
     Some((name, rhs))
 }
 
-/// If `line` looks like `obj.member = literal_value`, returns a `MemberAssignment`.
-/// Only handles simple RHS literals (bool, int, float); ignores complex expressions.
+/// If `line` looks like `obj.member = value`, returns a `MemberAssignment`.
+/// Handles bool/int/float literals precisely; uses TooComplex for strings and complex RHS.
+/// String literals are consumed by the tokenizer (skipped entirely), so lines like
+/// `obj.member = "str"` produce only 4 tokens — those are captured with TooComplex too.
 pub fn try_parse_member_assignment(line: &str) -> Option<MemberAssignment> {
     let tokens = tokenize_idents(line);
-    // Minimum pattern: [ident, ".", ident, "=", value]
-    if tokens.len() < 5 {
+    // Minimum pattern: [ident, ".", ident, "="]  (RHS may have been consumed as a string)
+    if tokens.len() < 4 {
         return None;
     }
     if !is_identifier(&tokens[0])
+        || is_js_keyword(&tokens[0])
         || tokens[1] != "."
         || !is_identifier(&tokens[2])
         || tokens[3] != "="
@@ -794,13 +850,18 @@ pub fn try_parse_member_assignment(line: &str) -> Option<MemberAssignment> {
     let object = tokens[0].clone();
     let member = tokens[2].clone();
 
-    let rhs = tokens[4].as_str();
-    let value = match rhs {
-        "true" => PropertyValue::Bool(true),
-        "false" => PropertyValue::Bool(false),
-        _ if rhs.parse::<i64>().is_ok() => PropertyValue::Int(rhs.parse().expect("TODO")),
-        _ if rhs.parse::<f64>().is_ok() => PropertyValue::Double(rhs.parse().expect("TODO")),
-        _ => return None, // complex RHS – skip
+    let value = if let Some(rhs) = tokens.get(4) {
+        let rhs = rhs.as_str();
+        match rhs {
+            "true" => PropertyValue::Bool(true),
+            "false" => PropertyValue::Bool(false),
+            _ if rhs.parse::<i64>().is_ok() => PropertyValue::Int(rhs.parse().expect("TODO")),
+            _ if rhs.parse::<f64>().is_ok() => PropertyValue::Double(rhs.parse().expect("TODO")),
+            _ => PropertyValue::TooComplex, // complex expression
+        }
+    } else {
+        // RHS was entirely consumed by tokenizer — string literal like `"…"` or backtick string
+        PropertyValue::TooComplex
     };
 
     Some(MemberAssignment { object, member, value })

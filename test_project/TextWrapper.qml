@@ -22,6 +22,7 @@ Text {
 
     onBlurContent: function (blured) { // No problem, a little strange way to define a signal handler, but it works and is not a problem
         blur.visible = blured;
+        rrr = Popup.CloseOnEscape | Popup.CloseOnPressOutside // No problem, Popup.CloseOnEscape and Popup.CloseOnPressOutside are valid properties of Popup, and bitwise OR operator is valid for color type
     }
 
     // No problem - very strange looking ternary operator, but it is valid and works
@@ -68,5 +69,17 @@ Text {
                 interval: 1000 * 60 * 60 * 24
             }
         }]
+    }
+
+    ListView {
+        id: list
+        property var validItem: ListView.Contain // No problem, ListView.Contain is a valid contant/enum value of ListView
+        Component.onCompleted: {
+            var validdddd = ListView.Contain // No problem, ListView.Contain is a valid contant/enum value of ListView
+        }
+    }
+
+    Item {
+        transform: Rotation { origin.x: width/2; origin.y: height/2; angle: 45 } // No problem, Rotation is a valid qml type, which has properties origin and angle, and width and height are valid properties of Item
     }
 }
