@@ -303,7 +303,10 @@ pub fn parse_function_header(line: &str) -> Option<(String, Vec<String>, bool)> 
         .map(|p| {
             let s = p.trim();
             // Strip default value: `param = default` → `param`
-            s.find('=').map_or(s, |eq| s[..eq].trim()).to_string()
+            let s = s.find('=').map_or(s, |eq| s[..eq].trim());
+            // Strip QML 6 type annotation: `param: Type` → `param`
+            // e.g. `x: var`, `text: string`, `menu: PlasmaExtras.Menu`
+            s.find(':').map_or(s, |colon| s[..colon].trim()).to_string()
         })
         .filter(|p| !p.is_empty())
         .collect();

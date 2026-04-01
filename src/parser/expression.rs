@@ -909,6 +909,8 @@ pub fn is_js_keyword(s: &str) -> bool {
             | "async"
             | "await"
             | "yield"
+            // QML type-cast operator: `value as Type`
+            | "as"
             // JS built-in objects used as method receivers (console.log(x), JSON.parse(x)):
             // keeping them as "keywords" here ensures that arguments inside the method call
             // (e.g. `msg` in `console.log(msg)`) continue to be collected by the parser,

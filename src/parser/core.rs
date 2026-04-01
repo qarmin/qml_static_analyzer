@@ -107,7 +107,8 @@ impl<'src> Parser<'src> {
 
             let line = strip_comment(raw_line).trim();
 
-            if line == "}" || line.ends_with('}') && line.len() == 1 {
+            // `}` alone, or `},` / `};` (element separator inside `[…]` arrays)
+            if line == "}" || line == "}," || line == "};" {
                 self.advance(); // consume the `}`
                 break;
             }
@@ -146,6 +147,17 @@ impl<'src> Parser<'src> {
                 prop.line = lineno;
                 body.properties.push(prop);
                 self.advance();
+                // If the declaration's value opens a JS/element block on the same line,
+                // consume it so the surrounding element body parses correctly.
+                // e.g. `readonly property Foo bar: SomeType {`
+                //
+                // We do NOT skip `[` arrays here: an array may contain QML elements with
+                // `id:` values needed by the parent scope (e.g. `readonly property
+                // list<QtObject> __data: [ Component { id: menuComp … }, … ]`).
+                // Fix #1 (`},` closes element bodies) already handles the array separators.
+                if line.ends_with('{') {
+                    self.skip_block()?;
+                }
                 continue;
             }
 
@@ -325,6 +337,21 @@ impl<'src> Parser<'src> {
                     break;
                 }
             }
+        }
+
+        // If the entire body is already closed on the header line
+        // (e.g. `function toggle() {}` or `function reset() { x = 0; }`),
+        // skip reading further lines to avoid consuming the outer `}`.
+        if has_open_brace && net_brace_depth(header) <= 0 {
+            return Ok(Function {
+                name,
+                is_signal_handler,
+                parameters: params,
+                used_names: vec![],
+                declared_locals: vec![],
+                member_assignments: vec![],
+                line: lineno,
+            });
         }
 
         let body = self.collect_function_body_names()?;
@@ -631,8 +658,17 @@ impl<'src> Parser<'src> {
             }
 
             // signal / property declaration — skip
-            if line.starts_with("signal ") || line.starts_with("property ") {
+            if line.starts_with("signal ")
+                || line.starts_with("property ")
+                || line.starts_with("required property ")
+                || line.starts_with("readonly property ")
+            {
                 self.advance();
+                if line.ends_with('[') {
+                    self.skip_bracket_block()?;
+                } else if line.ends_with('{') {
+                    self.skip_block()?;
+                }
                 continue;
             }
 

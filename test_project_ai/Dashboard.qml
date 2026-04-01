@@ -33,6 +33,14 @@ ApplicationWindow {
         width: parent.width
     }
 
+    ComponentArrayEdge {
+        id: compArrayEdge
+    }
+
+    TypedParamEdge {
+        id: typedParamEdge
+    }
+
     // ERROR: UnknownType – GhostWidget3000 is not defined anywhere
     GhostWidget3000 {
         id: ghost
