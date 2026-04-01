@@ -12,6 +12,14 @@ ApplicationWindow {
         anchors.fill: parent
     }
 
+    InlineHandlerEdge {
+        id: inlineEdge
+    }
+
+    StringBraceEdge {
+        id: stringEdge
+    }
+
     DataView {
         id: dataView
         width: 200

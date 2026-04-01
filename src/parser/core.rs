@@ -543,21 +543,26 @@ impl<'src> Parser<'src> {
 
     /// Skip an entire `[ … ]` bracket block (e.g. `states: [ … ]`), discarding its contents.
     fn skip_bracket_block(&mut self) -> Result<(), ParseError> {
-        let mut depth = 1usize;
+        let mut depth = 1i32;
         loop {
             let Some((_, raw_line)) = self.advance() else {
                 return Err(self.err("Unexpected end of input inside bracket block"));
             };
             let line = strip_comment(raw_line).trim();
+            // Count [ and ] while skipping string contents.
+            let mut in_str = false;
+            let mut str_ch = ' ';
+            let mut escape = false;
             for ch in line.chars() {
+                if escape { escape = false; continue; }
+                if in_str {
+                    if ch == '\\' { escape = true; } else if ch == str_ch { in_str = false; }
+                    continue;
+                }
                 match ch {
+                    '"' | '\'' | '`' => { in_str = true; str_ch = ch; }
                     '[' => depth += 1,
-                    ']' => {
-                        depth -= 1;
-                        if depth == 0 {
-                            return Ok(());
-                        }
-                    }
+                    ']' => { depth -= 1; if depth == 0 { return Ok(()); } }
                     _ => {}
                 }
             }
@@ -574,17 +579,9 @@ impl<'src> Parser<'src> {
                 return Err(self.err("Unexpected end of input inside Connections block"));
             };
             let line = strip_comment(raw_line).trim();
-            for ch in line.chars() {
-                match ch {
-                    '{' => depth += 1,
-                    '}' => {
-                        depth -= 1;
-                        if depth == 0 {
-                            return Ok(found_id);
-                        }
-                    }
-                    _ => {}
-                }
+            depth = (depth as i32 + net_brace_depth(line)) as usize;
+            if depth == 0 {
+                return Ok(found_id);
             }
             if depth > 0
                 && let Some(id) = try_parse_id(line)
@@ -596,23 +593,15 @@ impl<'src> Parser<'src> {
 
     /// Skip an entire `{ … }` block (e.g. Connections), discarding its contents.
     fn skip_block(&mut self) -> Result<(), ParseError> {
-        let mut depth = 1usize;
+        let mut depth = 1i32;
         loop {
             let Some((_, raw_line)) = self.advance() else {
                 return Err(self.err("Unexpected end of input inside skipped block"));
             };
             let line = strip_comment(raw_line).trim();
-            for ch in line.chars() {
-                match ch {
-                    '{' => depth += 1,
-                    '}' => {
-                        depth -= 1;
-                        if depth == 0 {
-                            return Ok(());
-                        }
-                    }
-                    _ => {}
-                }
+            depth += net_brace_depth(line);
+            if depth <= 0 {
+                return Ok(());
             }
         }
     }
@@ -774,8 +763,28 @@ impl<'src> Parser<'src> {
 
             let line = strip_comment(raw_line).trim();
 
+            // Count braces while skipping string literal contents.
+            let mut in_str = false;
+            let mut str_ch = ' ';
+            let mut escape = false;
             for ch in line.chars() {
+                if escape {
+                    escape = false;
+                    continue;
+                }
+                if in_str {
+                    if ch == '\\' {
+                        escape = true;
+                    } else if ch == str_ch {
+                        in_str = false;
+                    }
+                    continue;
+                }
                 match ch {
+                    '"' | '\'' | '`' => {
+                        in_str = true;
+                        str_ch = ch;
+                    }
                     '{' => depth += 1,
                     '}' => {
                         depth -= 1;
@@ -860,6 +869,40 @@ impl<'src> Parser<'src> {
             used_names.extend(annotate(collect_names_from_expression(line)));
         }
     }
+}
+
+// ─── brace depth helper ─────────────────────────────────────────────────────
+
+/// Net change in `{}`-depth for one line, skipping brace characters inside string literals.
+fn net_brace_depth(line: &str) -> i32 {
+    let mut depth = 0i32;
+    let mut in_str = false;
+    let mut str_ch = ' ';
+    let mut escape = false;
+    for ch in line.chars() {
+        if escape {
+            escape = false;
+            continue;
+        }
+        if in_str {
+            if ch == '\\' {
+                escape = true;
+            } else if ch == str_ch {
+                in_str = false;
+            }
+            continue;
+        }
+        match ch {
+            '"' | '\'' | '`' => {
+                in_str = true;
+                str_ch = ch;
+            }
+            '{' => depth += 1,
+            '}' => depth -= 1,
+            _ => {}
+        }
+    }
+    depth
 }
 
 // ─── intermediate result types ──────────────────────────────────────────────
