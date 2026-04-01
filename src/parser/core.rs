@@ -426,15 +426,44 @@ impl<'src> Parser<'src> {
                     })
                 }
             } else {
-                // Single expression on next line: `onXxx:\n    doSomething()`
-                let used_names = collect_names_from_expression(&next_line);
+                // Expression body starting on the next line, possibly spanning multiple lines:
+                //   onOpened:
+                //       if (condition)
+                //           doSomething()
+                // Collect lines until we hit a blank line, closing brace, or a new QML declaration.
+                let mut body_lines = vec![next_line.clone()];
+                loop {
+                    let Some((_, peek_raw)) = self.peek() else { break };
+                    let peek = strip_comment(peek_raw).trim().to_string();
+                    if peek.is_empty()
+                        || peek.starts_with('}')
+                        || is_signal_handler_block(&peek)
+                        || peek.starts_with("function ")
+                        || peek.starts_with("property ")
+                        || peek.starts_with("readonly ")
+                        || peek.starts_with("signal ")
+                        || parse_type_open(&peek).is_some()
+                    {
+                        break;
+                    }
+                    body_lines.push(peek);
+                    self.advance();
+                }
+                let mut used_names = Vec::new();
+                let mut member_assignments = Vec::new();
+                for l in &body_lines {
+                    used_names.extend(collect_names_from_expression(l));
+                    if let Some(ma) = try_parse_member_assignment(l) {
+                        member_assignments.push(ma);
+                    }
+                }
                 Ok(Function {
                     name,
                     is_signal_handler,
                     parameters: vec![],
                     used_names,
                     declared_locals: vec![],
-                    member_assignments: vec![],
+                    member_assignments,
                     line: lineno,
                 })
             };
