@@ -1,0 +1,1 @@
+sh: 1: ../target/debug/qml_static_analyzer: not found

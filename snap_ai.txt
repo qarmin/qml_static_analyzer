@@ -1,17 +1,32 @@
+test_project_ai/AdvancedForm.qml:72: Unknown member `reboot` on C++ object `deviceManager` [Dashboard -> AdvancedForm]
+test_project_ai/AdvancedForm.qml:77: Undefined name `peripheralBus` used in function `linkBus` [Dashboard -> AdvancedForm]
+test_project_ai/AliasEdge.qml:21: Undefined name `ghostChild` used in property `aliasToNowhere` [Dashboard -> AliasEdge]
+test_project_ai/AliasEdge.qml:56: Property `displayTitle` declared as `string` but assigned property `titleText` of type `alias` [Dashboard -> AliasEdge]
+test_project_ai/AliasEdge.qml:47: Undefined name `phantomId` used in function `badAccess` [Dashboard -> AliasEdge]
+test_project_ai/AliasEdge.qml:51: Assignment to unknown property `nonExistentProp` on `titleLabel` [Dashboard -> AliasEdge]
+test_project_ai/AttachedEdge.qml:18: Undefined name `event` used in function `Keys.onPressed` [Dashboard -> AttachedEdge]
+test_project_ai/AttachedEdge.qml:24: Undefined name `event` used in function `Keys.onReleased` [Dashboard -> AttachedEdge]
+test_project_ai/AttachedEdge.qml:81: Undefined name `missingService` used in function `handleInput` [Dashboard -> AttachedEdge]
+test_project_ai/AttachedEdge.qml:85: Signal handler `onTriggered` has no corresponding signal or property [Dashboard -> AttachedEdge]
+test_project_ai/AttachedEdge.qml:64: [innerDelegate] Assignment to unknown property `nonExistentAttachedProp` [Dashboard -> AttachedEdge]
 test_project_ai/ChildPanel.qml:8: Property `height` redefines existing property from `base type` [Dashboard -> ChildPanel]
 test_project_ai/ChildPanel.qml:11: Property `title` declared as `string` but assigned `int` literal [Dashboard -> ChildPanel]
 test_project_ai/ChildPanel.qml:14: Property `active` declared as `bool` but assigned `double` literal [Dashboard -> ChildPanel]
 test_project_ai/ChildPanel.qml:17: Property `retryCount` declared as `int` but assigned `bool` literal [Dashboard -> ChildPanel]
 test_project_ai/ChildPanel.qml:20: Property `errorCode` declared as `int` but assigned `string` literal [Dashboard -> ChildPanel]
-test_project_ai/ChildPanel.qml:23: Property `rate` declared as `string` but atest_project_ai/ChildPanel.qml:11: Property `title` declared as `string` but assigned `int` literal [Dashboard -> ChildPanel]
-test_project_ai/ChildPanel.qml:14: Property `active` declared as `bool` but assigned `double` literal [Dashboard -> ChildPanel]
-test_project_ai/ChildPanel.qml:17: Property `retryCount` declared as `int` but assigned `bool` literal [Dashboard -> ChildPanel]
-test_project_ai/ChildPanel.qml:20: Property `errorCode` declared as `int` but assigned `string` literal [Dashboard -> ChildPanel]
 test_project_ai/ChildPanel.qml:23: Property `rate` declared as `string` but assigned `double` literal [Dashboard -> ChildPanel]
-test_project_ai/ChildPanel.qml:29: Property test_project_ai/Dashboard.qml:49: Undefined name `unknownRef` used in function `refresh`
-test_project_ai/Dashboard.qml:56: Signal handler `onDataLoaded` has no corresponding signal or property
-test_project_ai/Dashboard.qml:42: Assignment to unknown property `fakeWindowProperty`
-test_project_ai/Dashboard.qml:37: Unknown type `GhostWidget3000`
+test_project_ai/ChildPanel.qml:29: Property `isCounterBool` declared as `bool` but assigned property `counter` of type `int` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:38: Undefined name `undeclaredNameABC` used in property `vis` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:41: Signal handler `onItemSelecttted` has no corresponding signal or property [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:52: Undefined name `unknownVar3456` used in function `doWork` [Dashboard -> ChildPanel]
+test_project_ai/ChildPanel.qml:35: Assignment to unknown property `unknownProp9876` [Dashboard -> ChildPanel]
+test_project_ai/ComponentArrayEdge.qml:81: Undefined name `ghostComp` used in function `showGhost` [Dashboard -> ComponentArrayEdge]
+test_project_ai/ComponentArrayEdge.qml:86: Undefined name `phantomService` used in function `callPhantom` [Dashboard -> ComponentArrayEdge]
+test_project_ai/ConnectionsEdge.qml:60: Unknown member `humidity` on C++ object `sensorManager` [Dashboard -> ConnectionsEdge]
+test_project_ai/Dashboard.qml:96: Undefined name `unknownRef` used in function `refresh`
+test_project_ai/Dashboard.qml:103: Signal handler `onDataLoaded` has no corresponding signal or property
+test_project_ai/Dashboard.qml:89: Assignment to unknown property `fakeWindowProperty`
+test_project_ai/Dashboard.qml:84: Unknown type `GhostWidget3000`
 test_project_ai/DataView.qml:22: Undefined name `undefinedModelCount` used in property `isEmpty` [Dashboard -> DataView]
 test_project_ai/DataView.qml:12: Signal handler `onCountTChanged` has no corresponding signal or property [Dashboard -> DataView]
 test_project_ai/DataView.qml:42: [delegateRoot] Assignment to unknown property `nonExistentTextProp` on `labelItem` [Dashboard -> DataView]
@@ -24,14 +39,20 @@ test_project_ai/InputForm.qml:31: Undefined name `undefinedHelper` used in funct
 test_project_ai/InputForm.qml:47: Assignment to unknown property `nonExistentField` on `textField` [Dashboard -> InputForm]
 test_project_ai/InputForm.qml:47: `textField.readOnly` expects `bool` but got `int` [Dashboard -> InputForm]
 test_project_ai/InputForm.qml:18: Unknown member `voltage` on C++ object `sensorManager` [Dashboard -> InputForm]
+test_project_ai/JSEdge.qml:24: Undefined name `value` used in function `summarize` [Dashboard -> JSEdge]
+test_project_ai/JSEdge.qml:24: Undefined name `label` used in function `summarize` [Dashboard -> JSEdge]
+test_project_ai/NestedScopeEdge.qml:63: Undefined name `phantomBox` used in function `badResize` [Dashboard -> NestedScopeEdge]
+test_project_ai/NestedScopeEdge.qml:67: Assignment to unknown property `notARealProp` on `panel` [Dashboard -> NestedScopeEdge]
+test_project_ai/NestedScopeEdge.qml:72: Signal handler `onPanelReady` has no corresponding signal or property [Dashboard -> NestedScopeEdge]
+test_project_ai/RepeaterEdge.qml:69: Undefined name `phantomRepeater` used in function `resetRepeater` [Dashboard -> RepeaterEdge]
+test_project_ai/RepeaterEdge.qml:53: [delegateRect] Undefined name `shadowService` used in function `Component.onCompleted` [Dashboard -> RepeaterEdge]
+test_project_ai/RepeaterEdge.qml:36: [delegateRect] Assignment to unknown property `nonExistentProp` [Dashboard -> RepeaterEdge]
+test_project_ai/StatesEdge.qml:70: Undefined name `undeclaredAnimTarget` used in function `jumpTo` [Dashboard -> StatesEdge]
+test_project_ai/StatesEdge.qml:75: Undefined name `ghostPanel` used in function `loadPanel` [Dashboard -> StatesEdge]
+test_project_ai/StatesEdge.qml:86: Signal handler `onStateTransitioned` has no corresponding signal or property [Dashboard -> StatesEdge]
 test_project_ai/StringBraceEdge.qml:7: Property `data` redefines existing property from `base type` [Dashboard -> StringBraceEdge]
 test_project_ai/StringBraceEdge.qml:46: Undefined name `undefinedParser` used in function `parseData` [Dashboard -> StringBraceEdge]
+test_project_ai/TypedParamEdge.qml:51: Undefined name `undeclaredProcessor` used in function `process` [Dashboard -> TypedParamEdge]
+test_project_ai/TypedParamEdge.qml:56: Undefined name `shadowRegistry` used in function `register` [Dashboard -> TypedParamEdge]
 
-Found 29 errors, 0 files not checked
-perty `nonExistentField` on `textField` [Dashboard -> InputForm]
-test_project_ai/InputForm.qml:47: `textField.readOnly` expects `bool` but got `int` [Dashboard -> InputForm]
-test_project_ai/InputForm.qml:18: Unknown member `voltage` on C++ object `sensorManager` [Dashboard -> InputForm]
-test_project_ai/StringBraceEdge.qml:7: Property `data` redefines existing property from `base type` [Dashboard -> StringBraceEdge]
-test_project_ai/StringBraceEdge.qml:46: Undefined name `undefinedParser` used in function `parseData` [Dashboard -> StringBraceEdge]
-
-Found 29 errors, 0 files not checked
+Found 56 errors, 0 files not checked

@@ -1,5 +1,6 @@
 [cpp_objects]
 sensorManager = "SensorController.h"
+deviceManager = "DeviceManager.h"
 
 [globals]
 names = ["AI_DEBUG_MODE"]

@@ -41,6 +41,45 @@ ApplicationWindow {
         id: typedParamEdge
     }
 
+    AliasEdge {
+        id: aliasEdge
+    }
+
+    ConnectionsEdge {
+        id: connectionsEdge
+    }
+
+    StatesEdge {
+        id: statesEdge
+    }
+
+    RepeaterEdge {
+        id: repeaterEdge
+        anchors.left: parent.left
+        width: 220
+        height: 200
+    }
+
+    AttachedEdge {
+        id: attachedEdge
+    }
+
+    JSEdge {
+        id: jsEdge
+    }
+
+    NestedScopeEdge {
+        id: nestedScopeEdge
+    }
+
+    AdvancedForm {
+        id: advancedForm
+        anchors.top: parent.top
+        anchors.right: parent.right
+        width: 200
+        height: 200
+    }
+
     // ERROR: UnknownType – GhostWidget3000 is not defined anywhere
     GhostWidget3000 {
         id: ghost
