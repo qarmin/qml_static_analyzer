@@ -70,6 +70,10 @@ pub struct Property {
     /// False for complex expressions like `!other` or `a && b`.
     #[serde(skip, default)]
     pub is_simple_ref: bool,
+    /// Raw initial-value expression string, preserved for C++ member validation at check time.
+    /// E.g. for `property double temp: sensor.temperature` this holds `"sensor.temperature"`.
+    #[serde(skip, default)]
+    pub raw_value_expr: String,
     /// Source line number (1-based). Not serialized — used for error reporting only.
     #[serde(skip)]
     pub line: usize,

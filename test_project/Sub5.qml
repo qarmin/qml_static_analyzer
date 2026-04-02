@@ -106,4 +106,9 @@ Rectangle {
             }
         }
     }
+
+    Button {
+        id: button
+        icon.source: nonexxxxxssrrr // Problem - nonexxxxxssrrr is not defined anywhere, so it should print error
+    }
 }

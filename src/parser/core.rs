@@ -169,6 +169,14 @@ impl<'src> Parser<'src> {
                 continue;
             }
 
+            // `async function name(…) {` — strip the `async ` prefix before parsing.
+            if line.starts_with("async function ") {
+                self.advance();
+                let func = self.parse_function(&line["async ".len()..], lineno)?;
+                body.functions.push(func);
+                continue;
+            }
+
             // ── inline signal-handler block  onXxx: { … } ─────────────────
             if is_signal_handler_block(line) {
                 self.advance();
@@ -299,10 +307,11 @@ impl<'src> Parser<'src> {
                     // `fixationGoodColor :` on its own line), not a real QML assignment.
                     if !value.is_empty()
                         && !key.is_empty()
-                        && !key.contains('.')
                         && !key.contains(' ')
                         && key.chars().next().is_some_and(|c| c.is_ascii_lowercase())
-                        && key.chars().all(|c| c.is_alphanumeric() || c == '_' || c == '$')
+                        && key
+                            .chars()
+                            .all(|c| c.is_alphanumeric() || c == '_' || c == '$' || c == '.')
                         && !is_js_keyword(key)
                     {
                         body.assignments.push((key.to_string(), value, lineno));
@@ -380,9 +389,12 @@ impl<'src> Parser<'src> {
         // Arrow params declared on the header line (e.g. `(id) =>`)
         let header_arrow_params = collect_arrow_params(rest);
 
-        // `function (param) {` form — extract params from anonymous function syntax
+        // `function (param) {` or `function(param) {` form — extract params.
+        // `parse_function_header` requires `"function "` (space after keyword) so it fails
+        // for the no-space form `function(event)`. Use `collect_function_keyword_params`
+        // which handles both `function(` and `function (` transparently.
         let header_function_params: Vec<String> = if rest.starts_with("function ") || rest.starts_with("function(") {
-            parse_function_header(rest).map(|(_, p, _)| p).unwrap_or_default()
+            collect_function_keyword_params(rest)
         } else {
             vec![]
         };
@@ -458,7 +470,7 @@ impl<'src> Parser<'src> {
                 //       if (condition)
                 //           doSomething()
                 // Collect lines until we hit a blank line, closing brace, or a new QML declaration.
-                let mut body_lines = vec![next_line.clone()];
+                let mut body_lines = vec![next_line];
                 loop {
                     let Some((_, peek_raw)) = self.peek() else { break };
                     let peek = strip_comment(peek_raw).trim().to_string();
@@ -581,15 +593,30 @@ impl<'src> Parser<'src> {
             let mut str_ch = ' ';
             let mut escape = false;
             for ch in line.chars() {
-                if escape { escape = false; continue; }
+                if escape {
+                    escape = false;
+                    continue;
+                }
                 if in_str {
-                    if ch == '\\' { escape = true; } else if ch == str_ch { in_str = false; }
+                    if ch == '\\' {
+                        escape = true;
+                    } else if ch == str_ch {
+                        in_str = false;
+                    }
                     continue;
                 }
                 match ch {
-                    '"' | '\'' | '`' => { in_str = true; str_ch = ch; }
+                    '"' | '\'' | '`' => {
+                        in_str = true;
+                        str_ch = ch;
+                    }
                     '[' => depth += 1,
-                    ']' => { depth -= 1; if depth == 0 { return Ok(()); } }
+                    ']' => {
+                        depth -= 1;
+                        if depth == 0 {
+                            return Ok(());
+                        }
+                    }
                     _ => {}
                 }
             }

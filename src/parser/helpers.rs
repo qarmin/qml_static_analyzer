@@ -242,6 +242,7 @@ pub fn parse_property_decl(line: &str) -> Option<Property> {
         value,
         accessed_properties,
         is_simple_ref,
+        raw_value_expr: value_str.unwrap_or_default(),
         line: 0, // will be filled in by the caller
     })
 }

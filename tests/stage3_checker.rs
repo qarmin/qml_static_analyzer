@@ -1004,7 +1004,7 @@ Item {
 /// Multiple different aliases in the same file are all recognized.
 #[test]
 fn test_multiple_aliases_not_flagged() {
-    let source = r#"
+    let source = "
 import QtQuick
 import org.kde.kirigami as Kirigami
 import org.kde.plasma.components as PlasmaComponents
@@ -1015,7 +1015,7 @@ Item {
     PlasmaComponents.ToolButton { }
     QQC2.Label { }
 }
-"#;
+";
     let file = parse_file("Test", source).expect("parse should succeed");
     let db = load_db();
     let mut ctx = CheckContext::empty();
@@ -1033,14 +1033,14 @@ Item {
 /// A type whose prefix is NOT a known alias must still be reported.
 #[test]
 fn test_non_aliased_dotted_type_still_flagged() {
-    let source = r#"
+    let source = "
 import QtQuick
 import org.kde.kirigami as Kirigami
 
 Item {
     UnknownModule.SomeType { }
 }
-"#;
+";
     let file = parse_file("Test", source).expect("parse should succeed");
     let db = load_db();
     let mut ctx = CheckContext::empty();
@@ -1228,5 +1228,529 @@ Kirigami.Page {
     assert!(
         !has_error(&errors, |e| matches!(e, ErrorKind::UnknownPropertyAssignment { .. })),
         "opaque aliased root must not produce UnknownPropertyAssignment, got: {errors:?}"
+    );
+}
+
+// ─── PropertyTypeMismatch ─────────────────────────────────────────────────────
+
+/// `property int count: "hello"` — string literal assigned to int → PropertyTypeMismatch.
+#[test]
+fn test_property_type_mismatch_string_to_int() {
+    let source = r#"
+Rectangle {
+    property int count: "hello"
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyTypeMismatch { name, .. } if name == "count")
+        ),
+        "string literal assigned to int must produce PropertyTypeMismatch, got: {errors:?}"
+    );
+}
+
+/// `property int count: 42` — correct literal → no PropertyTypeMismatch.
+#[test]
+fn test_property_type_match_int_no_error() {
+    let source = "
+Rectangle {
+    property int count: 42
+}
+";
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyTypeMismatch { name, .. } if name == "count")
+        ),
+        "int literal on int property must not produce PropertyTypeMismatch, got: {errors:?}"
+    );
+}
+
+/// `property bool active: 3.14` — double literal assigned to bool → PropertyTypeMismatch.
+#[test]
+fn test_property_type_mismatch_double_to_bool() {
+    let source = "
+Rectangle {
+    property bool active: 3.14
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyTypeMismatch { name, .. } if name == "active")
+        ),
+        "double literal assigned to bool must produce PropertyTypeMismatch, got: {errors:?}"
+    );
+}
+
+/// `property string rate: 99.9` — double literal assigned to string → PropertyTypeMismatch.
+#[test]
+fn test_property_type_mismatch_double_to_string() {
+    let source = "
+Rectangle {
+    property string rate: 99.9
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyTypeMismatch { name, .. } if name == "rate")
+        ),
+        "double literal assigned to string must produce PropertyTypeMismatch, got: {errors:?}"
+    );
+}
+
+/// `property int code: false` — bool literal assigned to int → PropertyTypeMismatch.
+#[test]
+fn test_property_type_mismatch_bool_to_int() {
+    let source = "
+Rectangle {
+    property int code: false
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyTypeMismatch { name, .. } if name == "code")
+        ),
+        "bool literal assigned to int must produce PropertyTypeMismatch, got: {errors:?}"
+    );
+}
+
+// ─── PropertyRedefinition ─────────────────────────────────────────────────────
+
+/// `property int width: 100` in Rectangle — width already exists in Qt base → PropertyRedefinition.
+#[test]
+fn test_property_redefinition_of_qt_prop() {
+    let source = "
+Rectangle {
+    property int width: 100
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyRedefinition { name, .. } if name == "width")
+        ),
+        "redeclaring Qt base property 'width' must produce PropertyRedefinition, got: {errors:?}"
+    );
+}
+
+/// `property string myCustomProp` — new property name → no PropertyRedefinition.
+#[test]
+fn test_property_redefinition_new_prop_no_error() {
+    let source = r#"
+Rectangle {
+    property string myCustomProp: "hello"
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::PropertyRedefinition { name, .. } if name == "myCustomProp")
+        ),
+        "declaring a new property must not produce PropertyRedefinition, got: {errors:?}"
+    );
+}
+
+// ─── UnknownMemberAccess in function ─────────────────────────────────────────
+
+/// `label.nonExistentProp = "x"` — nonExistentProp is not in Text → UnknownMemberAccess.
+#[test]
+fn test_unknown_member_access_in_function() {
+    let source = r#"
+Item {
+    Text {
+        id: label
+        text: "hello"
+    }
+
+    function update() {
+        label.nonExistentProp = "x"
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownMemberAccess { object, member }
+                if object == "label" && member == "nonExistentProp")
+        ),
+        "assignment to unknown child property must produce UnknownMemberAccess, got: {errors:?}"
+    );
+}
+
+/// `label.text = "world"` — text IS a property of Text → no UnknownMemberAccess.
+#[test]
+fn test_known_member_access_no_error() {
+    let source = r#"
+Item {
+    Text {
+        id: label
+        text: "hello"
+    }
+
+    function update() {
+        label.text = "world"
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownMemberAccess { object, member }
+                if object == "label" && member == "text")
+        ),
+        "assignment to valid Text.text must not produce UnknownMemberAccess, got: {errors:?}"
+    );
+}
+
+// ─── MemberAssignmentTypeMismatch ─────────────────────────────────────────────
+
+/// `textField.readOnly = 5` — readOnly is bool, 5 is int → MemberAssignmentTypeMismatch.
+#[test]
+fn test_member_assignment_type_mismatch_int_to_bool() {
+    let source = "
+Item {
+    TextField {
+        id: textField
+    }
+
+    function reset() {
+        textField.readOnly = 5
+    }
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::MemberAssignmentTypeMismatch { object, member, .. }
+                if object == "textField" && member == "readOnly")
+        ),
+        "int assigned to bool member must produce MemberAssignmentTypeMismatch, got: {errors:?}"
+    );
+}
+
+/// `textField.readOnly = false` — correct bool type → no MemberAssignmentTypeMismatch.
+#[test]
+fn test_member_assignment_type_match_no_error() {
+    let source = "
+Item {
+    TextField {
+        id: textField
+    }
+
+    function reset() {
+        textField.readOnly = false
+    }
+}
+";
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::MemberAssignmentTypeMismatch { object, member, .. }
+                if object == "textField" && member == "readOnly")
+        ),
+        "bool assigned to bool member must not produce MemberAssignmentTypeMismatch, got: {errors:?}"
+    );
+}
+
+// ─── UnknownPropertyAssignment at root inline level ──────────────────────────
+
+/// `badProp: "hello"` on Rectangle root — unknown property → UnknownPropertyAssignment.
+/// Requires non-empty known_types to activate the check.
+#[test]
+fn test_unknown_inline_assignment_on_root() {
+    let source = r#"
+Rectangle {
+    badProp: "hello"
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "badProp")
+        ),
+        "unknown inline assignment on root must produce UnknownPropertyAssignment, got: {errors:?}"
+    );
+}
+
+/// `width: 200` on Rectangle — width IS a valid Qt prop → no UnknownPropertyAssignment.
+#[test]
+fn test_known_inline_assignment_on_root_no_error() {
+    let source = "
+Rectangle {
+    width: 200
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "width")
+        ),
+        "valid Qt property 'width' inline assignment must not be flagged, got: {errors:?}"
+    );
+}
+
+// ─── UnknownCppMember ─────────────────────────────────────────────────────────
+
+fn make_sensor_ctx() -> CheckContext {
+    let mut ctx = CheckContext::empty();
+    let mut members = std::collections::HashSet::new();
+    members.insert("temperature".to_string());
+    members.insert("calibrate".to_string());
+    members.insert("sensorCount".to_string());
+    ctx.cpp_object_members
+        .insert("sensorManager".to_string(), Some(members));
+    ctx.cpp_globals.insert("sensorManager".to_string());
+    ctx
+}
+
+/// `sensorManager.temperature` — temperature IS declared → no UnknownCppMember.
+#[test]
+fn test_cpp_member_valid_no_error() {
+    let source = "
+Item {
+    function showTemp() {
+        console.log(sensorManager.temperature)
+    }
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = make_sensor_ctx();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownCppMember { object, member }
+                if object == "sensorManager" && member == "temperature")),
+        "valid C++ member access must not produce UnknownCppMember, got: {errors:?}"
+    );
+}
+
+/// `sensorManager.pressure` — pressure is NOT declared → UnknownCppMember.
+#[test]
+fn test_cpp_member_unknown_flagged() {
+    let source = "
+Item {
+    function process() {
+        let val = sensorManager.pressure
+    }
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = make_sensor_ctx();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UnknownCppMember { object, member }
+                if object == "sensorManager" && member == "pressure")),
+        "undeclared C++ member must produce UnknownCppMember, got: {errors:?}"
+    );
+}
+
+/// Opaque C++ object (None members) — ALL member access allowed, no error.
+#[test]
+fn test_cpp_opaque_object_allows_all_access() {
+    let source = "
+Item {
+    function doAnything() {
+        let x = opaqueService.anyMethod()
+    }
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.cpp_object_members.insert("opaqueService".to_string(), None); // opaque
+    ctx.cpp_globals.insert("opaqueService".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownCppMember { object, .. } if object == "opaqueService")
+        ),
+        "opaque C++ object must allow all member access, got: {errors:?}"
+    );
+}
+
+/// `enabled: sensorManager.pressure > 0` (inline assignment, not `property` decl) →
+/// UnknownCppMember is checked for inline assignments but NOT for `property T foo: expr`.
+#[test]
+fn test_cpp_member_unknown_in_inline_assignment() {
+    let source = "
+Item {
+    enabled: sensorManager.pressure > 0
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = make_sensor_ctx();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UnknownCppMember { object, member }
+                if object == "sensorManager" && member == "pressure")),
+        "undeclared C++ member in inline assignment must produce UnknownCppMember, got: {errors:?}"
+    );
+}
+
+/// `property bool hasPressure: sensorManager.pressure > 0` — C++ member validation does
+/// NOT apply to `property T name: expr` declarations (only inline assignments are checked).
+///
+/// Fixed: the checker now validates `base.member` accesses in `property T name: expr`
+/// declarations using the raw expression string stored at parse time.
+#[test]
+fn test_cpp_member_unknown_in_property_decl_expr() {
+    let source = "
+Item {
+    property bool hasPressure: sensorManager.pressure > 0
+}
+";
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = make_sensor_ctx();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UnknownCppMember { object, member }
+                if object == "sensorManager" && member == "pressure")),
+        "undeclared C++ member in property decl expr must produce UnknownCppMember, got: {errors:?}"
+    );
+}
+
+// ─── Declared signal → valid handler ─────────────────────────────────────────
+
+/// `signal mySignal()` declared → `function onMySignal() {}` must be valid.
+#[test]
+fn test_declared_signal_handler_valid() {
+    let source = r#"
+Item {
+    signal mySignal()
+
+    function onMySignal() {
+        console.log("received")
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownSignalHandler { handler } if handler == "onMySignal")
+        ),
+        "handler for declared signal must be valid, got: {errors:?}"
+    );
+}
+
+/// Handler for a non-declared signal on Item → UnknownSignalHandler.
+#[test]
+fn test_undeclared_signal_handler_flagged() {
+    let source = r#"
+Item {
+    function onNonExistentSignal() {
+        console.log("oops")
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownSignalHandler { handler } if handler == "onNonExistentSignal")
+        ),
+        "handler with no matching signal must produce UnknownSignalHandler, got: {errors:?}"
+    );
+}
+
+// ─── Known bugs (ignored): document desired behavior ─────────────────────────
+
+/// `Keys.onPressed: function(event) { event.accepted = true }` — `event` is an inline
+/// function parameter and must NOT be flagged as undefined.
+///
+/// Fixed: the parser now uses `collect_function_keyword_params` to extract parameters
+/// from the inline `function(param)` handler syntax, handling the no-space form too.
+#[test]
+fn test_inline_function_handler_param_not_undefined() {
+    let source = "
+FocusScope {
+    Keys.onPressed: function(event) {
+        event.accepted = true
+    }
+}
+";
+    let errors = check(source);
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UndefinedName { name, .. } if name == "event")
+        ),
+        "inline function(param) handler param 'event' must not be flagged, got: {errors:?}"
+    );
+}
+
+/// `items.map(x => undeclaredThing.doIt(x))` — `undeclaredThing` inside the arrow body
+/// is not in scope and SHOULD be flagged as UndefinedName.
+///
+/// Fixed: `collect_names_from_expression` now recurses into `(args)` in chain calls,
+/// so identifiers inside arrow function bodies passed to method calls are scope-checked.
+#[test]
+fn test_undefined_name_inside_arrow_in_method_call() {
+    let source = "
+Item {
+    property var items: []
+
+    function transform() {
+        return items.map(x => undeclaredThing.doIt(x))
+    }
+}
+";
+    let errors = check(source);
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UndefinedName { name, .. } if name == "undeclaredThing")
+        ),
+        "undefined name inside arrow in method call must be flagged, got: {errors:?}"
     );
 }

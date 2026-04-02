@@ -26,10 +26,13 @@ test_project/Sub4.qml:43: Undefined name `non_existenddddddddddddddddddddddddddd
 test_project/Sub4.qml:66: [SmoothedAnimation] Undefined name `animationTime` used in property `duration` [Global -> Sub4]
 test_project/Sub4.qml:77: [TabBar] Undefined name `currentIndex222` used in function `Component.onCompleted` [Global -> Sub4]
 test_project/Sub4.qml:75: [TabBar] Assignment to unknown property `non_eexxxiss` on `susItem` [Global -> Sub4]
+test_project/Sub5.qml:50: [ListView] Undefined name `selectedPatientModel` used in function `onContentYChanged` [Global -> Sub4 -> Sub5]
+test_project/Sub5.qml:50: [ListView] Undefined name `search` used in function `onContentYChanged` [Global -> Sub4 -> Sub5]
 test_project/Sub5.qml:44: [Rectangle] Assignment to unknown property `non_existtttttttend` [Global -> Sub4 -> Sub5]
 test_project/Sub5.qml:101: [RoundButton] Undefined name `texttttBusy2` used in function `onClicked` [Global -> Sub4 -> Sub5]
+test_project/Sub5.qml:112: [button] Undefined name `nonexxxxxssrrr` used in property `icon.source` [Global -> Sub4 -> Sub5]
 test_project/TextWrapper.qml:24: Undefined name `blur` used in function `onBlurContent` [Global -> Sub4 -> Sub5 -> TextWrapper]
 test_project/TextWrapper.qml:18: Undefined name `nonnnnnnn_esssistent` used in property `width` [Global -> Sub4 -> Sub5 -> TextWrapper]
 test_project/TextWrapper.qml:19: Undefined name `non_exissssssssstent_item` used in property `height` [Global -> Sub4 -> Sub5 -> TextWrapper]
 
-Found 33 errors, 0 files not checked
+Found 36 errors, 0 files not checked

@@ -255,10 +255,9 @@ impl Checker<'_> {
                 if self.db.has_type(unqualified) || self.ctx.known_types.contains(unqualified) {
                     // Resolved: full validation for Qt aliases, partial for non-Qt
                     return Some((unqualified, is_qt));
-                } else {
-                    // Known alias but type not in DB → opaque external type
-                    return Some((type_name, false));
                 }
+                // Known alias but type not in DB → opaque external type
+                return Some((type_name, false));
             }
         }
         None // not an alias prefix
@@ -512,6 +511,34 @@ impl Checker<'_> {
             Self::check_property_decl(prop, &qt_props, &file_prop_types, file_scope, self.db, errors, None);
         }
 
+        // 1b. C++ member validation for property declaration expressions.
+        // `check_property_decl` only checks scope via `accessed_properties` (base names).
+        // We additionally validate `base.member` accesses against `cpp_object_members` using
+        // the raw expression string stored at parse time.
+        for prop in &file.properties {
+            if prop.raw_value_expr.is_empty() {
+                continue;
+            }
+            let mut seen_cpp: HashSet<(String, String)> = HashSet::new();
+            for (base_name, member_opt) in collect_dotted_accesses_from_expression(&prop.raw_value_expr) {
+                let Some(accessed) = member_opt else { continue };
+                let key = (base_name.clone(), accessed.clone());
+                if seen_cpp.insert(key)
+                    && let Some(members_opt) = self.ctx.cpp_object_members.get(&base_name)
+                    && let Some(members) = members_opt
+                    && !members.contains(accessed.as_str())
+                {
+                    errors.push(
+                        AnalysisError::new(ErrorKind::UnknownCppMember {
+                            object: base_name.clone(),
+                            member: accessed,
+                        })
+                        .with_line(prop.line),
+                    );
+                }
+            }
+        }
+
         // 2. Sprawdź funkcje / handlery sygnałów
         for func in &file.functions {
             self.check_function(
@@ -530,8 +557,14 @@ impl Checker<'_> {
         // Skip entirely for opaque aliased base types — we don't know their property set.
         let type_member_names = self.all_file_member_names(&file.name);
         for (name, value_expr, line) in &file.assignments {
-            if base_is_opaque { continue; }
-            let prop_known = qt_props.contains_key(name.as_str())
+            if base_is_opaque {
+                continue;
+            }
+            // Skip the property-name check for dotted keys (e.g. `icon.source`): these are
+            // grouped/attached properties that are not individually listed in the Qt DB, so we
+            // cannot validate the key itself — but we still validate the RHS below.
+            let prop_known = name.contains('.')
+                || qt_props.contains_key(name.as_str())
                 || file.properties.iter().any(|p| p.name == *name)
                 || type_member_names.contains(name.as_str());
             if !prop_known {
@@ -961,22 +994,22 @@ impl Checker<'_> {
         //   `PC3.Label`      (non-Qt alias, in DB)   → scope via `Label`     [partial, no unknown-prop]
         //   `Kirigami.Icon`  (non-Qt alias, not DB)  → opaque, return silently
         //   `Unknown.Type`   (prefix not an alias)   → fall through to UnknownType check
-        let (resolved_type_name, child_full_validation): (&str, bool) =
-            if let Some(dot_pos) = child.type_name.find('.') {
-                let prefix = &child.type_name[..dot_pos];
-                if import_aliases.contains_key(prefix) {
-                    match self.resolve_aliased_base(&child.type_name, import_aliases) {
-                        // name unchanged means type not in DB → opaque external type, skip silently
-                        Some((name, _)) if name == child.type_name => return,
-                        Some((name, full)) => (name, full),
-                        None => return, // shouldn't happen (prefix is a known alias)
-                    }
-                } else {
-                    (&child.type_name, true)
+        let (resolved_type_name, child_full_validation): (&str, bool) = if let Some(dot_pos) = child.type_name.find('.')
+        {
+            let prefix = &child.type_name[..dot_pos];
+            if import_aliases.contains_key(prefix) {
+                match self.resolve_aliased_base(&child.type_name, import_aliases) {
+                    // name unchanged means type not in DB → opaque external type, skip silently
+                    Some((name, _)) if name == child.type_name => return,
+                    Some((name, full)) => (name, full),
+                    None => return, // shouldn't happen (prefix is a known alias)
                 }
             } else {
                 (&child.type_name, true)
-            };
+            }
+        } else {
+            (&child.type_name, true)
+        };
 
         // Sprawdź czy typ jest znany — albo Qt, albo sparsowany plik QML.
         // Sprawdzamy tylko gdy known_types nie jest puste (tzn. mamy pełen kontekst projektu).
@@ -1038,6 +1071,32 @@ impl Checker<'_> {
             );
         }
 
+        // C++ member validation for child property declaration expressions.
+        for prop in &child.properties {
+            if prop.raw_value_expr.is_empty() {
+                continue;
+            }
+            let mut seen_cpp: HashSet<(String, String)> = HashSet::new();
+            for (base_name, member_opt) in collect_dotted_accesses_from_expression(&prop.raw_value_expr) {
+                let Some(accessed) = member_opt else { continue };
+                let key = (base_name.clone(), accessed.clone());
+                if seen_cpp.insert(key)
+                    && let Some(members_opt) = self.ctx.cpp_object_members.get(&base_name)
+                    && let Some(members) = members_opt
+                    && !members.contains(accessed.as_str())
+                {
+                    errors.push(
+                        AnalysisError::new(ErrorKind::UnknownCppMember {
+                            object: base_name.clone(),
+                            member: accessed,
+                        })
+                        .with_line(prop.line)
+                        .with_context(&ctx),
+                    );
+                }
+            }
+        }
+
         for func in &child.functions {
             self.check_function(
                 func,
@@ -1058,7 +1117,10 @@ impl Checker<'_> {
             // For partial (non-Qt alias) types, skip UnknownPropertyAssignment — the external
             // type may expose additional properties beyond what the Qt base type declares.
             if child_full_validation {
-                let prop_known = qt_props.contains_key(name.as_str())
+                // Skip the property-name check for dotted keys (e.g. `icon.source`): grouped
+                // properties are not individually listed in the Qt DB.
+                let prop_known = name.contains('.')
+                    || qt_props.contains_key(name.as_str())
                     || child.properties.iter().any(|p| p.name == *name)
                     || type_member_names.contains(name.as_str());
                 if !prop_known {
@@ -1123,7 +1185,14 @@ impl Checker<'_> {
         }
 
         for grandchild in &child.children {
-            self.check_child(grandchild, &child_scope, errors, &my_elem_path, file_id_map, import_aliases);
+            self.check_child(
+                grandchild,
+                &child_scope,
+                errors,
+                &my_elem_path,
+                file_id_map,
+                import_aliases,
+            );
         }
     }
 }

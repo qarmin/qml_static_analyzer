@@ -221,15 +221,45 @@ pub fn collect_names_from_expression(expr: &str) -> Vec<FunctionUsedName> {
                 {
                     i += if tokens[i] == "." { 2 } else { 3 };
                 }
-                // [anything] bracket access or () call — skip to matching closer
-                if i < tokens.len() && (tokens[i] == "[" || tokens[i] == "(") {
-                    let (opener, closer) = if tokens[i] == "[" { ("[", "]") } else { ("(", ")") };
+                // [anything] bracket access or () call.
+                // For `(args)`: recurse into the argument list so that names inside
+                // arrow function bodies (e.g. `x => undeclaredThing.doIt(x)`) are
+                // scope-checked.  Arrow-function parameters within the args are
+                // detected and excluded to prevent false positives.
+                // For `[idx]`: skip without analysis (index expressions are uncommon
+                // sources of undefined-name bugs and this keeps the logic simple).
+                if i < tokens.len() && tokens[i] == "(" {
+                    i += 1; // skip "("
+                    let arg_start = i;
+                    let mut depth = 1usize;
+                    while i < tokens.len() && depth > 0 {
+                        if tokens[i] == "(" {
+                            depth += 1;
+                        } else if tokens[i] == ")" {
+                            depth -= 1;
+                        }
+                        i += 1;
+                    }
+                    if i > arg_start + 1 {
+                        let arg_tokens = &tokens[arg_start..i - 1];
+                        // Re-join tokens; `= >` was split by tokenizer, glue back to `=>`
+                        // so that `collect_arrow_params` can detect arrow-function params.
+                        let arg_expr: String = arg_tokens.join(" ").replace("= >", "=>");
+                        let arrow_params: std::collections::HashSet<String> =
+                            collect_arrow_params(&arg_expr).into_iter().collect();
+                        for n in collect_names_from_expression(&arg_expr) {
+                            if !arrow_params.contains(n.name.as_str()) {
+                                result.push(n);
+                            }
+                        }
+                    }
+                } else if i < tokens.len() && tokens[i] == "[" {
                     let mut depth = 1usize;
                     i += 1;
                     while i < tokens.len() && depth > 0 {
-                        if tokens[i] == opener {
+                        if tokens[i] == "[" {
                             depth += 1;
-                        } else if tokens[i] == closer {
+                        } else if tokens[i] == "]" {
                             depth -= 1;
                         }
                         i += 1;
@@ -611,10 +641,7 @@ pub fn collect_function_keyword_params(line: &str) -> Vec<String> {
             !c.is_ascii_alphanumeric() && c != b'_'
         };
         let after_kw = &rest[kw_pos + 8..];
-        let after_kw_ok = after_kw
-            .chars()
-            .next()
-            .map_or(true, |c| !c.is_alphanumeric() && c != '_');
+        let after_kw_ok = after_kw.chars().next().is_none_or(|c| !c.is_alphanumeric() && c != '_');
         rest = after_kw;
         if !before_ok || !after_kw_ok {
             continue;
@@ -629,13 +656,13 @@ pub fn collect_function_keyword_params(line: &str) -> Vec<String> {
         } else {
             trimmed
         };
-        if let Some(after_open) = trimmed.strip_prefix('(') {
-            if let Some(close) = after_open.find(')') {
-                for p in after_open[..close].split(',') {
-                    let name = p.trim();
-                    if !name.is_empty() && is_identifier(name) && !is_js_keyword(name) {
-                        params.push(name.to_string());
-                    }
+        if let Some(after_open) = trimmed.strip_prefix('(')
+            && let Some(close) = after_open.find(')')
+        {
+            for p in after_open[..close].split(',') {
+                let name = p.trim();
+                if !name.is_empty() && is_identifier(name) && !is_js_keyword(name) {
+                    params.push(name.to_string());
                 }
             }
         }
@@ -816,36 +843,56 @@ pub fn try_parse_destructure_decl(line: &str) -> Option<(Vec<String>, String)> {
     if rest.starts_with('{') {
         let close = rest.find('}')?;
         let inner = &rest[1..close];
-        let rhs = rest[close + 1..].trim().strip_prefix('=').map_or("", str::trim).to_string();
+        let rhs = rest[close + 1..]
+            .trim()
+            .strip_prefix('=')
+            .map_or("", str::trim)
+            .to_string();
         let names: Vec<String> = inner
             .split(',')
             .map(str::trim)
             .filter(|s| !s.is_empty())
             .filter_map(|entry| {
                 // strip optional default: `key = value` or `key: alias = value`
-                let binding = if let Some(pos) = entry.find('=') { entry[..pos].trim() } else { entry };
+                let binding = if let Some(pos) = entry.find('=') {
+                    entry[..pos].trim()
+                } else {
+                    entry
+                };
                 // rename: `key: alias` → bind `alias`
                 let name = if let Some(pos) = binding.find(':') {
                     binding[pos + 1..].trim()
                 } else {
                     binding
                 };
-                if name.is_empty() || !is_identifier(name) { None } else { Some(name.to_string()) }
+                if name.is_empty() || !is_identifier(name) {
+                    None
+                } else {
+                    Some(name.to_string())
+                }
             })
             .collect();
-        if names.is_empty() { return None; }
+        if names.is_empty() {
+            return None;
+        }
         Some((names, rhs))
     } else if rest.starts_with('[') {
         let close = rest.find(']')?;
         let inner = &rest[1..close];
-        let rhs = rest[close + 1..].trim().strip_prefix('=').map_or("", str::trim).to_string();
+        let rhs = rest[close + 1..]
+            .trim()
+            .strip_prefix('=')
+            .map_or("", str::trim)
+            .to_string();
         let names: Vec<String> = inner
             .split(',')
             .map(str::trim)
             .filter(|s| !s.is_empty() && is_identifier(s))
             .map(str::to_string)
             .collect();
-        if names.is_empty() { return None; }
+        if names.is_empty() {
+            return None;
+        }
         Some((names, rhs))
     } else {
         None

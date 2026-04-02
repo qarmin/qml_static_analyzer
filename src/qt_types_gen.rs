@@ -126,8 +126,8 @@ fn load_all_classes(metatypes_dir: &Path) -> HashMap<String, Value> {
     for module in MODULES {
         // Try relwithdebinfo variant first (Qt ≤ 6.8), then plain (Qt 6.11+)
         let candidates = [
-            format!("{}_relwithdebinfo_metatypes.json", module),
-            format!("{}_metatypes.json", module),
+            format!("{module}_relwithdebinfo_metatypes.json"),
+            format!("{module}_metatypes.json"),
         ];
         let path = candidates
             .iter()

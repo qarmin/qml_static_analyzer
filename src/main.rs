@@ -248,11 +248,11 @@ fn cmd_check(args: &[String]) {
         process::exit(1);
     }
 
-    if let Some(ref p) = opts.config_file {
-        if !p.exists() {
-            eprintln!("error: --config {:?} does not exist", p);
-            process::exit(1);
-        }
+    if let Some(ref p) = opts.config_file
+        && !p.exists()
+    {
+        eprintln!("error: --config {p:?} does not exist");
+        process::exit(1);
     }
 
     let config = opts

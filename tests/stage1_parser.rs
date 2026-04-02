@@ -84,6 +84,7 @@ fn test_properties() {
                     value: PropertyValue::Int(42),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -92,6 +93,7 @@ fn test_properties() {
                     value: PropertyValue::Bool(true),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -100,6 +102,7 @@ fn test_properties() {
                     value: PropertyValue::String("hello".to_string()),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -108,6 +111,7 @@ fn test_properties() {
                     value: PropertyValue::Int(99),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -116,6 +120,7 @@ fn test_properties() {
                     value: PropertyValue::Double(3.13),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
             ],
@@ -300,6 +305,7 @@ fn test_children() {
                 value: PropertyValue::Int(10),
                 accessed_properties: vec![],
                 is_simple_ref: false,
+                raw_value_expr: String::new(),
                 line: 0,
             }],
             children: vec![
@@ -312,6 +318,7 @@ fn test_children() {
                         value: PropertyValue::String("child".to_string()),
                         accessed_properties: vec![],
                         is_simple_ref: false,
+                        raw_value_expr: String::new(),
                         line: 0,
                     }],
                     functions: vec![Function {
@@ -333,6 +340,7 @@ fn test_children() {
                         value: PropertyValue::Bool(false),
                         accessed_properties: vec![],
                         is_simple_ref: false,
+                        raw_value_expr: String::new(),
                         line: 0,
                     }],
                     functions: vec![],
@@ -347,6 +355,7 @@ fn test_children() {
                             value: PropertyValue::Int(2),
                             accessed_properties: vec![],
                             is_simple_ref: false,
+                            raw_value_expr: String::new(),
                             line: 0,
                         }],
                         functions: vec![],
@@ -407,6 +416,7 @@ fn test_complex_file() {
                     value: PropertyValue::Bool(false),
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -415,6 +425,7 @@ fn test_complex_file() {
                     value: PropertyValue::Unset,
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
                 Property {
@@ -423,6 +434,7 @@ fn test_complex_file() {
                     value: PropertyValue::Unset,
                     accessed_properties: vec![],
                     is_simple_ref: false,
+                    raw_value_expr: String::new(),
                     line: 0,
                 },
             ],
@@ -495,6 +507,7 @@ Item {
                 value: PropertyValue::Unset,
                 accessed_properties: vec![],
                 is_simple_ref: false,
+                raw_value_expr: String::new(),
                 line: 0,
             },
             Property {
@@ -503,6 +516,7 @@ Item {
                 value: PropertyValue::Unset,
                 accessed_properties: vec![],
                 is_simple_ref: false,
+                raw_value_expr: String::new(),
                 line: 0,
             },
             Property {
@@ -511,6 +525,7 @@ Item {
                 value: PropertyValue::Unset,
                 accessed_properties: vec![],
                 is_simple_ref: false,
+                raw_value_expr: String::new(),
                 line: 0,
             },
         ]
