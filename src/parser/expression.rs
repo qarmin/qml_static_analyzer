@@ -803,6 +803,55 @@ pub fn try_parse_method_shorthand_params(line: &str) -> Option<Vec<String>> {
     Some(params)
 }
 
+/// If `line` is a destructuring variable declaration, returns the bound names and the RHS.
+/// Handles object destructuring (`const { a, b } = expr`) and array destructuring
+/// (`const [a, b] = expr`).  Rename syntax (`{ key: alias }`) correctly binds the alias.
+pub fn try_parse_destructure_decl(line: &str) -> Option<(Vec<String>, String)> {
+    let rest = line
+        .strip_prefix("let ")
+        .or_else(|| line.strip_prefix("const "))
+        .or_else(|| line.strip_prefix("var "))
+        .map(str::trim)?;
+
+    if rest.starts_with('{') {
+        let close = rest.find('}')?;
+        let inner = &rest[1..close];
+        let rhs = rest[close + 1..].trim().strip_prefix('=').map_or("", str::trim).to_string();
+        let names: Vec<String> = inner
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .filter_map(|entry| {
+                // strip optional default: `key = value` or `key: alias = value`
+                let binding = if let Some(pos) = entry.find('=') { entry[..pos].trim() } else { entry };
+                // rename: `key: alias` → bind `alias`
+                let name = if let Some(pos) = binding.find(':') {
+                    binding[pos + 1..].trim()
+                } else {
+                    binding
+                };
+                if name.is_empty() || !is_identifier(name) { None } else { Some(name.to_string()) }
+            })
+            .collect();
+        if names.is_empty() { return None; }
+        Some((names, rhs))
+    } else if rest.starts_with('[') {
+        let close = rest.find(']')?;
+        let inner = &rest[1..close];
+        let rhs = rest[close + 1..].trim().strip_prefix('=').map_or("", str::trim).to_string();
+        let names: Vec<String> = inner
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty() && is_identifier(s))
+            .map(str::to_string)
+            .collect();
+        if names.is_empty() { return None; }
+        Some((names, rhs))
+    } else {
+        None
+    }
+}
+
 /// If `line` starts with `let`/`const`/`var name`, returns `(name, rhs_expr)`.
 pub fn try_parse_var_decl(line: &str) -> Option<(&str, &str)> {
     let rest = line

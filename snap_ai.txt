@@ -39,8 +39,6 @@ test_project_ai/InputForm.qml:31: Undefined name `undefinedHelper` used in funct
 test_project_ai/InputForm.qml:47: Assignment to unknown property `nonExistentField` on `textField` [Dashboard -> InputForm]
 test_project_ai/InputForm.qml:47: `textField.readOnly` expects `bool` but got `int` [Dashboard -> InputForm]
 test_project_ai/InputForm.qml:18: Unknown member `voltage` on C++ object `sensorManager` [Dashboard -> InputForm]
-test_project_ai/JSEdge.qml:24: Undefined name `value` used in function `summarize` [Dashboard -> JSEdge]
-test_project_ai/JSEdge.qml:24: Undefined name `label` used in function `summarize` [Dashboard -> JSEdge]
 test_project_ai/NestedScopeEdge.qml:63: Undefined name `phantomBox` used in function `badResize` [Dashboard -> NestedScopeEdge]
 test_project_ai/NestedScopeEdge.qml:67: Assignment to unknown property `notARealProp` on `panel` [Dashboard -> NestedScopeEdge]
 test_project_ai/NestedScopeEdge.qml:72: Signal handler `onPanelReady` has no corresponding signal or property [Dashboard -> NestedScopeEdge]
@@ -55,4 +53,7 @@ test_project_ai/StringBraceEdge.qml:46: Undefined name `undefinedParser` used in
 test_project_ai/TypedParamEdge.qml:51: Undefined name `undeclaredProcessor` used in function `process` [Dashboard -> TypedParamEdge]
 test_project_ai/TypedParamEdge.qml:56: Undefined name `shadowRegistry` used in function `register` [Dashboard -> TypedParamEdge]
 
-Found 56 errors, 0 files not checked
+Not checked (not reachable from any root):
+  test_project_ai/AliasedModuleEdge.qml
+
+Found 54 errors, 1 files not checked

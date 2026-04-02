@@ -969,3 +969,264 @@ Item {
         "NonExistentType must be flagged as UnknownType when known_types is non-empty, got: {errors:?}"
     );
 }
+
+// ─── Aliased module imports ────────────────────────────────────────────────────
+
+/// A type whose prefix matches a known import alias (e.g. `Kirigami.Icon` when
+/// `import org.kde.kirigami as Kirigami` is present) must NOT be reported as
+/// UnknownType — even in a non-empty project context.
+#[test]
+fn test_aliased_module_type_not_flagged_as_unknown() {
+    let source = r#"
+import QtQuick
+import org.kde.kirigami as Kirigami
+
+Item {
+    Kirigami.Icon {
+        source: "folder"
+    }
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeOtherType".to_string()); // non-empty context
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownType { .. })),
+        "Kirigami.Icon (aliased type) must not be reported as UnknownType, got: {errors:?}"
+    );
+}
+
+/// Multiple different aliases in the same file are all recognized.
+#[test]
+fn test_multiple_aliases_not_flagged() {
+    let source = r#"
+import QtQuick
+import org.kde.kirigami as Kirigami
+import org.kde.plasma.components as PlasmaComponents
+import QtQuick.Controls as QQC2
+
+Item {
+    Kirigami.FormLayout { }
+    PlasmaComponents.ToolButton { }
+    QQC2.Label { }
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeKnownType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownType { .. })),
+        "All aliased types must be accepted without UnknownType errors, got: {errors:?}"
+    );
+}
+
+/// A type whose prefix is NOT a known alias must still be reported.
+#[test]
+fn test_non_aliased_dotted_type_still_flagged() {
+    let source = r#"
+import QtQuick
+import org.kde.kirigami as Kirigami
+
+Item {
+    UnknownModule.SomeType { }
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeKnownType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownType { type_name } if type_name == "UnknownModule.SomeType")
+        ),
+        "UnknownModule.SomeType (non-aliased prefix) must still be reported as UnknownType, got: {errors:?}"
+    );
+}
+
+/// When an aliased type resolves to a known Qt type (e.g. `QQC2.Label` → `Label`),
+/// its properties are fully validated — unknown properties must be reported.
+#[test]
+fn test_aliased_qt_type_properties_validated() {
+    let source = r#"
+import QtQuick
+import QtQuick.Controls as QQC2
+
+Item {
+    QQC2.Label {
+        text: "hello"
+        notARealLabelProp: true
+    }
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeKnownType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    // QQC2.Label resolves to Label — valid property must NOT be flagged
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "text")
+        ),
+        "`text` is a valid Label property and must not be flagged, got: {errors:?}"
+    );
+    // Invalid property must still be reported
+    assert!(
+        has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "notARealLabelProp")
+        ),
+        "`notARealLabelProp` must be reported as unknown on QQC2.Label, got: {errors:?}"
+    );
+    // QQC2.Label itself must NOT be reported as UnknownType
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownType { .. })),
+        "QQC2.Label must not be reported as UnknownType, got: {errors:?}"
+    );
+}
+
+/// Shape and ShapePath from QtQuick.Shapes (non-aliased direct import) must be
+/// recognised as valid types — no UnknownType error.
+#[test]
+fn test_shape_and_shapepath_not_unknown() {
+    let source = r#"
+import QtQuick
+import QtQuick.Shapes
+
+Item {
+    Shape {
+        ShapePath {
+            strokeWidth: 2
+            strokeColor: "red"
+            fillColor: "transparent"
+        }
+    }
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeKnownType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownType { type_name } if type_name == "Shape")
+        ),
+        "Shape must not be flagged as UnknownType, got: {errors:?}"
+    );
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownType { type_name } if type_name == "ShapePath")
+        ),
+        "ShapePath must not be flagged as UnknownType, got: {errors:?}"
+    );
+}
+
+// ─── Aliased root element ──────────────────────────────────────────────────────
+
+/// When a file's root element uses an aliased module type (e.g.
+/// `PlasmaComponents.ToolButton {` with `import ... as PlasmaComponents`),
+/// the base type must be resolved to the Qt type — so its properties are
+/// recognised and NOT flagged as unknown.
+#[test]
+fn test_aliased_root_element_properties_recognised() {
+    // ToolButton → Button → AbstractButton → text, checkable, checked, onToggled
+    let source = r#"
+import QtQuick.Controls as QQC2
+
+QQC2.ToolButton {
+    text: "hello"
+    checkable: true
+    checked: false
+    onToggled: console.log("toggled")
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = CheckContext::empty();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "text")
+        ),
+        "`text` on aliased root ToolButton must not be flagged, got: {errors:?}"
+    );
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "checkable")
+        ),
+        "`checkable` on aliased root ToolButton must not be flagged, got: {errors:?}"
+    );
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownPropertyAssignment { name } if name == "checked")
+        ),
+        "`checked` on aliased root ToolButton must not be flagged, got: {errors:?}"
+    );
+    assert!(
+        !has_error(
+            &errors,
+            |e| matches!(e, ErrorKind::UnknownSignalHandler { handler } if handler == "onToggled")
+        ),
+        "`onToggled` on aliased root ToolButton must not be flagged, got: {errors:?}"
+    );
+}
+
+/// When a file's root element uses an aliased type whose bare name is NOT in
+/// the Qt DB (opaque external type like Kirigami.Page), the properties of
+/// that root element must not be reported as UnknownPropertyAssignment.
+/// (Opaque base type → qt_props is empty → all assignments are accepted.)
+#[test]
+fn test_opaque_aliased_root_element_not_flagged() {
+    let source = r#"
+import org.kde.kirigami as Kirigami
+
+Kirigami.Page {
+    title: "My page"
+    someKirigamiProp: true
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    // non-empty context
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeType".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownPropertyAssignment { .. })),
+        "opaque aliased root must not produce UnknownPropertyAssignment, got: {errors:?}"
+    );
+}

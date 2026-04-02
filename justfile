@@ -121,6 +121,10 @@ custom PATH VERSION="6.3.2":
     just build_with_qt
     target/debug/qml_static_analyzer check --path {{PATH}} --builtin-qt-version {{VERSION}} 2>&1 | tee snap_custom.txt
 
+customc PATH CONFIG VERSION="6.3.2":
+    just build_with_qt
+    target/debug/qml_static_analyzer check --path {{PATH}} --config {{CONFIG}} --builtin-qt-version {{VERSION}} --complex 2>&1 | tee snap_custom.txt
+
 syncgui:
     rm -rf gui
     cp -r ~/Projekty/ap-600/gui .

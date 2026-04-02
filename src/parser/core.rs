@@ -4,8 +4,8 @@
 use super::error::ParseError;
 use super::expression::{
     collect_arrow_params, collect_function_keyword_params, collect_names_from_expression, is_js_keyword,
-    try_parse_catch_param, try_parse_for_vars, try_parse_member_assignment, try_parse_method_shorthand_params,
-    try_parse_object_key, try_parse_var_decl,
+    try_parse_catch_param, try_parse_destructure_decl, try_parse_for_vars, try_parse_member_assignment,
+    try_parse_method_shorthand_params, try_parse_object_key, try_parse_var_decl,
 };
 use super::helpers::{
     extract_loader_source_types, is_signal_handler_block, parse_function_header, parse_property_decl,
@@ -854,6 +854,15 @@ impl<'src> Parser<'src> {
                 }
                 names
             };
+
+            // Destructuring declaration: `const { a, b } = expr` or `const [a, b] = expr`
+            if let Some((names, rhs)) = try_parse_destructure_decl(line) {
+                declared_locals.extend(names);
+                if !rhs.is_empty() {
+                    used_names.extend(annotate(collect_names_from_expression(&rhs)));
+                }
+                continue;
+            }
 
             // Variable declaration: `let`/`const`/`var name = expr`
             if let Some((name, rhs)) = try_parse_var_decl(line) {

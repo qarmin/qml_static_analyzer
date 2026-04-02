@@ -230,6 +230,40 @@ fn build_child_id_map(children: &[QmlChild]) -> HashMap<String, ChildInfo> {
 impl Checker<'_> {
     // ── rozwiązywanie łańcucha typów bazowych ────────────────────────────
 
+    /// Classify a type name that may contain a module alias prefix.
+    ///
+    /// Three outcomes (encoded as `Option<(&str, bool)>` where the `bool` means
+    /// "full validation allowed"):
+    ///
+    /// * `None`              – prefix is **not** a known import alias → fall through to
+    ///                         normal `UnknownType` check.
+    ///
+    /// * `Some((name, true))`  – Qt-module alias (`import QtQuick.Controls as QQC2`) AND
+    ///                           bare `name` is in the Qt DB → **full** validation.
+    ///
+    /// * `Some((name, false))` – non-Qt alias (e.g. `org.kde.*`) AND bare `name` is in
+    ///                           the Qt DB → use for scope/signal lookup but **skip**
+    ///                           `UnknownPropertyAssignment` (the external type may expose
+    ///                           additional properties not in the Qt type).
+    ///                           Also used when bare name is NOT in DB → `name` == original
+    ///                           dotted string → caller should `return` (opaque external type).
+    fn resolve_aliased_base<'a>(&self, type_name: &'a str, aliases: &HashMap<String, bool>) -> Option<(&'a str, bool)> {
+        if let Some(dot_pos) = type_name.find('.') {
+            let prefix = &type_name[..dot_pos];
+            if let Some(&is_qt) = aliases.get(prefix) {
+                let unqualified = &type_name[dot_pos + 1..];
+                if self.db.has_type(unqualified) || self.ctx.known_types.contains(unqualified) {
+                    // Resolved: full validation for Qt aliases, partial for non-Qt
+                    return Some((unqualified, is_qt));
+                } else {
+                    // Known alias but type not in DB → opaque external type
+                    return Some((type_name, false));
+                }
+            }
+        }
+        None // not an alias prefix
+    }
+
     /// Zwraca najbliższy typ Qt w łańcuchu typów bazowych.
     /// Np. TextButton → GenericButton → RoundButton (Qt type).
     /// Zapobiega nieskończonej pętli przez max 32 kroki.
@@ -323,14 +357,26 @@ impl Checker<'_> {
         // id dzieci
         self.collect_child_ids(&file.children, &mut scope);
         // property z bazy Qt (przez pełen łańcuch typów bazowych)
-        let resolved_base = self.resolve_qt_type(&file.base_type);
+        // Resolve aliased base type first:
+        //   `QQC2.ToolButton`      → Some(("ToolButton", true))  → full Qt props in scope
+        //   `Kirigami.Page`        → Some(("Page", false))       → Qt props for scope (partial)
+        //   `Kirigami.CustomThing` → Some(("Kirigami.CustomThing", false)) → opaque
+        //   `Rectangle`            → None                         → normal lookup
+        let import_aliases = extract_import_aliases(&file.imports);
+        let effective_base_name: &str = match self.resolve_aliased_base(&file.base_type, &import_aliases) {
+            // Opaque: alias prefix known but type not in DB → name unchanged → no Qt props
+            Some((name, _)) if name == file.base_type => &file.base_type,
+            Some((name, _)) => name,
+            None => &file.base_type,
+        };
+        let resolved_base = self.resolve_qt_type(effective_base_name);
         for (name, _) in self.db.all_properties(&resolved_base) {
             scope.insert(name);
         }
         // Properties/signals from user-defined QML base type chain
         // e.g. Global extends WindowBase → windowBusy from WindowBase is in scope
         {
-            let mut current = file.base_type.clone();
+            let mut current = effective_base_name.to_string();
             let mut seen = HashSet::new();
             while seen.insert(current.clone()) {
                 if let Some((props, sigs)) = self.ctx.file_members.get(&current) {
@@ -408,9 +454,28 @@ impl Checker<'_> {
     // ── sprawdzanie root ──────────────────────────────────────────────────
 
     fn check_root(&self, file: &FileItem, file_scope: &HashSet<String>, errors: &mut Vec<AnalysisError>) {
-        let effective_base = self.resolve_qt_type(&file.base_type);
+        // Resolve aliased base type.
+        // `resolve_aliased_base` returns:
+        //   None                           → not an alias, look up normally
+        //   Some(("ToolButton",  true))    → Qt alias + in DB → full validation
+        //   Some(("Page",        false))   → non-Qt alias + in DB → scope OK, skip assignment checks
+        //   Some(("Kirigami.X",  false))   → alias but NOT in DB  → opaque (name unchanged)
+        let import_aliases = extract_import_aliases(&file.imports);
+        let (effective_base_name, base_full_validation): (&str, bool) =
+            match self.resolve_aliased_base(&file.base_type, &import_aliases) {
+                // Opaque: alias prefix known but type not in DB → name unchanged
+                Some((name, _)) if name == file.base_type => (&file.base_type, false),
+                Some((name, full)) => (name, full),
+                None => (&file.base_type, true), // not an alias → normal validation
+            };
+        let effective_base = self.resolve_qt_type(effective_base_name);
         let qt_props = self.db.all_properties(&effective_base);
         let qt_signals = self.db.all_signals(&effective_base);
+
+        // Skip UnknownPropertyAssignment when:
+        //   - non-Qt aliased root (may expose more props than the Qt type), OR
+        //   - opaque aliased root (bare name not in DB, qt_props is empty).
+        let base_is_opaque = !base_full_validation;
 
         // Budujemy mapę property pliku (name → PropertyType) do sprawdzania referencji
         let file_prop_types: HashMap<String, &PropertyType> =
@@ -462,8 +527,10 @@ impl Checker<'_> {
         }
 
         // 3. Sprawdź root-level inline assignments (e.g. `width: expr`, `invalidProp: val`).
+        // Skip entirely for opaque aliased base types — we don't know their property set.
         let type_member_names = self.all_file_member_names(&file.name);
         for (name, value_expr, line) in &file.assignments {
+            if base_is_opaque { continue; }
             let prop_known = qt_props.contains_key(name.as_str())
                 || file.properties.iter().any(|p| p.name == *name)
                 || type_member_names.contains(name.as_str());
@@ -515,7 +582,7 @@ impl Checker<'_> {
 
         // 4. Sprawdź dzieci
         for child in &file.children {
-            self.check_child(child, file_scope, errors, &[], &child_id_map);
+            self.check_child(child, file_scope, errors, &[], &child_id_map, &import_aliases);
         }
     }
 
@@ -876,6 +943,7 @@ impl Checker<'_> {
         errors: &mut Vec<AnalysisError>,
         elem_path: &[String],
         file_id_map: &HashMap<String, ChildInfo>,
+        import_aliases: &HashMap<String, bool>,
     ) {
         let ctx = child.id.as_deref().unwrap_or(&child.type_name).to_string();
 
@@ -883,12 +951,39 @@ impl Checker<'_> {
         let mut my_elem_path = elem_path.to_vec();
         my_elem_path.push(ctx.clone());
 
+        // Resolve aliased module types, e.g. `QQC2.ApplicationWindow` (alias `QQC2`
+        // from `import QtQuick.Controls as QQC2`):
+        //   - Strip the alias prefix and look up the bare name in the Qt DB.
+        //   - If found → use it as the effective type for full validation.
+        //   - If NOT found (e.g. `Kirigami.Icon`) → opaque external type, skip silently.
+        // Resolve aliased module types:
+        //   `QQC2.Label`     (Qt alias, in DB)       → validate as `Label`   [full]
+        //   `PC3.Label`      (non-Qt alias, in DB)   → scope via `Label`     [partial, no unknown-prop]
+        //   `Kirigami.Icon`  (non-Qt alias, not DB)  → opaque, return silently
+        //   `Unknown.Type`   (prefix not an alias)   → fall through to UnknownType check
+        let (resolved_type_name, child_full_validation): (&str, bool) =
+            if let Some(dot_pos) = child.type_name.find('.') {
+                let prefix = &child.type_name[..dot_pos];
+                if import_aliases.contains_key(prefix) {
+                    match self.resolve_aliased_base(&child.type_name, import_aliases) {
+                        // name unchanged means type not in DB → opaque external type, skip silently
+                        Some((name, _)) if name == child.type_name => return,
+                        Some((name, full)) => (name, full),
+                        None => return, // shouldn't happen (prefix is a known alias)
+                    }
+                } else {
+                    (&child.type_name, true)
+                }
+            } else {
+                (&child.type_name, true)
+            };
+
         // Sprawdź czy typ jest znany — albo Qt, albo sparsowany plik QML.
         // Sprawdzamy tylko gdy known_types nie jest puste (tzn. mamy pełen kontekst projektu).
         // Puste known_types oznacza tryb izolowany (testy jednostkowe) — pomijamy sprawdzanie.
         if !self.ctx.known_types.is_empty()
-            && !self.db.has_type(&child.type_name)
-            && !self.ctx.known_types.contains(&child.type_name)
+            && !self.db.has_type(resolved_type_name)
+            && !self.ctx.known_types.contains(resolved_type_name)
         {
             errors.push(
                 AnalysisError::new(ErrorKind::UnknownType {
@@ -902,7 +997,7 @@ impl Checker<'_> {
         // Dla znanych typów QML (pliki .qml) używamy ich typu bazowego do wyszukiwania Qt props.
         // Np. Sub2 extends Switch → qt_props = Switch's properties (includes `checked`).
         // Musimy iść przez cały łańcuch typów bazowych aż do Qt type (TextButton → GenericButton → RoundButton).
-        let effective_type = self.resolve_qt_type(&child.type_name);
+        let effective_type = self.resolve_qt_type(resolved_type_name);
         let qt_props = self.db.all_properties(&effective_type);
         let qt_signals = self.db.all_signals(&effective_type);
 
@@ -918,7 +1013,7 @@ impl Checker<'_> {
             child_scope.insert(name.clone());
         }
         // Add properties/signals from QML base type chain (e.g. Sub4 → SwitchWrapper → switchWrapperColor).
-        for name in self.all_file_member_names(&child.type_name) {
+        for name in self.all_file_member_names(resolved_type_name) {
             child_scope.insert(name);
         }
 
@@ -958,17 +1053,21 @@ impl Checker<'_> {
 
         // Check inline property assignments (e.g. `non_existtttttttend: 2`) against known props,
         // and check names used in the value expression against scope.
-        let type_member_names = self.all_file_member_names(&child.type_name);
+        let type_member_names = self.all_file_member_names(resolved_type_name);
         for (name, value_expr, line) in &child.assignments {
-            let prop_known = qt_props.contains_key(name.as_str())
-                || child.properties.iter().any(|p| p.name == *name)
-                || type_member_names.contains(name.as_str());
-            if !prop_known {
-                errors.push(
-                    AnalysisError::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() })
-                        .with_line(*line)
-                        .with_context(&ctx),
-                );
+            // For partial (non-Qt alias) types, skip UnknownPropertyAssignment — the external
+            // type may expose additional properties beyond what the Qt base type declares.
+            if child_full_validation {
+                let prop_known = qt_props.contains_key(name.as_str())
+                    || child.properties.iter().any(|p| p.name == *name)
+                    || type_member_names.contains(name.as_str());
+                if !prop_known {
+                    errors.push(
+                        AnalysisError::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() })
+                            .with_line(*line)
+                            .with_context(&ctx),
+                    );
+                }
             }
             // Check names used in the value expression against scope.
             // Skip standalone object literals `{ … }` and inline type instantiations `TypeName { … }`.
@@ -1024,12 +1123,45 @@ impl Checker<'_> {
         }
 
         for grandchild in &child.children {
-            self.check_child(grandchild, &child_scope, errors, &my_elem_path, file_id_map);
+            self.check_child(grandchild, &child_scope, errors, &my_elem_path, file_id_map, import_aliases);
         }
     }
 }
 
 // ── pomocnicze ────────────────────────────────────────────────────────────
+
+/// Extract module aliases from a file's import list.
+///
+/// Returns a map `alias → is_qt_module` where `is_qt_module` is `true` when
+/// the imported module name starts with `Qt` (e.g. `QtQuick.Controls`).
+/// Non-Qt aliases (e.g. `org.kde.kirigami as Kirigami`) are also included
+/// with `is_qt_module = false` so the caller can treat their types as opaque
+/// without reporting `UnknownType`.
+fn extract_import_aliases(imports: &[String]) -> HashMap<String, bool> {
+    let mut aliases = HashMap::new();
+    for import_str in imports {
+        if let Some(as_pos) = import_str.find(" as ") {
+            let before_as = import_str[..as_pos].trim();
+            let alias = import_str[as_pos + 4..].trim();
+            if !alias.is_empty()
+                && alias.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_')
+                && alias.chars().all(|c| c.is_alphanumeric() || c == '_')
+            {
+                // Determine whether this is a Qt standard module.
+                // Module name is the word after "import " (before an optional version number).
+                let module_name = before_as
+                    .strip_prefix("import ")
+                    .unwrap_or(before_as)
+                    .split_whitespace()
+                    .next()
+                    .unwrap_or("");
+                let is_qt = module_name.starts_with("Qt");
+                aliases.insert(alias.to_string(), is_qt);
+            }
+        }
+    }
+    aliases
+}
 
 // `onWidthChanged` → `widthChanged` lub `width`
 fn handler_to_signal(handler: &str) -> String {
