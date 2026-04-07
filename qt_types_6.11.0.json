@@ -3389,12 +3389,17 @@
     }
   },
   "InputMethod": {
-    "enums": {},
+    "enums": {
+      "Action": [
+        "Click",
+        "ContextMenu"
+      ]
+    },
     "methods": {
       "commit": [],
       "hide": [],
       "invokeAction": [
-        "enumeration",
+        "var",
         "int"
       ],
       "reset": [],
@@ -6865,57 +6870,6 @@
       "wrapModeChanged": []
     }
   },
-  "Shape": {
-    "enums": {},
-    "methods": {},
-    "parent": "Item",
-    "properties": {
-      "asynchronous": "bool",
-      "containsMode": "int",
-      "data": "list",
-      "rendererType": "int",
-      "status": "int",
-      "vendorExtensionsEnabled": "bool"
-    },
-    "signals": {
-      "asynchronousChanged": [],
-      "containsModeChanged": [],
-      "rendererTypeChanged": [],
-      "statusChanged": [],
-      "vendorExtensionsEnabledChanged": []
-    }
-  },
-  "ShapePath": {
-    "enums": {},
-    "methods": {},
-    "parent": "Path",
-    "properties": {
-      "capStyle": "int",
-      "dashOffset": "real",
-      "dashPattern": "list",
-      "fillColor": "color",
-      "fillGradient": "var",
-      "fillRule": "int",
-      "joinStyle": "int",
-      "miterLimit": "real",
-      "strokeColor": "color",
-      "strokeStyle": "int",
-      "strokeWidth": "real"
-    },
-    "signals": {
-      "capStyleChanged": [],
-      "dashOffsetChanged": [],
-      "dashPatternChanged": [],
-      "fillColorChanged": [],
-      "fillGradientChanged": [],
-      "fillRuleChanged": [],
-      "joinStyleChanged": [],
-      "miterLimitChanged": [],
-      "strokeColorChanged": [],
-      "strokeStyleChanged": [],
-      "strokeWidthChanged": []
-    }
-  },
   "Shear": {
     "enums": {},
     "methods": {},
@@ -8519,171 +8473,138 @@
   "TextField": {
     "enums": {},
     "methods": {},
-    "parent": "Item",
+    "parent": "TextInput",
     "properties": {
-      "acceptableInput": "bool",
-      "activeFocusOnPress": "bool",
-      "autoScroll": "bool",
       "background": "Item",
       "bottomInset": "real",
-      "bottomPadding": "real",
-      "canPaste": "bool",
-      "canRedo": "bool",
-      "canUndo": "bool",
-      "color": "color",
-      "contentHeight": "real",
-      "contentWidth": "real",
-      "cursorDelegate": "Component",
-      "cursorPosition": "int",
-      "cursorRectangle": "rect",
-      "cursorVisible": "bool",
-      "displayText": "string",
-      "echoMode": "var",
-      "effectiveHorizontalAlignment": "var",
       "focusReason": "enumeration",
       "font": "font",
-      "horizontalAlignment": "var",
       "hoverEnabled": "bool",
       "hovered": "bool",
       "implicitBackgroundHeight": "real",
       "implicitBackgroundWidth": "real",
       "implicitHeight": "real",
       "implicitWidth": "real",
-      "inputMask": "string",
-      "inputMethodComposing": "bool",
-      "inputMethodHints": "enumeration",
       "leftInset": "real",
-      "leftPadding": "real",
-      "length": "int",
-      "maximumLength": "int",
-      "mouseSelectionMode": "var",
-      "overwriteMode": "bool",
-      "padding": "real",
-      "passwordCharacter": "string",
-      "passwordMaskDelay": "int",
-      "persistentSelection": "bool",
       "placeholderText": "string",
       "placeholderTextColor": "color",
-      "preeditText": "string",
-      "readOnly": "bool",
-      "renderType": "var",
       "rightInset": "real",
-      "rightPadding": "real",
-      "selectByMouse": "bool",
-      "selectedText": "string",
-      "selectedTextColor": "color",
-      "selectionColor": "color",
-      "selectionEnd": "int",
-      "selectionStart": "int",
-      "text": "string",
-      "topInset": "real",
-      "topPadding": "real",
-      "validator": "QValidator",
-      "verticalAlignment": "var",
-      "wrapMode": "var"
+      "topInset": "real"
     },
     "signals": {
-      "acceptableInputChanged": [],
-      "accepted": [],
-      "activeFocusOnPressChanged": [
-        "bool"
-      ],
-      "autoScrollChanged": [
-        "bool"
-      ],
       "backgroundChanged": [],
       "bottomInsetChanged": [],
-      "bottomPaddingChanged": [],
-      "canPasteChanged": [],
-      "canRedoChanged": [],
-      "canUndoChanged": [],
-      "colorChanged": [],
-      "contentSizeChanged": [],
-      "cursorDelegateChanged": [],
-      "cursorPositionChanged": [],
-      "cursorRectangleChanged": [],
-      "cursorVisibleChanged": [
-        "bool"
-      ],
-      "displayTextChanged": [],
-      "echoModeChanged": [
-        "enumeration"
-      ],
-      "editingFinished": [],
-      "effectiveHorizontalAlignmentChanged": [],
       "focusReasonChanged": [],
       "fontChanged": [],
-      "horizontalAlignmentChanged": [
-        "enumeration"
-      ],
       "hoverEnabledChanged": [],
       "hoveredChanged": [],
       "implicitBackgroundHeightChanged": [],
       "implicitBackgroundWidthChanged": [],
       "implicitHeightChanged3": [],
       "implicitWidthChanged3": [],
-      "inputMaskChanged": [
-        "string"
-      ],
-      "inputMethodComposingChanged": [],
-      "inputMethodHintsChanged": [],
       "leftInsetChanged": [],
-      "leftPaddingChanged": [],
-      "maximumLengthChanged": [
-        "int"
-      ],
-      "mouseSelectionModeChanged": [
-        "enumeration"
-      ],
-      "overwriteModeChanged": [
-        "bool"
-      ],
-      "paddingChanged": [],
-      "passwordCharacterChanged": [],
-      "passwordMaskDelayChanged": [
-        "int"
-      ],
-      "persistentSelectionChanged": [],
       "placeholderTextChanged": [],
       "placeholderTextColorChanged": [],
-      "preeditTextChanged": [],
       "pressAndHold": [
         "MouseEvent"
       ],
       "pressed": [
         "MouseEvent"
       ],
-      "readOnlyChanged": [
-        "bool"
-      ],
       "released": [
         "MouseEvent"
       ],
-      "renderTypeChanged": [],
       "rightInsetChanged": [],
-      "rightPaddingChanged": [],
-      "selectByMouseChanged": [
-        "bool"
-      ],
-      "selectedTextChanged": [],
-      "selectedTextColorChanged": [],
-      "selectionColorChanged": [],
-      "selectionEndChanged": [],
-      "selectionStartChanged": [],
-      "textChanged": [],
-      "textEdited": [],
-      "topInsetChanged": [],
-      "topPaddingChanged": [],
-      "validatorChanged": [],
-      "verticalAlignmentChanged": [
-        "enumeration"
-      ],
-      "wrapModeChanged": []
+      "topInsetChanged": []
     }
   },
   "TextInput": {
-    "enums": {},
-    "methods": {},
+    "enums": {
+      "CursorPosition": [
+        "CursorBetweenCharacters",
+        "CursorOnCharacter"
+      ],
+      "EchoMode": [
+        "Normal",
+        "NoEcho",
+        "Password",
+        "PasswordEchoOnEdit"
+      ],
+      "HAlignment": [
+        "AlignLeft",
+        "AlignRight",
+        "AlignHCenter"
+      ],
+      "RenderType": [
+        "QtRendering",
+        "NativeRendering",
+        "CurveRendering"
+      ],
+      "SelectionMode": [
+        "SelectCharacters",
+        "SelectWords"
+      ],
+      "VAlignment": [
+        "AlignTop",
+        "AlignBottom",
+        "AlignVCenter"
+      ],
+      "WrapMode": [
+        "NoWrap",
+        "WordWrap",
+        "WrapAnywhere",
+        "WrapAtWordBoundaryOrAnywhere",
+        "Wrap"
+      ]
+    },
+    "methods": {
+      "clear": [],
+      "copy": [],
+      "cut": [],
+      "deselect": [],
+      "ensureVisible": [
+        "int"
+      ],
+      "getText": [
+        "int",
+        "int"
+      ],
+      "inputMethodQuery": [
+        "enumeration",
+        "var"
+      ],
+      "insert": [
+        "int",
+        "string"
+      ],
+      "isRightToLeft": [
+        "int",
+        "int"
+      ],
+      "moveCursorSelection": [
+        "int",
+        "enumeration"
+      ],
+      "paste": [],
+      "positionAt": [
+        "real"
+      ],
+      "positionToRectangle": [
+        "int"
+      ],
+      "redo": [],
+      "remove": [
+        "int",
+        "int"
+      ],
+      "select": [
+        "int",
+        "int"
+      ],
+      "selectAll": [],
+      "selectWord": [],
+      "undo": []
+    },
     "parent": "Item",
     "properties": {
       "acceptableInput": "bool",
@@ -9520,7 +9441,7 @@
     "properties": {},
     "signals": {}
   },
-  "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually \u2014 re-run the generator instead.",
+  "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually — re-run the generator instead.",
   "_version": "6.11.0",
   "bool": {
     "enums": {},

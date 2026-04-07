@@ -68,6 +68,11 @@ gen-qt VER:
     cargo build
     target/debug/qml_static_analyzer generate-qt-types --qt-path $HOME/Qt/{{VER}}/gcc_64
 
+gen-qt-all:
+    just gen-qt 6.3.2
+    just gen-qt 6.8.3
+    just gen-qt 6.11.0
+
 ai VERSION="6.3.2":
     just build_with_qt
     target/debug/qml_static_analyzer check --path test_project_ai --config test_project_ai/config.toml --builtin-qt-version {{VERSION}} 2>&1 | tee snap_ai.txt

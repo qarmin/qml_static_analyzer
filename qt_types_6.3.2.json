@@ -6056,57 +6056,6 @@
       "wrapModeChanged": []
     }
   },
-  "Shape": {
-    "enums": {},
-    "methods": {},
-    "parent": "Item",
-    "properties": {
-      "asynchronous": "bool",
-      "containsMode": "int",
-      "data": "list",
-      "rendererType": "int",
-      "status": "int",
-      "vendorExtensionsEnabled": "bool"
-    },
-    "signals": {
-      "asynchronousChanged": [],
-      "containsModeChanged": [],
-      "rendererTypeChanged": [],
-      "statusChanged": [],
-      "vendorExtensionsEnabledChanged": []
-    }
-  },
-  "ShapePath": {
-    "enums": {},
-    "methods": {},
-    "parent": "Path",
-    "properties": {
-      "capStyle": "int",
-      "dashOffset": "real",
-      "dashPattern": "list",
-      "fillColor": "color",
-      "fillGradient": "var",
-      "fillRule": "int",
-      "joinStyle": "int",
-      "miterLimit": "real",
-      "strokeColor": "color",
-      "strokeStyle": "int",
-      "strokeWidth": "real"
-    },
-    "signals": {
-      "capStyleChanged": [],
-      "dashOffsetChanged": [],
-      "dashPatternChanged": [],
-      "fillColorChanged": [],
-      "fillGradientChanged": [],
-      "fillRuleChanged": [],
-      "joinStyleChanged": [],
-      "miterLimitChanged": [],
-      "strokeColorChanged": [],
-      "strokeStyleChanged": [],
-      "strokeWidthChanged": []
-    }
-  },
   "Shortcut": {
     "enums": {},
     "methods": {},
@@ -8213,7 +8162,7 @@
     "properties": {},
     "signals": {}
   },
-  "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually \u2014 re-run the generator instead.",
+  "_comment": "Auto-generated from Qt metatype JSON files. Do not edit manually — re-run the generator instead.",
   "_version": "6.3.2",
   "color": {
     "enums": {},
