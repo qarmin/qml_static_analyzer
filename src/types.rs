@@ -158,6 +158,9 @@ pub struct QmlChild {
     pub type_name: String,
     /// Optional `id:` value
     pub id: Option<String>,
+    /// Signal declarations inside this child, e.g. `signal stopPressed()`
+    #[serde(default)]
+    pub signals: Vec<Signal>,
     /// Extra properties declared inside this child
     pub properties: Vec<Property>,
     /// Functions / signal handlers declared inside this child
@@ -168,15 +171,26 @@ pub struct QmlChild {
     /// Tuple: (key, value_expr, line). Not serialized.
     #[serde(skip)]
     pub assignments: Vec<(String, String, usize)>,
+    /// Synthetic functions representing the bodies of JS-block property values,
+    /// e.g. `text: { if (foo) return "a"; return "b" }`.
+    /// These are validated against scope but are not part of the element's declared API.
+    #[serde(skip, default)]
+    pub property_js_block_funcs: Vec<Function>,
     /// Source line number (1-based). Not serialized — used for error reporting only.
     #[serde(skip)]
     pub line: usize,
+    /// True when this child was created as a synthetic proxy for Loader content
+    /// (via `source: "qrc:/Foo.qml"` in a Loader block). In this case the child
+    /// represents the loaded content, but the element itself is still a `Loader`.
+    #[serde(skip, default)]
+    pub is_loader_content: bool,
 }
 
 impl PartialEq for QmlChild {
     fn eq(&self, other: &Self) -> bool {
         self.type_name == other.type_name
             && self.id == other.id
+            && self.signals == other.signals
             && self.properties == other.properties
             && self.functions == other.functions
             && self.children == other.children
@@ -208,6 +222,10 @@ pub struct FileItem {
     /// Not serialized — used only during semantic checking.
     #[serde(skip)]
     pub assignments: Vec<(String, String, usize)>,
+    /// Synthetic functions representing the bodies of JS-block property values at the root level,
+    /// e.g. `text: { if (foo) return "a"; return "b" }`.
+    #[serde(skip, default)]
+    pub property_js_block_funcs: Vec<Function>,
 }
 
 /// An explicit `signal` declaration, e.g. `signal clicked()` or

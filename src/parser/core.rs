@@ -5,7 +5,7 @@ use super::error::ParseError;
 use super::expression::{
     collect_arrow_params, collect_function_keyword_params, collect_names_from_expression, is_js_keyword,
     try_parse_catch_param, try_parse_destructure_decl, try_parse_for_vars, try_parse_member_assignment,
-    try_parse_method_shorthand_params, try_parse_object_key, try_parse_var_decl,
+    try_parse_method_shorthand_params, try_parse_nested_function_decl_name, try_parse_object_key, try_parse_var_decl,
 };
 use super::helpers::{
     extract_loader_source_types, is_signal_handler_block, parse_function_header, parse_property_decl,
@@ -90,6 +90,7 @@ impl<'src> Parser<'src> {
             functions: body.functions,
             children: body.children,
             assignments: body.assignments,
+            property_js_block_funcs: body.property_js_block_funcs,
         })
     }
 
@@ -191,11 +192,14 @@ impl<'src> Parser<'src> {
                 body.children.push(QmlChild {
                     type_name,
                     id: None,
+                    signals: vec![],
                     properties: vec![],
                     functions: vec![],
                     children: vec![],
                     assignments: vec![],
+                    property_js_block_funcs: vec![],
                     line: lineno,
+                    is_loader_content: false,
                 });
                 continue;
             }
@@ -204,22 +208,10 @@ impl<'src> Parser<'src> {
             if let Some(type_name) = parse_type_open(line) {
                 self.advance();
 
-                // Connections { … } — skip body but extract the `id` if present,
-                // so that code referencing the id (e.g. `czoker.x`) doesn't get
-                // flagged as undefined.
+                // Connections { … } — parse body to extract id, target, and handler functions.
                 if type_name == "Connections" {
-                    let connections_id = self.parse_connections_for_id()?;
-                    if let Some(id) = connections_id {
-                        body.children.push(QmlChild {
-                            type_name: "Connections".to_string(),
-                            id: Some(id),
-                            properties: vec![],
-                            functions: vec![],
-                            children: vec![],
-                            assignments: vec![],
-                            line: lineno,
-                        });
-                    }
+                    let conn_child = self.parse_connections_body(lineno)?;
+                    body.children.push(conn_child);
                     continue;
                 }
 
@@ -234,11 +226,14 @@ impl<'src> Parser<'src> {
                 body.children.push(QmlChild {
                     type_name,
                     id: child_body.id,
+                    signals: child_body.signals,
                     properties: child_body.properties,
                     functions: child_body.functions,
                     children: child_body.children,
                     assignments: child_body.assignments,
+                    property_js_block_funcs: child_body.property_js_block_funcs,
                     line: lineno,
+                    is_loader_content: false,
                 });
                 continue;
             }
@@ -251,11 +246,14 @@ impl<'src> Parser<'src> {
                 body.children.push(QmlChild {
                     type_name,
                     id: child_body.id,
+                    signals: child_body.signals,
                     properties: child_body.properties,
                     functions: child_body.functions,
                     children: child_body.children,
                     assignments: child_body.assignments,
+                    property_js_block_funcs: child_body.property_js_block_funcs,
                     line: lineno,
+                    is_loader_content: false,
                 });
                 continue;
             }
@@ -268,8 +266,8 @@ impl<'src> Parser<'src> {
                 continue;
             }
 
-            // ── property: { — JavaScript expression/object block, skip ──────
-            // e.g. `sourceComponent: { ternary ? a : b }`
+            // ── property: { — JavaScript expression/object block ────────────
+            // e.g. `text: { if (foo) return "a"; return "b" }`
             // Special case: `model: [{` — the value starts with `[` so the `{` is
             // inside an array literal; use skip_bracket_block() to track the outer `[`
             // and avoid exiting prematurely at `}, {` separators.
@@ -279,7 +277,18 @@ impl<'src> Parser<'src> {
                 if val_starts_with_bracket {
                     self.skip_bracket_block()?;
                 } else {
-                    self.skip_block()?;
+                    // Extract names from the JS block body for scope validation.
+                    let prop_key = line[..line.find(':').unwrap()].trim().to_string();
+                    let fdata = self.collect_function_body_names()?;
+                    body.property_js_block_funcs.push(Function {
+                        name: prop_key,
+                        is_signal_handler: false,
+                        parameters: vec![],
+                        used_names: fdata.used_names,
+                        declared_locals: fdata.declared_locals,
+                        member_assignments: fdata.member_assignments,
+                        line: lineno,
+                    });
                 }
                 continue;
             }
@@ -308,7 +317,7 @@ impl<'src> Parser<'src> {
                     if !value.is_empty()
                         && !key.is_empty()
                         && !key.contains(' ')
-                        && key.chars().next().is_some_and(|c| c.is_ascii_lowercase())
+                        && key.chars().next().is_some_and(|c| c.is_ascii_alphabetic())
                         && key
                             .chars()
                             .all(|c| c.is_alphanumeric() || c == '_' || c == '$' || c == '.')
@@ -623,26 +632,95 @@ impl<'src> Parser<'src> {
         }
     }
 
-    /// Consume a `Connections { … }` block, returning the `id` value if found.
-    /// Everything else inside (target, functions, …) is discarded.
-    fn parse_connections_for_id(&mut self) -> Result<Option<String>, ParseError> {
-        let mut found_id = None;
-        let mut depth = 1usize;
+    /// Parse a `Connections { … }` block, extracting id, target, and handler functions.
+    fn parse_connections_body(&mut self, lineno: usize) -> Result<QmlChild, ParseError> {
+        let mut id: Option<String> = None;
+        let mut target_assignment: Option<(String, usize)> = None;
+        let mut functions: Vec<Function> = Vec::new();
+        let mut properties: Vec<Property> = Vec::new();
+
         loop {
-            let Some((_, raw_line)) = self.advance() else {
+            let Some((ln, raw_line)) = self.peek() else {
                 return Err(self.err("Unexpected end of input inside Connections block"));
             };
             let line = strip_comment(raw_line).trim();
-            depth = (depth as i32 + net_brace_depth(line)) as usize;
-            if depth == 0 {
-                return Ok(found_id);
+
+            if line == "}" || line == "}," || line == "};" {
+                self.advance();
+                break;
             }
-            if depth > 0
-                && let Some(id) = try_parse_id(line)
+
+            // id: xxx
+            if let Some(id_val) = try_parse_id(line) {
+                id = Some(id_val);
+                self.advance();
+                continue;
+            }
+
+            // target: <identifier>  (simple name only; complex expressions are skipped)
+            if let Some(rest) = line.strip_prefix("target:") {
+                let val = rest.trim().trim_end_matches(';');
+                if !val.is_empty() && val.chars().all(|c| c.is_alphanumeric() || c == '_') {
+                    target_assignment = Some((val.to_string(), ln));
+                }
+                self.advance();
+                continue;
+            }
+
+            // property declarations (e.g. `property var messageReceived: () => {}`)
+            // Collect them so their names are available in handler function scope.
+            if line.starts_with("property ")
+                || line.starts_with("readonly property ")
+                || line.starts_with("required property ")
             {
-                found_id = Some(id);
+                if let Some(prop) = parse_property_decl(line) {
+                    properties.push(prop);
+                }
+                self.advance();
+                if line.ends_with('{') {
+                    self.skip_block()?;
+                }
+                continue;
             }
+
+            // function onXxx(params) { … }
+            if line.starts_with("function ") || line.starts_with("async function ") {
+                self.advance();
+                let stripped = if line.starts_with("async ") { &line["async ".len()..] } else { line };
+                let func = self.parse_function(stripped, ln)?;
+                functions.push(func);
+                continue;
+            }
+
+            // onXxx: { … }  or  onXxx: expr  inline signal handler
+            if is_signal_handler_block(line) {
+                self.advance();
+                let func = self.parse_inline_handler(line, ln)?;
+                functions.push(func);
+                continue;
+            }
+
+            // Everything else (enabled: true, ignoreUnknownSignals: true, …) — skip
+            self.advance();
         }
+
+        let mut assignments = Vec::new();
+        if let Some((target_name, target_ln)) = target_assignment {
+            assignments.push(("target".to_string(), target_name, target_ln));
+        }
+
+        Ok(QmlChild {
+            type_name: "Connections".to_string(),
+            id,
+            signals: vec![],
+            properties,
+            functions,
+            children: vec![],
+            assignments,
+            property_js_block_funcs: vec![],
+            line: lineno,
+            is_loader_content: false,
+        })
     }
 
     /// Skip an entire `{ … }` block (e.g. Connections), discarding its contents.
@@ -719,11 +797,14 @@ impl<'src> Parser<'src> {
                 children.push(QmlChild {
                     type_name,
                     id: None,
+                    signals: vec![],
                     properties: vec![],
                     functions: vec![],
                     children: vec![],
                     assignments: vec![],
+                    property_js_block_funcs: vec![],
                     line: lineno,
+                    is_loader_content: false,
                 });
                 continue;
             }
@@ -732,18 +813,8 @@ impl<'src> Parser<'src> {
             if let Some(type_name) = parse_type_open(line) {
                 self.advance();
                 if type_name == "Connections" {
-                    let connections_id = self.parse_connections_for_id()?;
-                    if let Some(id) = connections_id {
-                        children.push(QmlChild {
-                            type_name: "Connections".to_string(),
-                            id: Some(id),
-                            properties: vec![],
-                            functions: vec![],
-                            children: vec![],
-                            assignments: vec![],
-                            line: lineno,
-                        });
-                    }
+                    let conn_child = self.parse_connections_body(lineno)?;
+                    children.push(conn_child);
                     continue;
                 }
                 if type_name == "Loader" {
@@ -755,11 +826,14 @@ impl<'src> Parser<'src> {
                 children.push(QmlChild {
                     type_name,
                     id: child_body.id,
+                    signals: child_body.signals,
                     properties: child_body.properties,
                     functions: child_body.functions,
                     children: child_body.children,
                     assignments: child_body.assignments,
+                    property_js_block_funcs: child_body.property_js_block_funcs,
                     line: lineno,
+                    is_loader_content: false,
                 });
                 continue;
             }
@@ -787,11 +861,14 @@ impl<'src> Parser<'src> {
                 children.push(QmlChild {
                     type_name,
                     id: loader_id.clone(),
+                    signals: vec![],
                     properties: vec![],
                     functions: vec![],
                     children: vec![],
                     assignments: vec![],
+                    property_js_block_funcs: vec![],
                     line: lineno,
+                    is_loader_content: true,
                 });
             }
         } else if let Some(id) = loader_id {
@@ -800,11 +877,14 @@ impl<'src> Parser<'src> {
             children.push(QmlChild {
                 type_name: "Loader".to_string(),
                 id: Some(id),
+                signals: vec![],
                 properties: vec![],
                 functions: vec![],
                 children: vec![],
                 assignments: vec![],
+                property_js_block_funcs: vec![],
                 line: 0,
+                is_loader_content: false,
             });
         }
 
@@ -868,6 +948,12 @@ impl<'src> Parser<'src> {
 
             // `function(params)` callback params: `.then(function (points) {`
             declared_locals.extend(collect_function_keyword_params(line));
+
+            // Nested named function declaration: `function name(...) {`
+            // The declared name is a local of the outer function.
+            if let Some(nested_name) = try_parse_nested_function_decl_name(line) {
+                declared_locals.push(nested_name);
+            }
 
             // Catch clause parameter: `catch (e)` or `} catch(_) {`
             if let Some(catch_var) = try_parse_catch_param(line) {
@@ -993,4 +1079,5 @@ pub(super) struct ElementBody {
     pub functions: Vec<Function>,
     pub children: Vec<QmlChild>,
     pub assignments: Vec<(String, String, usize)>,
+    pub property_js_block_funcs: Vec<Function>,
 }

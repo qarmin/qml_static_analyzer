@@ -158,10 +158,15 @@ pub fn collect_names_from_expression(expr: &str) -> Vec<FunctionUsedName> {
         if !is_identifier(tok) {
             prev_tok = tok.as_str();
             i += 1;
-            // After a closing paren/bracket, skip any chain tail (.member, ?.member, etc.)
-            // so that `(expr).length` does not emit `length` as a standalone name.
+            // After a closing paren/bracket, process any chained call arguments
+            // (e.g. `.arg(undeclared)` after `qsTr("...")`) instead of silently
+            // discarding them with skip_chain_tokens.
             if tok == ")" || tok == "]" {
-                i = skip_chain_tokens(&tokens, i);
+                let mut chain_names: Vec<(String, Option<String>)> = Vec::new();
+                i = skip_chain_collect_args(&tokens, i, &mut chain_names);
+                for (name, accessed) in chain_names {
+                    result.push(FunctionUsedName { name, accessed_item: accessed, line: 0 });
+                }
             }
             continue;
         }
@@ -186,8 +191,17 @@ pub fn collect_names_from_expression(expr: &str) -> Vec<FunctionUsedName> {
             i += 2; // skip key + ":"
             continue;
         }
-        // Skip function-call identifiers: name(
+        // Standalone function call: collect the name (unless it follows a "." which means
+        // it's a method call on a preceding expression — e.g. `console.log(...)` where
+        // `console` was skipped as a keyword, leaving `.log(...)` as apparent standalone call).
         if i + 1 < tokens.len() && tokens[i + 1] == "(" {
+            if prev_tok != "." {
+                result.push(FunctionUsedName {
+                    name: tok.clone(),
+                    accessed_item: None,
+                    line: 0,
+                });
+            }
             prev_tok = "id";
             i += 2;
             continue;
@@ -324,8 +338,9 @@ fn skip_chain_collect_args(tokens: &[String], mut i: usize, result: &mut Vec<(St
                 }
             }
         } else if i < tokens.len() && tokens[i] == "[" {
+            i += 1; // skip "["
+            let idx_start = i;
             let mut depth = 1usize;
-            i += 1;
             while i < tokens.len() && depth > 0 {
                 if tokens[i] == "[" {
                     depth += 1;
@@ -333,6 +348,14 @@ fn skip_chain_collect_args(tokens: &[String], mut i: usize, result: &mut Vec<(St
                     depth -= 1;
                 }
                 i += 1;
+            }
+            // Process index content for name references (e.g. `arr[obj.field]` → validate field).
+            if i > idx_start + 1 {
+                let idx_tokens = &tokens[idx_start..i - 1];
+                let idx_expr: String = idx_tokens.join(" ").replace("= >", "=>");
+                for n in collect_names_from_expression(&idx_expr) {
+                    result.push((n.name, n.accessed_item));
+                }
             }
         } else {
             break;
@@ -427,7 +450,7 @@ pub fn collect_dotted_accesses_from_expression(expr: &str) -> Vec<(String, Optio
         if !is_identifier(tok) {
             let s = tok.as_str();
             match s {
-                "{" | "," => prev_tok = s,
+                "{" | "," | "." => prev_tok = s,
                 _ => {}
             }
             i += 1;
@@ -471,8 +494,13 @@ pub fn collect_dotted_accesses_from_expression(expr: &str) -> Vec<(String, Optio
             i = skip_chain_collect_args(&tokens, i, &mut result);
             continue;
         }
-        // Standalone function call — skip (don't collect name, don't process args).
+        // Standalone function call — collect the name (unless it follows a "." which means
+        // it's a method call on a preceding expression — e.g. `console.log(...)` where
+        // `console` was skipped as a keyword, leaving `.log(...)` as apparent standalone call).
         if i + 1 < tokens.len() && tokens[i + 1] == "(" {
+            if prev_tok != "." {
+                result.push((tok.clone(), None));
+            }
             prev_tok = "id";
             i += 2;
             i = skip_to_matching_close_paren(&tokens, i);
@@ -729,6 +757,38 @@ pub fn try_parse_catch_param(line: &str) -> Option<String> {
         return None;
     }
     if !is_identifier(name) {
+        return None;
+    }
+    Some(name.to_string())
+}
+
+/// If the line is a nested named-function declaration, e.g.
+///   `function fieldsValid() {`  or  `function inner(a, b) {`
+/// returns the declared function name so the caller can add it to `declared_locals`.
+///
+/// Only matches top-level `function` keyword (not inside an expression like
+/// `.filter(function helper(x)`), and only when the name is a plain identifier.
+pub fn try_parse_nested_function_decl_name(line: &str) -> Option<String> {
+    let rest = line.trim_start();
+    // Must begin with "function " keyword (not part of a larger identifier).
+    let after_kw = rest.strip_prefix("function")?;
+    // Next char must be whitespace (named declaration), not `(` (anonymous) or `.`.
+    let after_kw = after_kw.strip_prefix(|c: char| c.is_whitespace())?;
+    let after_kw = after_kw.trim_start();
+    // Collect the function name identifier.
+    let name_end = after_kw
+        .find(|c: char| !c.is_alphanumeric() && c != '_' && c != '$')
+        .unwrap_or(after_kw.len());
+    if name_end == 0 {
+        return None;
+    }
+    let name = &after_kw[..name_end];
+    if name.is_empty() || is_js_keyword(name) {
+        return None;
+    }
+    // Confirm it is followed by `(` (optionally with whitespace).
+    let after_name = after_kw[name_end..].trim_start();
+    if !after_name.starts_with('(') {
         return None;
     }
     Some(name.to_string())

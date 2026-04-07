@@ -2,10 +2,14 @@ import QtQuick
 import QtQuick.Controls
 
 ApplicationWindow {
-    id: root
+    id: mainDashboard
     width: 800
     height: 600
     title: "Dashboard"
+
+    property bool processingInBackground: false
+
+    signal settingsRequested()
 
     ChildPanel {
         id: childPanel
@@ -49,6 +53,18 @@ ApplicationWindow {
         id: connectionsEdge
     }
 
+    ChainEdge {
+        id: chainEdge
+    }
+
+    ConnectionsAdvancedEdge {
+        id: connectionsAdvancedEdge
+    }
+
+    QmlChildMemberEdge {
+        id: qmlChildMemberEdge
+    }
+
     StatesEdge {
         id: statesEdge
     }
@@ -62,6 +78,26 @@ ApplicationWindow {
 
     AttachedEdge {
         id: attachedEdge
+    }
+
+    ParentIdAccessEdge {
+        id: parentIdAccessEdge
+    }
+
+    LoaderMethodEdge {
+        id: loaderMethodEdge
+    }
+
+    UnknownFunctionEdge {
+        id: unknownFunctionEdge
+    }
+
+    AttachedPropValueEdge {
+        id: attachedPropValueEdge
+    }
+
+    QmlMemberInExprEdge {
+        id: qmlMemberInExprEdge
     }
 
     JSEdge {
@@ -107,5 +143,45 @@ ApplicationWindow {
     // OK: onClosing is a valid signal handler for ApplicationWindow
     onClosing: {
         console.log("Window closing")
+    }
+
+    // ── previously unlinked edge cases ────────────────────────────────────────
+
+    ConnectionsQmlSignalEdge {
+        id: connectionsQmlSignalEdge
+    }
+
+    FunctionParamEdge {
+        id: functionParamEdge
+    }
+
+    LoaderItemEdge {
+        id: loaderItemEdge
+    }
+
+    NestedFunctionEdge {
+        id: nestedFunctionEdge
+    }
+
+    SiblingFunctionEdge {
+        id: siblingFunctionEdge
+    }
+
+    // ── new fix regression tests ───────────────────────────────────────────────
+
+    ParentSignalEdge {
+        id: parentSignalEdge
+    }
+
+    ParentPropChangedEdge {
+        id: parentPropChangedEdge
+    }
+
+    ParentQtMethodEdge {
+        id: parentQtMethodEdge
+    }
+
+    PropVarShadowEdge {
+        id: propVarShadowEdge
     }
 }

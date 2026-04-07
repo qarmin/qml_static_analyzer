@@ -50,6 +50,12 @@ impl QtTypeDb {
         result
     }
 
+    pub fn all_methods(&self, type_name: &str) -> HashMap<String, Vec<String>> {
+        let mut result = HashMap::new();
+        self.collect_methods(type_name, &mut result);
+        result
+    }
+
     fn collect_properties(&self, type_name: &str, out: &mut HashMap<String, String>) {
         let Some(qt_type) = self.types.get(type_name) else {
             return;
@@ -70,6 +76,18 @@ impl QtTypeDb {
             self.collect_signals(parent, out);
         }
         for (k, v) in &qt_type.signals {
+            out.insert(k.clone(), v.clone());
+        }
+    }
+
+    fn collect_methods(&self, type_name: &str, out: &mut HashMap<String, Vec<String>>) {
+        let Some(qt_type) = self.types.get(type_name) else {
+            return;
+        };
+        if let Some(parent) = &qt_type.parent {
+            self.collect_methods(parent, out);
+        }
+        for (k, v) in &qt_type.methods {
             out.insert(k.clone(), v.clone());
         }
     }

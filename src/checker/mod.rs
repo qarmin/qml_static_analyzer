@@ -1,156 +1,19 @@
+mod errors;
+mod helpers;
+
+pub use errors::{AnalysisError, ErrorKind};
+
 use std::collections::{HashMap, HashSet};
 
 use crate::parser::collect_dotted_accesses_from_expression;
 use crate::qt_types::QtTypeDb;
 use crate::types::{FileItem, Function, Property, PropertyType, PropertyValue, QmlChild};
-
-// ── typy błędów ───────────────────────────────────────────────────────────
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ErrorKind {
-    /// `property int height` w Rectangle – height już istnieje w bazie Qt
-    PropertyRedefinition { name: String, base_type: String },
-    /// `property int foo: false` – zadeklarowany typ != typ przypisywanej wartości
-    PropertyTypeMismatch {
-        name: String,
-        declared: String,
-        assigned: String,
-    },
-    /// `property bool b: otherIntProp` – zadeklarowany typ != typ wskazanej property
-    PropertyRefTypeMismatch {
-        name: String,
-        declared: String,
-        ref_name: String,
-        ref_type: String,
-    },
-    /// `Layout.notExist: true` – property nie istnieje w typie
-    UnknownPropertyAssignment { name: String },
-    /// `Layout.fillWidth: 21` – typ wartości nie zgadza się z oczekiwanym
-    AssignmentTypeMismatch {
-        name: String,
-        expected: String,
-        assigned: String,
-    },
-    /// `zzzz = x + y` wewnątrz funkcji – nazwa niezdefiniowana nigdzie w zasięgu
-    UndefinedName { name: String, function: String },
-    /// `function onStatussChanged()` – sygnał o tej nazwie nie istnieje
-    UnknownSignalHandler { handler: String },
-    /// `element.nonExisting = true` – property nie istnieje na elemencie
-    UnknownMemberAccess { object: String, member: String },
-    /// `element.boolProp = 0` – typ przypisanej wartości niezgodny z typem property
-    MemberAssignmentTypeMismatch {
-        object: String,
-        member: String,
-        expected: String,
-        assigned: String,
-    },
-    /// `property bool foo: undeclared.bar` – nazwa w wyrażeniu property nie jest w zasięgu
-    UndefinedPropertyAccess { prop: String, name: String },
-    /// `Sub3 { }` – typ nie jest zdefiniowany nigdzie w projekcie ani w Qt
-    UnknownType { type_name: String },
-    /// `diskManager.nonExisting` — member not found in C++ object
-    UnknownCppMember { object: String, member: String },
-}
-
-#[derive(Debug, Clone)]
-pub struct AnalysisError {
-    pub kind: ErrorKind,
-    /// Opcjonalny kontekst (np. nazwa elementu dziecka)
-    pub context: Option<String>,
-    /// Source line number (1-based), if known.
-    pub line: Option<usize>,
-    /// Full element path within the file (populated in --complex mode).
-    /// E.g. ["Row", "cancelButton"] means the error is inside the cancelButton
-    /// child of a Row which is a direct child of the file root.
-    pub element_path: Vec<String>,
-}
-
-impl AnalysisError {
-    fn new(kind: ErrorKind) -> Self {
-        Self {
-            kind,
-            context: None,
-            line: None,
-            element_path: Vec::new(),
-        }
-    }
-    fn with_context(mut self, ctx: impl Into<String>) -> Self {
-        self.context = Some(ctx.into());
-        self
-    }
-    fn with_line(mut self, line: usize) -> Self {
-        if line > 0 {
-            self.line = Some(line);
-        }
-        self
-    }
-}
-
-impl std::fmt::Display for AnalysisError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let prefix = match &self.context {
-            Some(c) => format!("[{c}] "),
-            None => String::new(),
-        };
-        match &self.kind {
-            ErrorKind::PropertyRedefinition { name, base_type } => write!(
-                f,
-                "{prefix}Property `{name}` redefines existing property from `{base_type}`"
-            ),
-            ErrorKind::PropertyTypeMismatch {
-                name,
-                declared,
-                assigned,
-            } => write!(
-                f,
-                "{prefix}Property `{name}` declared as `{declared}` but assigned `{assigned}` literal"
-            ),
-            ErrorKind::PropertyRefTypeMismatch {
-                name,
-                declared,
-                ref_name,
-                ref_type,
-            } => write!(
-                f,
-                "{prefix}Property `{name}` declared as `{declared}` but assigned property `{ref_name}` of type `{ref_type}`"
-            ),
-            ErrorKind::UnknownPropertyAssignment { name } => {
-                write!(f, "{prefix}Assignment to unknown property `{name}`")
-            }
-            ErrorKind::AssignmentTypeMismatch {
-                name,
-                expected,
-                assigned,
-            } => write!(f, "{prefix}Property `{name}` expects `{expected}` but got `{assigned}`"),
-            ErrorKind::UndefinedName { name, function } => {
-                write!(f, "{prefix}Undefined name `{name}` used in function `{function}`")
-            }
-            ErrorKind::UnknownSignalHandler { handler } => write!(
-                f,
-                "{prefix}Signal handler `{handler}` has no corresponding signal or property"
-            ),
-            ErrorKind::UnknownMemberAccess { object, member } => {
-                write!(f, "{prefix}Assignment to unknown property `{member}` on `{object}`")
-            }
-            ErrorKind::MemberAssignmentTypeMismatch {
-                object,
-                member,
-                expected,
-                assigned,
-            } => write!(
-                f,
-                "{prefix}`{object}.{member}` expects `{expected}` but got `{assigned}`"
-            ),
-            ErrorKind::UndefinedPropertyAccess { prop, name } => {
-                write!(f, "{prefix}Undefined name `{name}` used in property `{prop}`")
-            }
-            ErrorKind::UnknownType { type_name } => write!(f, "{prefix}Unknown type `{type_name}`"),
-            ErrorKind::UnknownCppMember { object, member } => {
-                write!(f, "{prefix}Unknown member `{member}` on C++ object `{object}`")
-            }
-        }
-    }
-}
+use errors::AnalysisError as AE;
+use helpers::{
+    extract_import_aliases, handler_to_signal, is_inline_type_instantiation, is_js_global,
+    prop_type_name, strip_changed_suffix, type_name_to_id, types_compatible, JS_GLOBALS,
+    QML_DELEGATE_GLOBALS, QML_STYLE_GLOBALS,
+};
 
 // ── publiczne API ─────────────────────────────────────────────────────────
 
@@ -175,6 +38,10 @@ pub struct CheckContext {
     /// Dla każdego typu QML: nazwy property i sygnałów dostępnych z zasięgu rodzica (parent scope).
     /// Zapobiega fałszywym błędom dla referencji do property zdefiniowanych w pliku nadrzędnym.
     pub parent_scopes: std::collections::HashMap<String, std::collections::HashSet<String>>,
+    /// Global id → type info map: element ids (and their types) visible across files.
+    /// Allows validating `mainWindow.propName` accesses even in child files that don't own mainWindow.
+    /// Maps id → (type_name, declared_properties, function_names, is_loader_content).
+    pub parent_id_types: std::collections::HashMap<String, (String, Vec<crate::types::Property>, Vec<String>, bool)>,
     /// When true, errors carry a full within-file element path (for --complex output mode).
     pub complex: bool,
 }
@@ -204,9 +71,15 @@ struct Checker<'a> {
 }
 
 /// Info o dziecku potrzebne do sprawdzania member access w funkcjach.
+#[derive(Clone)]
 struct ChildInfo {
     type_name: String,
     properties: Vec<Property>,
+    /// Names of functions declared inline in this child instantiation (not the type def).
+    function_names: Vec<String>,
+    /// Names of signals declared inline in this child instantiation.
+    signal_names: Vec<String>,
+    is_loader_content: bool,
 }
 
 fn build_child_id_map(children: &[QmlChild]) -> HashMap<String, ChildInfo> {
@@ -218,11 +91,15 @@ fn build_child_id_map(children: &[QmlChild]) -> HashMap<String, ChildInfo> {
                 ChildInfo {
                     type_name: child.type_name.clone(),
                     properties: child.properties.clone(),
+                    function_names: child.functions.iter().map(|f| f.name.clone()).collect(),
+                    signal_names: child.signals.iter().map(|s| s.name.clone()).collect(),
+                    is_loader_content: child.is_loader_content,
                 },
             );
         }
         // Rekurencyjnie — id zagnieżdżonych dzieci też są widoczne
-        map.extend(build_child_id_map(&child.children));
+        let nested = build_child_id_map(&child.children);
+        map.extend(nested);
     }
     map
 }
@@ -314,6 +191,14 @@ impl Checker<'_> {
         for g in QML_DELEGATE_GLOBALS {
             scope.insert(g.to_string());
         }
+        // QML style attached-type globals (Material, Universal, Imagine)
+        for g in QML_STYLE_GLOBALS {
+            scope.insert(g.to_string());
+        }
+        // `parent` is always available in QML (refers to the visual parent element).
+        // The actual parent type varies by usage context and cannot be determined statically,
+        // so we only ensure the name is in scope without validating member access on it.
+        scope.insert("parent".to_string());
         // Aliasy importów: `import "..." as Alias` → Alias jest dostępne globalnie
         // Also: `import TypeName 1.0` → TypeName is a C++ registered type/enum module
         for import_str in &file.imports {
@@ -341,9 +226,10 @@ impl Checker<'_> {
         if let Some(id) = &file.id {
             scope.insert(id.clone());
         }
-        // property root
+        // property root + auto-generated <propName>Changed signals
         for p in &file.properties {
             scope.insert(p.name.clone());
+            scope.insert(format!("{}Changed", p.name));
         }
         // sygnały root
         for s in &file.signals {
@@ -372,6 +258,15 @@ impl Checker<'_> {
         for (name, _) in self.db.all_properties(&resolved_base) {
             scope.insert(name);
         }
+        let qt_methods = self.db.all_methods(&resolved_base);
+        for name in qt_methods.keys() {
+            scope.insert(name.clone());
+        }
+        // Qt signals of the root base type are also callable (to emit them).
+        let qt_sigs_base = self.db.all_signals(&resolved_base);
+        for name in qt_sigs_base.keys() {
+            scope.insert(name.clone());
+        }
         // Properties/signals from user-defined QML base type chain
         // e.g. Global extends WindowBase → windowBusy from WindowBase is in scope
         {
@@ -395,7 +290,13 @@ impl Checker<'_> {
         // Property dostępne z zasięgu rodzica (pliku nadrzędnego który zawiera ten typ).
         // Np. Sub4.qml może odwoływać się do property zdefiniowanych w Global.qml.
         if let Some(parent_scope) = self.ctx.parent_scopes.get(&file.name) {
-            scope.extend(parent_scope.iter().cloned());
+            for name in parent_scope {
+                // Also synthesise the auto-generated Changed signal so that
+                // `worklistDataChanged()` is valid when `worklistData` lives in a
+                // parent file and reaches this file's scope via parent_scopes.
+                scope.insert(format!("{}Changed", name));
+                scope.insert(name.clone());
+            }
         }
         // Syntetyczne id dzieci z konfiguracji (new_child)
         // The config supports two forms of keys:
@@ -452,7 +353,7 @@ impl Checker<'_> {
 
     // ── sprawdzanie root ──────────────────────────────────────────────────
 
-    fn check_root(&self, file: &FileItem, file_scope: &HashSet<String>, errors: &mut Vec<AnalysisError>) {
+    fn check_root(&self, file: &FileItem, file_scope: &HashSet<String>, errors: &mut Vec<AE>) {
         // Resolve aliased base type.
         // `resolve_aliased_base` returns:
         //   None                           → not an alias, look up normally
@@ -482,6 +383,44 @@ impl Checker<'_> {
 
         // Mapa id dzieci → info o dziecku (do sprawdzania member access w funkcjach)
         let mut child_id_map = build_child_id_map(&file.children);
+
+        // Add root element id so that `rootId.member = value` accesses can be validated.
+        // Include both function names AND declared signal names (signals are callable members).
+        if let Some(root_id) = &file.id {
+            child_id_map.entry(root_id.clone()).or_insert_with(|| ChildInfo {
+                type_name: file.base_type.clone(),
+                properties: file.properties.clone(),
+                function_names: file
+                    .functions
+                    .iter()
+                    .map(|f| f.name.clone())
+                    .chain(file.signals.iter().map(|s| s.name.clone()))
+                    .collect(),
+                signal_names: file.signals.iter().map(|s| s.name.clone()).collect(),
+                is_loader_content: false,
+            });
+        }
+
+        // Globally-visible element ids from parent files (e.g. mainWindow from main.qml).
+        // Added with or_insert_with so local children take precedence.
+        // Skip any id that is also a locally-declared property: a `property var foo`
+        // (or any typed property) shadows a global id of the same name, and since
+        // the property type may be unknown (var), member-access validation must be
+        // skipped entirely.
+        let local_prop_names: HashSet<&str> = file.properties.iter().map(|p| p.name.as_str()).collect();
+        for (id, (type_name, properties, function_names, is_loader_content)) in &self.ctx.parent_id_types {
+            if local_prop_names.contains(id.as_str()) {
+                continue;
+            }
+            child_id_map.entry(id.clone()).or_insert_with(|| ChildInfo {
+                type_name: type_name.clone(),
+                properties: properties.clone(),
+                function_names: function_names.clone(),
+                signal_names: vec![],
+                is_loader_content: *is_loader_content,
+            });
+        }
+
         // Syntetyczne dzieci z konfiguracji (new_child)
         if let Some(child_types) = self.ctx.extra_children.get(&file.name) {
             for child_type in child_types {
@@ -489,6 +428,9 @@ impl Checker<'_> {
                 child_id_map.entry(id).or_insert_with(|| ChildInfo {
                     type_name: child_type.clone(),
                     properties: vec![],
+                    function_names: vec![],
+                    signal_names: vec![],
+                    is_loader_content: false,
                 });
             }
         }
@@ -501,7 +443,33 @@ impl Checker<'_> {
                     child_id_map.entry(child_id.clone()).or_insert_with(|| ChildInfo {
                         type_name: child_type.clone(),
                         properties: vec![],
+                        function_names: vec![],
+                        signal_names: vec![],
+                        is_loader_content: false,
                     });
+                }
+            }
+        }
+
+        // NOTE: `parent` is intentionally NOT added to child_id_map. In QML, `parent`
+        // refers to the visual parent whose type varies by instantiation context and
+        // cannot be determined statically. Adding it as `Item` caused false positives
+        // (e.g. `parent.radius` on a Rectangle parent, `parent.goToReportsScreen` on a
+        // custom component). `parent` is in scope via build_file_scope; member access
+        // on it is simply not validated.
+
+        // Resolve property aliases: `property alias X: Y` — if Y is a known child id,
+        // make X point to the same ChildInfo as Y. This overrides any conflicting entry
+        // from parent_id_types (e.g. another file's root element that happens to have the
+        // same id as the alias name).
+        for prop in &file.properties {
+            if prop.is_simple_ref
+                && matches!(prop.prop_type, PropertyType::Custom(ref t) if t == "alias")
+                && !prop.accessed_properties.is_empty()
+            {
+                let target = &prop.accessed_properties[0];
+                if let Some(info) = child_id_map.get(target).cloned() {
+                    child_id_map.insert(prop.name.clone(), info);
                 }
             }
         }
@@ -511,10 +479,11 @@ impl Checker<'_> {
             Self::check_property_decl(prop, &qt_props, &file_prop_types, file_scope, self.db, errors, None);
         }
 
-        // 1b. C++ member validation for property declaration expressions.
+        // 1b. C++ and QML member validation for property declaration expressions.
         // `check_property_decl` only checks scope via `accessed_properties` (base names).
-        // We additionally validate `base.member` accesses against `cpp_object_members` using
-        // the raw expression string stored at parse time.
+        // We additionally validate `base.member` accesses against `cpp_object_members` and
+        // known QML child ids using the raw expression string stored at parse time.
+        let mut seen_qml_prop_decl: HashSet<(String, String)> = HashSet::new();
         for prop in &file.properties {
             if prop.raw_value_expr.is_empty() {
                 continue;
@@ -523,18 +492,75 @@ impl Checker<'_> {
             for (base_name, member_opt) in collect_dotted_accesses_from_expression(&prop.raw_value_expr) {
                 let Some(accessed) = member_opt else { continue };
                 let key = (base_name.clone(), accessed.clone());
-                if seen_cpp.insert(key)
+                if seen_cpp.insert(key.clone())
                     && let Some(members_opt) = self.ctx.cpp_object_members.get(&base_name)
                     && let Some(members) = members_opt
                     && !members.contains(accessed.as_str())
                 {
                     errors.push(
-                        AnalysisError::new(ErrorKind::UnknownCppMember {
+                        AE::new(ErrorKind::UnknownCppMember {
                             object: base_name.clone(),
-                            member: accessed,
+                            member: accessed.clone(),
                         })
                         .with_line(prop.line),
                     );
+                }
+                // Also validate QML child member access in property declaration expressions.
+                if !self.ctx.cpp_object_members.contains_key(&base_name) {
+                    if let Some(child_info2) = child_id_map.get(&base_name) {
+                        if child_info2.type_name != "Connections" {
+                            let child_member_names = self.all_file_member_names(&child_info2.type_name);
+                            let qt_base2 = self.resolve_qt_type(&child_info2.type_name);
+                            if !child_member_names.is_empty()
+                                || !child_info2.properties.is_empty()
+                                || self.db.has_type(&child_info2.type_name)
+                                || self.db.has_type(&qt_base2)
+                            {
+                                let qt_child_props2 = self.db.all_properties(&qt_base2);
+                                let qt_child_sigs2 = self.db.all_signals(&qt_base2);
+                                let qt_child_methods2 = self.db.all_methods(&qt_base2);
+                                let loader_methods2 = if child_info2.is_loader_content {
+                                    self.db.all_methods("Loader")
+                                } else {
+                                    HashMap::new()
+                                };
+                                // Also allow Loader's own properties (e.g. `item`, `status`) when
+                                // the child id belongs to a Loader whose content is the proxy type.
+                                let loader_own_props2 = if child_info2.is_loader_content {
+                                    self.db.all_properties("Loader")
+                                } else {
+                                    HashMap::new()
+                                };
+                                let is_auto_sig = accessed.strip_suffix("Changed").is_some_and(|base| {
+                                    child_member_names.contains(base)
+                                        || qt_child_props2.contains_key(base)
+                                        || child_info2.properties.iter().any(|p| p.name == base)
+                                });
+                                let member_valid = child_member_names.contains(accessed.as_str())
+                                    || qt_child_props2.contains_key(accessed.as_str())
+                                    || qt_child_sigs2.contains_key(accessed.as_str())
+                                    || qt_child_methods2.contains_key(accessed.as_str())
+                                    || loader_methods2.contains_key(accessed.as_str())
+                                    || loader_own_props2.contains_key(accessed.as_str())
+                                    || child_info2.properties.iter().any(|p| p.name == accessed.as_str())
+                                    || child_info2.function_names.iter().any(|f| f == accessed.as_str())
+                                    || is_auto_sig
+                                    // For `parent`, all Item properties are always valid because any
+                                    // visual element is Item-derived and anchor/size properties are universal.
+                                    || (base_name == "parent"
+                                        && self.db.all_properties("Item").contains_key(accessed.as_str()));
+                                if !member_valid && seen_qml_prop_decl.insert(key) {
+                                    errors.push(
+                                        AE::new(ErrorKind::UnknownQmlMember {
+                                            object: base_name.clone(),
+                                            member: accessed.clone(),
+                                        })
+                                        .with_line(prop.line),
+                                    );
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -553,9 +579,15 @@ impl Checker<'_> {
             );
         }
 
+        // 2b. Check JS-block property value bodies (e.g. `text: { if (foo) ... }`).
+        for func in &file.property_js_block_funcs {
+            self.check_function(func, file_scope, &qt_props, &qt_signals, &file.signals, &child_id_map, errors, None);
+        }
+
         // 3. Sprawdź root-level inline assignments (e.g. `width: expr`, `invalidProp: val`).
         // Skip entirely for opaque aliased base types — we don't know their property set.
         let type_member_names = self.all_file_member_names(&file.name);
+        let mut seen_qml_assign_root: HashSet<(String, String)> = HashSet::new();
         for (name, value_expr, line) in &file.assignments {
             if base_is_opaque {
                 continue;
@@ -569,7 +601,7 @@ impl Checker<'_> {
                 || type_member_names.contains(name.as_str());
             if !prop_known {
                 errors.push(
-                    AnalysisError::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() }).with_line(*line),
+                    AE::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() }).with_line(*line),
                 );
             }
             // Check names in the value expression against scope.
@@ -586,7 +618,7 @@ impl Checker<'_> {
                             && !members.contains(accessed.as_str())
                         {
                             errors.push(
-                                AnalysisError::new(ErrorKind::UnknownCppMember {
+                                AE::new(ErrorKind::UnknownCppMember {
                                     object: base_name.clone(),
                                     member: accessed.clone(),
                                 })
@@ -594,6 +626,67 @@ impl Checker<'_> {
                             );
                         }
                     }
+
+                    // Also validate QML child member access.
+                    if let Some(accessed) = &member {
+                        if !self.ctx.cpp_object_members.contains_key(&base_name) {
+                            if let Some(child_info2) = child_id_map.get(&base_name) {
+                                if child_info2.type_name != "Connections" {
+                                    let child_member_names = self.all_file_member_names(&child_info2.type_name);
+                                    let qt_base2 = self.resolve_qt_type(&child_info2.type_name);
+                                    if !child_member_names.is_empty()
+                                        || !child_info2.properties.is_empty()
+                                        || self.db.has_type(&child_info2.type_name)
+                                        || self.db.has_type(&qt_base2)
+                                    {
+                                        let qt_child_props2 = self.db.all_properties(&qt_base2);
+                                        let qt_child_sigs2 = self.db.all_signals(&qt_base2);
+                                        let qt_child_methods2 = self.db.all_methods(&qt_base2);
+                                        let loader_methods2 = if child_info2.is_loader_content {
+                                            self.db.all_methods("Loader")
+                                        } else {
+                                            HashMap::new()
+                                        };
+                                        let loader_own_props2 = if child_info2.is_loader_content {
+                                            self.db.all_properties("Loader")
+                                        } else {
+                                            HashMap::new()
+                                        };
+                                        let is_auto_sig =
+                                            accessed.strip_suffix("Changed").is_some_and(|base| {
+                                                child_member_names.contains(base)
+                                                    || qt_child_props2.contains_key(base)
+                                                    || child_info2.properties.iter().any(|p| p.name == base)
+                                            });
+                                        let member_valid = child_member_names.contains(accessed.as_str())
+                                            || qt_child_props2.contains_key(accessed.as_str())
+                                            || qt_child_sigs2.contains_key(accessed.as_str())
+                                            || qt_child_methods2.contains_key(accessed.as_str())
+                                            || loader_methods2.contains_key(accessed.as_str())
+                                            || loader_own_props2.contains_key(accessed.as_str())
+                                            || child_info2.properties.iter().any(|p| p.name == accessed.as_str())
+                                            || child_info2.function_names.iter().any(|f| f == accessed.as_str())
+                                            || is_auto_sig
+                                            || (base_name == "parent"
+                                                && self.db.all_properties("Item").contains_key(accessed.as_str()));
+                                        if !member_valid {
+                                            let seen_key = (base_name.clone(), accessed.clone());
+                                            if seen_qml_assign_root.insert(seen_key) {
+                                                errors.push(
+                                                    AE::new(ErrorKind::UnknownQmlMember {
+                                                        object: base_name.clone(),
+                                                        member: accessed.clone(),
+                                                    })
+                                                    .with_line(*line),
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if !seen_names.insert(base_name.clone()) {
                         continue;
                     }
@@ -602,7 +695,7 @@ impl Checker<'_> {
                     }
                     if !file_scope.contains(base_name.as_str()) && !is_js_global(&base_name) {
                         errors.push(
-                            AnalysisError::new(ErrorKind::UndefinedPropertyAccess {
+                            AE::new(ErrorKind::UndefinedPropertyAccess {
                                 prop: name.clone(),
                                 name: base_name.clone(),
                             })
@@ -614,8 +707,25 @@ impl Checker<'_> {
         }
 
         // 4. Sprawdź dzieci
+        // For direct children of this file, their QML `parent` is the root element.
+        // Build a parent-aware id map so `parent.xxx` accesses can be validated against
+        // the actual root element's type instead of being skipped entirely.
+        let mut child_id_map_for_children = child_id_map.clone();
+        child_id_map_for_children.entry("parent".to_string()).or_insert_with(|| ChildInfo {
+            type_name: file.name.clone(),
+            properties: file.properties.clone(),
+            function_names: file
+                .functions
+                .iter()
+                .filter(|f| !f.is_signal_handler)
+                .map(|f| f.name.clone())
+                .chain(file.signals.iter().map(|s| s.name.clone()))
+                .collect(),
+            signal_names: file.signals.iter().map(|s| s.name.clone()).collect(),
+            is_loader_content: false,
+        });
         for child in &file.children {
-            self.check_child(child, file_scope, errors, &[], &child_id_map, &import_aliases);
+            self.check_child(child, file_scope, errors, &[], &child_id_map_for_children, &import_aliases);
         }
     }
 
@@ -627,13 +737,13 @@ impl Checker<'_> {
         file_prop_types: &HashMap<String, &PropertyType>,
         scope: &HashSet<String>,
         db: &QtTypeDb,
-        errors: &mut Vec<AnalysisError>,
+        errors: &mut Vec<AE>,
         context: Option<&str>,
     ) {
         // 1. Redefinicja property z klasy bazowej
         if qt_props.contains_key(&prop.name) {
             let base = "base type".to_string();
-            let mut e = AnalysisError::new(ErrorKind::PropertyRedefinition {
+            let mut e = AE::new(ErrorKind::PropertyRedefinition {
                 name: prop.name.clone(),
                 base_type: base,
             })
@@ -648,7 +758,7 @@ impl Checker<'_> {
         if !matches!(prop.prop_type, PropertyType::Var)
             && let Some(mismatch) = Self::literal_type_mismatch(&prop.prop_type, &prop.value)
         {
-            let mut e = AnalysisError::new(ErrorKind::PropertyTypeMismatch {
+            let mut e = AE::new(ErrorKind::PropertyTypeMismatch {
                 name: prop.name.clone(),
                 declared: prop_type_name(&prop.prop_type),
                 assigned: mismatch,
@@ -680,7 +790,7 @@ impl Checker<'_> {
             if let Some(ref_type) = file_prop_types.get(ref_name)
                 && !types_compatible(&prop.prop_type, ref_type)
             {
-                let mut e = AnalysisError::new(ErrorKind::PropertyRefTypeMismatch {
+                let mut e = AE::new(ErrorKind::PropertyRefTypeMismatch {
                     name: prop.name.clone(),
                     declared: prop_type_name(&prop.prop_type),
                     ref_name: ref_name.clone(),
@@ -705,7 +815,7 @@ impl Checker<'_> {
                     continue; // Qt type used as enum namespace (e.g. `Popup.CloseOnEscape`)
                 }
                 if !scope.contains(name.as_str()) {
-                    let mut e = AnalysisError::new(ErrorKind::UndefinedPropertyAccess {
+                    let mut e = AE::new(ErrorKind::UndefinedPropertyAccess {
                         prop: prop.name.clone(),
                         name: name.clone(),
                     })
@@ -758,7 +868,7 @@ impl Checker<'_> {
         qt_signals: &HashMap<String, Vec<String>>,
         declared_signals: &[crate::types::Signal],
         child_id_map: &HashMap<String, ChildInfo>,
-        errors: &mut Vec<AnalysisError>,
+        errors: &mut Vec<AE>,
         context: Option<&str>,
     ) {
         // Sprawdź czy handler sygnału ma odpowiadający sygnał/property
@@ -775,7 +885,7 @@ impl Checker<'_> {
                 };
 
             if !prop_exists && !signal_exists {
-                let mut e = AnalysisError::new(ErrorKind::UnknownSignalHandler {
+                let mut e = AE::new(ErrorKind::UnknownSignalHandler {
                     handler: func.name.clone(),
                 })
                 .with_line(func.line);
@@ -804,25 +914,6 @@ impl Checker<'_> {
             .chain(JS_GLOBALS.iter().copied())
             .collect();
 
-        // Nazwy które nie istnieją nigdzie = błąd.
-        // Ponieważ powyżej dodaliśmy wszystkie used_names do local,
-        // jedynymi undefined są te, które nie zostały zgłoszone przez żadne
-        // znane źródło. Strategia: zgłaszamy tylko te, które nie mają żadnego
-        // „partnera" – tzn. nie mają accessed_item (bo samo `zzzz` bez żadnego
-        // przypisania lokalnego jest błędem).
-        //
-        // Uproszczenie z Planu: sprawdzamy czy nazwa istnieje w którymkolwiek zasięgu.
-        // Skoro local zawiera wszystkie used_names, wszystko będzie w all_scope.
-        // Musimy zatem inaczej: nie dodawać do local nazw które NIE są w file_scope.
-        // Zamiast tego: tylko nazwy których nie ma w file_scope ORAZ nie są wyłącznie
-        // po lewej stronie = (przypisanie), co parser też zbiera.
-        //
-        // Rzeczywiste podejście: collect_function_body_names zbiera WSZYSTKIE identyfikatory
-        // z ciała. Nie wiemy które są deklaracjami. Plan mówi "nie sprawdzamy zakresu zmiennych".
-        // Dlatego: sprawdzamy tylko te nazwy, które są w `used_names` BEZ accessed_item
-        // ORAZ nie ma ich w file_scope. Jeśli nazwa ma accessed_item (foo.bar) – ignorujemy,
-        // bo używana jako obiekt (var/local). Bez accessed_item i bez file_scope → undefined.
-
         // Zbuduj TYLKO file_scope + parameters + declared_locals + JS_GLOBALS (bez local!)
         let strict_scope: HashSet<&str> = file_scope
             .iter()
@@ -834,6 +925,7 @@ impl Checker<'_> {
 
         let mut seen_bases: HashSet<&str> = HashSet::new();
         let mut seen_cpp_members: HashSet<(String, String)> = HashSet::new();
+        let mut seen_qml_members: HashSet<(String, String)> = HashSet::new();
         for used in &func.used_names {
             let name = used.name.as_str();
             // Use the per-name line if available, otherwise fall back to the function start line.
@@ -847,7 +939,7 @@ impl Checker<'_> {
                     && let Some(members) = members_opt
                     && !members.contains(accessed.as_str())
                 {
-                    let mut e = AnalysisError::new(ErrorKind::UnknownCppMember {
+                    let mut e = AE::new(ErrorKind::UnknownCppMember {
                         object: name.to_string(),
                         member: accessed.clone(),
                     })
@@ -857,12 +949,79 @@ impl Checker<'_> {
                     }
                     errors.push(e);
                 }
+
+                // Check member access on known QML children (non-C++ objects).
+                // Fires when the child's type is known (Qt DB, user QML, or has declared properties).
+                // Skip entirely when the name is a function parameter or a declared local variable —
+                // their types are unknown (parameters are untyped; locals may be arrow-function params
+                // or `let`/`const` bindings that shadow a child id).
+                if !self.ctx.cpp_object_members.contains_key(name)
+                    && !func.parameters.iter().any(|p| p == name)
+                    && !func.declared_locals.iter().any(|l| l == name)
+                    && let Some(child_info) = child_id_map.get(name)
+                    && child_info.type_name != "Connections"
+                    && seen_qml_members.insert((name.to_string(), accessed.clone()))
+                {
+                    let file_member_names = self.all_file_member_names(&child_info.type_name);
+                    let qt_base = self.resolve_qt_type(&child_info.type_name);
+                    if !file_member_names.is_empty()
+                        || !child_info.properties.is_empty()
+                        || self.db.has_type(&child_info.type_name)
+                        || self.db.has_type(&qt_base)
+                    {
+                        let qt_child_props = self.db.all_properties(&qt_base);
+                        let qt_child_sigs = self.db.all_signals(&qt_base);
+                        let qt_child_methods = self.db.all_methods(&qt_base);
+                        // For Loader content proxies, also allow Loader's own methods (e.g. setSource)
+                        // and Loader's own properties (e.g. `item`, `status`, `source`).
+                        let loader_methods = if child_info.is_loader_content {
+                            self.db.all_methods("Loader")
+                        } else {
+                            HashMap::new()
+                        };
+                        let loader_own_props = if child_info.is_loader_content {
+                            self.db.all_properties("Loader")
+                        } else {
+                            HashMap::new()
+                        };
+                        // Auto-generated xxxChanged signal for any known property.
+                        let is_auto_signal = accessed.strip_suffix("Changed").is_some_and(|base| {
+                            file_member_names.contains(base)
+                                || qt_child_props.contains_key(base)
+                                || child_info.properties.iter().any(|p| p.name == base)
+                        });
+                        let member_valid = file_member_names.contains(accessed.as_str())
+                            || qt_child_props.contains_key(accessed.as_str())
+                            || qt_child_sigs.contains_key(accessed.as_str())
+                            || qt_child_methods.contains_key(accessed.as_str())
+                            || loader_methods.contains_key(accessed.as_str())
+                            || loader_own_props.contains_key(accessed.as_str())
+                            || child_info.properties.iter().any(|p| p.name == accessed.as_str())
+                            || child_info.function_names.iter().any(|f| f == accessed.as_str())
+                            || is_auto_signal
+                            // For `parent`, all Item properties are always valid because any
+                            // visual element is Item-derived and anchor/size properties are universal.
+                            || (name == "parent"
+                                && self.db.all_properties("Item").contains_key(accessed.as_str()));
+                        if !member_valid {
+                            let mut e = AE::new(ErrorKind::UnknownQmlMember {
+                                object: name.to_string(),
+                                member: accessed.clone(),
+                            })
+                            .with_line(err_line);
+                            if let Some(c) = context {
+                                e = e.with_context(c);
+                            }
+                            errors.push(e);
+                        }
+                    }
+                }
                 // Also check that the base name itself is in scope
                 // (e.g. `nnnonono_existent.state` → `nnnonono_existent` must be defined).
                 if !seen_bases.contains(name) {
                     seen_bases.insert(name);
                     if !strict_scope.contains(name) && !self.db.has_type(name) {
-                        let mut e = AnalysisError::new(ErrorKind::UndefinedName {
+                        let mut e = AE::new(ErrorKind::UndefinedName {
                             name: name.to_string(),
                             function: func.name.clone(),
                         })
@@ -882,7 +1041,7 @@ impl Checker<'_> {
             seen_bases.insert(name);
 
             if !strict_scope.contains(name) && !self.db.has_type(name) {
-                let mut e = AnalysisError::new(ErrorKind::UndefinedName {
+                let mut e = AE::new(ErrorKind::UndefinedName {
                     name: name.to_string(),
                     function: func.name.clone(),
                 })
@@ -902,6 +1061,14 @@ impl Checker<'_> {
                 continue;
             }
 
+            // Function parameters are untyped JS values — skip member validation entirely.
+            // Declared locals (arrow-function params, let/const/var) are also untyped — skip them.
+            if func.parameters.iter().any(|p| p == &assignment.object)
+                || func.declared_locals.iter().any(|l| l == &assignment.object)
+            {
+                continue;
+            }
+
             let Some(child_info) = child_id_map.get(&assignment.object) else {
                 // Nie znamy tego obiektu (może być JS local) — pomijamy
                 continue;
@@ -914,16 +1081,32 @@ impl Checker<'_> {
 
             // Jeśli typ dziecka jest całkowicie nieznany (nie w Qt DB, nie ma zadeklarowanych
             // properties) — traktujemy jako opaque i zezwalamy na wszystkie operacje.
-            if !self.db.has_type(&child_info.type_name) && child_info.properties.is_empty() {
+            let resolved_qt = self.resolve_qt_type(&child_info.type_name);
+            if !self.db.has_type(&child_info.type_name) && !self.db.has_type(&resolved_qt) && child_info.properties.is_empty() {
                 continue;
             }
 
-            let child_qt_props = self.db.all_properties(&child_info.type_name);
+            let child_qt_props = self.db.all_properties(&resolved_qt);
+            let child_qt_methods = self.db.all_methods(&resolved_qt);
             let qt_type_str = child_qt_props.get(&assignment.member);
             let decl_prop = child_info.properties.iter().find(|p| p.name == assignment.member);
+            // Also check properties and functions declared in the type's own QML file,
+            // and functions declared inline in this child block (e.g. `function foo() {}`).
+            let file_member_names = self.all_file_member_names(&child_info.type_name);
+            let inline_func = child_info.function_names.iter().any(|f| f == &assignment.member);
+            // Auto-generated xxxChanged signal counts as a valid assignment target.
+            let is_auto_signal = assignment.member.strip_suffix("Changed").is_some_and(|base| {
+                file_member_names.contains(base) || child_qt_props.contains_key(base)
+            });
 
-            if qt_type_str.is_none() && decl_prop.is_none() {
-                let mut e = AnalysisError::new(ErrorKind::UnknownMemberAccess {
+            if qt_type_str.is_none()
+                && decl_prop.is_none()
+                && !file_member_names.contains(assignment.member.as_str())
+                && !inline_func
+                && !child_qt_methods.contains_key(assignment.member.as_str())
+                && !is_auto_signal
+            {
+                let mut e = AE::new(ErrorKind::UnknownMemberAccess {
                     object: assignment.object.clone(),
                     member: assignment.member.clone(),
                 })
@@ -952,7 +1135,7 @@ impl Checker<'_> {
             }
 
             if let Some(mismatch) = Self::literal_type_mismatch(&expected_type, &assignment.value) {
-                let mut e = AnalysisError::new(ErrorKind::MemberAssignmentTypeMismatch {
+                let mut e = AE::new(ErrorKind::MemberAssignmentTypeMismatch {
                     object: assignment.object.clone(),
                     member: assignment.member.clone(),
                     expected: prop_type_name(&expected_type),
@@ -969,15 +1152,150 @@ impl Checker<'_> {
 
     // ── sprawdzanie dzieci ────────────────────────────────────────────────
 
+    /// Validate a `Connections { … }` child element.
+    ///
+    /// Checks:
+    /// 1. `target:` is a known name in scope (only in project mode).
+    /// 2. Signal handler names match the target's signals (when the target type is known).
+    /// 3. Function body names are valid against the parent scope.
+    fn check_connections_child(
+        &self,
+        child: &QmlChild,
+        parent_scope: &HashSet<String>,
+        errors: &mut Vec<AE>,
+        file_id_map: &HashMap<String, ChildInfo>,
+    ) {
+        let ctx_str = child.id.as_deref().unwrap_or("Connections").to_string();
+
+        // Extract target name and its source line.
+        let target_entry = child.assignments.iter().find(|(k, _, _)| k == "target");
+        let target_name = target_entry.map(|(_, v, _)| v.as_str());
+        let target_line = target_entry.and_then(|(_, _, l)| if *l > 0 { Some(*l) } else { None });
+
+        // ── 1. Validate target is in scope (project mode only) ─────────────────
+        if let Some(target) = target_name {
+            let target_known = parent_scope.contains(target)
+                || self.ctx.cpp_object_members.contains_key(target)
+                || is_js_global(target);
+
+            // Only report in project mode (same gate as UnknownType).
+            if !target_known && (!self.ctx.known_types.is_empty() || !self.ctx.cpp_globals.is_empty()) {
+                let mut e = AE::new(ErrorKind::UnknownConnectionsTarget { name: target.to_string() });
+                if let Some(ln) = target_line {
+                    e = e.with_line(ln);
+                }
+                e = e.with_context(&ctx_str);
+                errors.push(e);
+            }
+        }
+
+        // ── 2. Build target's signals for handler name validation ──────────────
+        let mut target_qt_props: HashMap<String, String> = HashMap::new();
+        let mut target_qt_signals: HashMap<String, Vec<String>> = HashMap::new();
+
+        let allow_any_handler = |funcs: &[crate::types::Function],
+                                 props: &mut HashMap<String, String>,
+                                 signals: &mut HashMap<String, Vec<String>>| {
+            for func in funcs {
+                if func.is_signal_handler {
+                    let sname = handler_to_signal(&func.name);
+                    signals.insert(sname.clone(), vec![]);
+                    props.insert(sname, "var".to_string());
+                }
+            }
+        };
+
+        match target_name {
+            Some(target) if self.ctx.cpp_object_members.contains_key(target) => {
+                match self.ctx.cpp_object_members.get(target) {
+                    Some(Some(members)) => {
+                        // Known C++ object with explicit member list → validate handlers.
+                        for m in members {
+                            target_qt_signals.insert(m.clone(), vec![]);
+                            target_qt_props.insert(m.clone(), "var".to_string());
+                        }
+                    }
+                    _ => {
+                        // Opaque C++ object → allow all declared handler names.
+                        allow_any_handler(&child.functions, &mut target_qt_props, &mut target_qt_signals);
+                    }
+                }
+            }
+            Some(target) if file_id_map.contains_key(target) => {
+                // QML child by id → use its Qt type's signals and properties.
+                let child_info = &file_id_map[target];
+                let qt_type = self.resolve_qt_type(&child_info.type_name);
+                target_qt_props = self.db.all_properties(&qt_type);
+                target_qt_signals = self.db.all_signals(&qt_type);
+                // Include signals declared directly on this child instance.
+                for s in &child_info.signal_names {
+                    target_qt_signals.insert(s.clone(), vec![]);
+                    target_qt_props.insert(s.clone(), "var".to_string());
+                }
+                // Also include signals/properties from the user-defined QML type chain
+                // (e.g. NavigationExamPanel has `signal stopPressed` not in the Qt DB).
+                let mut current = child_info.type_name.clone();
+                let mut seen = HashSet::new();
+                while seen.insert(current.clone()) {
+                    if let Some((props, sigs)) = self.ctx.file_members.get(&current) {
+                        for s in sigs {
+                            target_qt_signals.insert(s.clone(), vec![]);
+                        }
+                        for p in props {
+                            target_qt_props.entry(p.clone()).or_insert_with(|| "var".to_string());
+                        }
+                    }
+                    match self.ctx.file_base_types.get(&current) {
+                        Some(b) if self.ctx.file_members.contains_key(b.as_str()) => current = b.clone(),
+                        _ => break,
+                    }
+                }
+            }
+            _ => {
+                // Target unknown, in scope but non-id, or no target → allow all handlers.
+                allow_any_handler(&child.functions, &mut target_qt_props, &mut target_qt_signals);
+            }
+        }
+
+        // ── 3. Check each handler function ────────────────────────────────────
+        let mut connections_scope = parent_scope.clone();
+        connections_scope.insert("target".to_string());
+        if let Some(id) = &child.id {
+            connections_scope.insert(id.clone());
+        }
+        for prop in &child.properties {
+            connections_scope.insert(prop.name.clone());
+        }
+
+        for func in &child.functions {
+            self.check_function(
+                func,
+                &connections_scope,
+                &target_qt_props,
+                &target_qt_signals,
+                &[], // no declared signals — target signals already in target_qt_signals
+                file_id_map,
+                errors,
+                Some(&ctx_str),
+            );
+        }
+    }
+
     fn check_child(
         &self,
         child: &QmlChild,
         parent_scope: &HashSet<String>,
-        errors: &mut Vec<AnalysisError>,
+        errors: &mut Vec<AE>,
         elem_path: &[String],
         file_id_map: &HashMap<String, ChildInfo>,
         import_aliases: &HashMap<String, bool>,
     ) {
+        // Connections blocks get their own specialised check.
+        if child.type_name == "Connections" {
+            self.check_connections_child(child, parent_scope, errors, file_id_map);
+            return;
+        }
+
         let ctx = child.id.as_deref().unwrap_or(&child.type_name).to_string();
 
         // Build the element path for this child (used in --complex mode).
@@ -989,11 +1307,6 @@ impl Checker<'_> {
         //   - Strip the alias prefix and look up the bare name in the Qt DB.
         //   - If found → use it as the effective type for full validation.
         //   - If NOT found (e.g. `Kirigami.Icon`) → opaque external type, skip silently.
-        // Resolve aliased module types:
-        //   `QQC2.Label`     (Qt alias, in DB)       → validate as `Label`   [full]
-        //   `PC3.Label`      (non-Qt alias, in DB)   → scope via `Label`     [partial, no unknown-prop]
-        //   `Kirigami.Icon`  (non-Qt alias, not DB)  → opaque, return silently
-        //   `Unknown.Type`   (prefix not an alias)   → fall through to UnknownType check
         let (resolved_type_name, child_full_validation): (&str, bool) = if let Some(dot_pos) = child.type_name.find('.')
         {
             let prefix = &child.type_name[..dot_pos];
@@ -1012,14 +1325,12 @@ impl Checker<'_> {
         };
 
         // Sprawdź czy typ jest znany — albo Qt, albo sparsowany plik QML.
-        // Sprawdzamy tylko gdy known_types nie jest puste (tzn. mamy pełen kontekst projektu).
-        // Puste known_types oznacza tryb izolowany (testy jednostkowe) — pomijamy sprawdzanie.
         if !self.ctx.known_types.is_empty()
             && !self.db.has_type(resolved_type_name)
             && !self.ctx.known_types.contains(resolved_type_name)
         {
             errors.push(
-                AnalysisError::new(ErrorKind::UnknownType {
+                AE::new(ErrorKind::UnknownType {
                     type_name: child.type_name.clone(),
                 })
                 .with_line(child.line),
@@ -1028,8 +1339,6 @@ impl Checker<'_> {
         }
 
         // Dla znanych typów QML (pliki .qml) używamy ich typu bazowego do wyszukiwania Qt props.
-        // Np. Sub2 extends Switch → qt_props = Switch's properties (includes `checked`).
-        // Musimy iść przez cały łańcuch typów bazowych aż do Qt type (TextButton → GenericButton → RoundButton).
         let effective_type = self.resolve_qt_type(resolved_type_name);
         let qt_props = self.db.all_properties(&effective_type);
         let qt_signals = self.db.all_signals(&effective_type);
@@ -1041,13 +1350,27 @@ impl Checker<'_> {
         }
         for p in &child.properties {
             child_scope.insert(p.name.clone());
+            // Auto-generated <propName>Changed signal is also in scope.
+            child_scope.insert(format!("{}Changed", p.name));
         }
         for name in qt_props.keys() {
+            child_scope.insert(name.clone());
+        }
+        let qt_methods = self.db.all_methods(&effective_type);
+        for name in qt_methods.keys() {
+            child_scope.insert(name.clone());
+        }
+        // Qt signals are also callable (to emit them, e.g. `pressAndHold()` in `onDoubleClicked`).
+        for name in qt_signals.keys() {
             child_scope.insert(name.clone());
         }
         // Add properties/signals from QML base type chain (e.g. Sub4 → SwitchWrapper → switchWrapperColor).
         for name in self.all_file_member_names(resolved_type_name) {
             child_scope.insert(name);
+        }
+        // Add the child's own declared functions so sibling handlers can call them.
+        for f in &child.functions {
+            child_scope.insert(f.name.clone());
         }
 
         let child_prop_types: HashMap<String, &PropertyType> = child
@@ -1086,7 +1409,7 @@ impl Checker<'_> {
                     && !members.contains(accessed.as_str())
                 {
                     errors.push(
-                        AnalysisError::new(ErrorKind::UnknownCppMember {
+                        AE::new(ErrorKind::UnknownCppMember {
                             object: base_name.clone(),
                             member: accessed,
                         })
@@ -1110,29 +1433,28 @@ impl Checker<'_> {
             );
         }
 
-        // Check inline property assignments (e.g. `non_existtttttttend: 2`) against known props,
-        // and check names used in the value expression against scope.
+        // Check JS-block property value bodies (e.g. `text: { if (foo) ... }`).
+        for func in &child.property_js_block_funcs {
+            self.check_function(func, &child_scope, &qt_props, &qt_signals, &[], file_id_map, errors, Some(&ctx));
+        }
+
+        // Check inline property assignments against known props.
         let type_member_names = self.all_file_member_names(resolved_type_name);
+        let mut seen_qml_assign: HashSet<(String, String)> = HashSet::new();
         for (name, value_expr, line) in &child.assignments {
-            // For partial (non-Qt alias) types, skip UnknownPropertyAssignment — the external
-            // type may expose additional properties beyond what the Qt base type declares.
             if child_full_validation {
-                // Skip the property-name check for dotted keys (e.g. `icon.source`): grouped
-                // properties are not individually listed in the Qt DB.
                 let prop_known = name.contains('.')
                     || qt_props.contains_key(name.as_str())
                     || child.properties.iter().any(|p| p.name == *name)
                     || type_member_names.contains(name.as_str());
                 if !prop_known {
                     errors.push(
-                        AnalysisError::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() })
+                        AE::new(ErrorKind::UnknownPropertyAssignment { name: name.clone() })
                             .with_line(*line)
                             .with_context(&ctx),
                     );
                 }
             }
-            // Check names used in the value expression against scope.
-            // Skip standalone object literals `{ … }` and inline type instantiations `TypeName { … }`.
             if !is_inline_type_instantiation(value_expr) {
                 let mut seen_names: HashSet<String> = HashSet::new();
                 let mut seen_cpp: HashSet<(String, String)> = HashSet::new();
@@ -1146,13 +1468,74 @@ impl Checker<'_> {
                             && !members.contains(accessed.as_str())
                         {
                             errors.push(
-                                AnalysisError::new(ErrorKind::UnknownCppMember {
+                                AE::new(ErrorKind::UnknownCppMember {
                                     object: base_name.clone(),
                                     member: accessed.clone(),
                                 })
                                 .with_line(*line)
                                 .with_context(&ctx),
                             );
+                        }
+                    }
+
+                    // Also validate QML child member access.
+                    if let Some(accessed) = &member {
+                        if !self.ctx.cpp_object_members.contains_key(&base_name) {
+                            if let Some(child_info2) = file_id_map.get(&base_name) {
+                                if child_info2.type_name != "Connections" {
+                                    let child_member_names = self.all_file_member_names(&child_info2.type_name);
+                                    let qt_base2 = self.resolve_qt_type(&child_info2.type_name);
+                                    if !child_member_names.is_empty()
+                                        || !child_info2.properties.is_empty()
+                                        || self.db.has_type(&child_info2.type_name)
+                                        || self.db.has_type(&qt_base2)
+                                    {
+                                        let qt_child_props2 = self.db.all_properties(&qt_base2);
+                                        let qt_child_sigs2 = self.db.all_signals(&qt_base2);
+                                        let qt_child_methods2 = self.db.all_methods(&qt_base2);
+                                        let loader_methods2 = if child_info2.is_loader_content {
+                                            self.db.all_methods("Loader")
+                                        } else {
+                                            HashMap::new()
+                                        };
+                                        let loader_own_props2 = if child_info2.is_loader_content {
+                                            self.db.all_properties("Loader")
+                                        } else {
+                                            HashMap::new()
+                                        };
+                                        let is_auto_sig =
+                                            accessed.strip_suffix("Changed").is_some_and(|base| {
+                                                child_member_names.contains(base)
+                                                    || qt_child_props2.contains_key(base)
+                                                    || child_info2.properties.iter().any(|p| p.name == base)
+                                            });
+                                        let member_valid = child_member_names.contains(accessed.as_str())
+                                            || qt_child_props2.contains_key(accessed.as_str())
+                                            || qt_child_sigs2.contains_key(accessed.as_str())
+                                            || qt_child_methods2.contains_key(accessed.as_str())
+                                            || loader_methods2.contains_key(accessed.as_str())
+                                            || loader_own_props2.contains_key(accessed.as_str())
+                                            || child_info2.properties.iter().any(|p| p.name == accessed.as_str())
+                                            || child_info2.function_names.iter().any(|f| f == accessed.as_str())
+                                            || is_auto_sig
+                                            || (base_name == "parent"
+                                                && self.db.all_properties("Item").contains_key(accessed.as_str()));
+                                        if !member_valid {
+                                            let seen_key = (base_name.clone(), accessed.clone());
+                                            if seen_qml_assign.insert(seen_key) {
+                                                errors.push(
+                                                    AE::new(ErrorKind::UnknownQmlMember {
+                                                        object: base_name.clone(),
+                                                        member: accessed.clone(),
+                                                    })
+                                                    .with_line(*line)
+                                                    .with_context(&ctx),
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -1165,7 +1548,7 @@ impl Checker<'_> {
                     }
                     if !child_scope.contains(base_name.as_str()) && !is_js_global(&base_name) {
                         errors.push(
-                            AnalysisError::new(ErrorKind::UndefinedPropertyAccess {
+                            AE::new(ErrorKind::UndefinedPropertyAccess {
                                 prop: name.clone(),
                                 name: base_name.clone(),
                             })
@@ -1184,165 +1567,42 @@ impl Checker<'_> {
             }
         }
 
+        // For grandchildren, their QML `parent` is the current child element.
+        // Exception: Repeater and Component don't create a visual parent context —
+        // Repeater delegates have their runtime parent set to Repeater.parent,
+        // and Component templates are instantiated elsewhere.
+        // For these, pass through the outer parent unchanged.
+        let grandchild_id_map = if matches!(child.type_name.as_str(), "Repeater" | "Component") {
+            file_id_map.clone()
+        } else {
+            let mut m = file_id_map.clone();
+            m.insert(
+                "parent".to_string(),
+                ChildInfo {
+                    type_name: child.type_name.clone(),
+                    properties: child.properties.clone(),
+                    function_names: child
+                        .functions
+                        .iter()
+                        .filter(|f| !f.is_signal_handler)
+                        .map(|f| f.name.clone())
+                        .chain(child.signals.iter().map(|s| s.name.clone()))
+                        .collect(),
+                    signal_names: child.signals.iter().map(|s| s.name.clone()).collect(),
+                    is_loader_content: false,
+                },
+            );
+            m
+        };
         for grandchild in &child.children {
             self.check_child(
                 grandchild,
                 &child_scope,
                 errors,
                 &my_elem_path,
-                file_id_map,
+                &grandchild_id_map,
                 import_aliases,
             );
         }
     }
 }
-
-// ── pomocnicze ────────────────────────────────────────────────────────────
-
-/// Extract module aliases from a file's import list.
-///
-/// Returns a map `alias → is_qt_module` where `is_qt_module` is `true` when
-/// the imported module name starts with `Qt` (e.g. `QtQuick.Controls`).
-/// Non-Qt aliases (e.g. `org.kde.kirigami as Kirigami`) are also included
-/// with `is_qt_module = false` so the caller can treat their types as opaque
-/// without reporting `UnknownType`.
-fn extract_import_aliases(imports: &[String]) -> HashMap<String, bool> {
-    let mut aliases = HashMap::new();
-    for import_str in imports {
-        if let Some(as_pos) = import_str.find(" as ") {
-            let before_as = import_str[..as_pos].trim();
-            let alias = import_str[as_pos + 4..].trim();
-            if !alias.is_empty()
-                && alias.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_')
-                && alias.chars().all(|c| c.is_alphanumeric() || c == '_')
-            {
-                // Determine whether this is a Qt standard module.
-                // Module name is the word after "import " (before an optional version number).
-                let module_name = before_as
-                    .strip_prefix("import ")
-                    .unwrap_or(before_as)
-                    .split_whitespace()
-                    .next()
-                    .unwrap_or("");
-                let is_qt = module_name.starts_with("Qt");
-                aliases.insert(alias.to_string(), is_qt);
-            }
-        }
-    }
-    aliases
-}
-
-// `onWidthChanged` → `widthChanged` lub `width`
-fn handler_to_signal(handler: &str) -> String {
-    let body = &handler[2..]; // strip `on`
-    let mut chars = body.chars();
-    match chars.next() {
-        Some(c) => c.to_lowercase().to_string() + chars.as_str(),
-        None => String::new(),
-    }
-}
-
-/// `widthChanged` → Some("width")
-fn strip_changed_suffix(s: &str) -> Option<&str> {
-    s.strip_suffix("Changed")
-}
-
-/// `NewExaminationScreen` → `newExaminationScreen`
-fn type_name_to_id(type_name: &str) -> String {
-    let mut chars = type_name.chars();
-    match chars.next() {
-        Some(c) => c.to_lowercase().to_string() + chars.as_str(),
-        None => String::new(),
-    }
-}
-
-fn prop_type_name(t: &PropertyType) -> String {
-    match t {
-        PropertyType::Int => "int".into(),
-        PropertyType::Bool => "bool".into(),
-        PropertyType::String => "string".into(),
-        PropertyType::Var => "var".into(),
-        PropertyType::Double => "double".into(),
-        PropertyType::Real => "real".into(),
-        PropertyType::Url => "url".into(),
-        PropertyType::Color => "color".into(),
-        PropertyType::List => "list".into(),
-        PropertyType::Custom(s) => s.clone(),
-    }
-}
-
-fn types_compatible(a: &PropertyType, b: &PropertyType) -> bool {
-    if matches!(a, PropertyType::Var) || matches!(b, PropertyType::Var) {
-        return true;
-    }
-    // real i double są kompatybilne
-    let numeric = |t: &PropertyType| matches!(t, PropertyType::Double | PropertyType::Real);
-    if numeric(a) && numeric(b) {
-        return true;
-    }
-    a == b
-}
-
-fn is_js_global(name: &str) -> bool {
-    JS_GLOBALS.contains(&name)
-}
-
-/// Returns `true` when `expr` is an inline QML type instantiation like `Rotation { … }` or
-/// `Scale { … }` — an uppercase-starting identifier immediately followed by `{`.
-/// Properties inside are not free variable references, so the caller should skip name-checking.
-fn is_inline_type_instantiation(expr: &str) -> bool {
-    let t = expr.trim_start();
-    if t.starts_with('{') {
-        return true; // pure JS object literal — already handled by callers, kept for convenience
-    }
-    let mut chars = t.chars();
-    let Some(first) = chars.next() else { return false };
-    if !first.is_uppercase() {
-        return false;
-    }
-    let rest = chars.as_str();
-    let name_end = rest
-        .find(|c: char| !c.is_alphanumeric() && c != '_')
-        .unwrap_or(rest.len());
-    rest[name_end..].trim_start().starts_with('{')
-}
-
-/// QML-specyficzne zmienne dostępne w kontekście delegatów modeli.
-const QML_DELEGATE_GLOBALS: &[&str] = &[
-    "model",     // obiekt modelu w delegacie (model.field)
-    "modelData", // dane elementu w prostym delegacie
-    "index",     // indeks elementu w delegacie
-];
-
-const JS_GLOBALS: &[&str] = &[
-    "console",
-    "Math",
-    "JSON",
-    "parseInt",
-    "parseFloat",
-    "qsTr",
-    "Qt",
-    "undefined",
-    "null",
-    "true",
-    "false",
-    "NaN",
-    "Infinity",
-    "String",
-    "Number",
-    "Boolean",
-    "Array",
-    "Object",
-    "Date",
-    "RegExp",
-    "Error",
-    "Promise",
-    "Symbol",
-    "Map",
-    "Set",
-    "WeakMap",
-    "WeakSet",
-    "x",
-    "y",
-    "z", // często lokalne w lambdach
-];

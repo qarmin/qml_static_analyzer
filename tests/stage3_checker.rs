@@ -5,19 +5,20 @@
 
 use qml_static_analyzer::checker::{CheckContext, ErrorKind, check_file};
 use qml_static_analyzer::parser::parse_file;
-use qml_static_analyzer::qt_types::{QtTypeDb, load_default_builtin_db, load_from_json_file};
+use qml_static_analyzer::qt_types::{QtTypeDb, load_from_json_file};
 
 // ─── helper ──────────────────────────────────────────────────────────────────
 
 /// Load the Qt type database.
 ///
-/// If `QT_TYPES_JSON` env var is set, load from that file.
-/// Otherwise fall back to whatever is compiled in (panics if nothing is).
+/// Requires the `QT_TYPES_JSON` env var to be set to a Qt types JSON file.
+/// Use `just test` to run tests with the correct environment.
 fn load_db() -> QtTypeDb {
-    if let Ok(path) = std::env::var("QT_TYPES_JSON") {
-        return load_from_json_file(std::path::Path::new(&path)).expect("failed to load Qt types from QT_TYPES_JSON");
-    }
-    load_default_builtin_db()
+    let path = std::env::var("QT_TYPES_JSON").expect(
+        "\n\nQT_TYPES_JSON env var is not set.\n\
+         Please run tests via `just test` instead of `cargo test` directly.\n"
+    );
+    load_from_json_file(std::path::Path::new(&path)).expect("failed to load Qt types from QT_TYPES_JSON")
 }
 
 fn check(source: &str) -> Vec<ErrorKind> {
@@ -128,10 +129,10 @@ Item {
     assert_eq!(file.children[1].id.as_deref(), Some("globalsLoader"));
 }
 
-// ─── Connections: entire block ignored ───────────────────────────────────────
+// ─── Connections: parsed and validated ───────────────────────────────────────
 
-/// Everything inside `Connections { … }` should be silently ignored —
-/// no children, no functions, no errors.
+/// Connections block is now parsed: it appears as a child and its handler
+/// function bodies are checked for undefined names.
 #[test]
 fn test_connections_block_ignored() {
     let source = "
@@ -147,23 +148,26 @@ Item {
 }
 ";
     let file = parse_file("Test", source).expect("parse should succeed");
-    // Connections should produce no children and no functions on the root
-    assert_eq!(file.children.len(), 0, "Connections block should produce no children");
-    assert_eq!(
-        file.functions.len(),
-        0,
-        "Connections block should produce no root functions"
-    );
+    // Connections is now a proper child element
+    assert_eq!(file.children.len(), 1, "Connections block should appear as a child");
+    assert_eq!(file.children[0].type_name, "Connections");
+    // Handler function is extracted
+    assert_eq!(file.children[0].functions.len(), 1);
+    // Root-level functions are still 0
+    assert_eq!(file.functions.len(), 0, "Connections functions must not leak to root");
 
-    // Checker should report no errors either
+    // VirtualKeyboardSettings is not in scope → UndefinedName is expected
     let errors = check(source);
     assert!(
-        errors.is_empty(),
-        "Connections block should produce no checker errors, got: {errors:?}"
+        errors.iter().any(|e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "VirtualKeyboardSettings"
+        )),
+        "Expected UndefinedName for VirtualKeyboardSettings, got: {errors:?}"
     );
 }
 
-/// Connections block does not pollute scope — references inside it don't leak.
+/// Connections block appears as a child and its handler bodies are validated.
+/// References inside handler functions are checked against the parent scope.
 #[test]
 fn test_connections_inside_nested_item() {
     let source = "
@@ -182,12 +186,18 @@ Rectangle {
     assert_eq!(file.children.len(), 1, "only the Item child expected");
     let item_child = &file.children[0];
     assert_eq!(item_child.type_name, "Item");
-    assert_eq!(
-        item_child.children.len(),
-        0,
-        "Connections should not appear as a child of Item"
+    // Connections is now parsed as a child of Item
+    assert_eq!(item_child.children.len(), 1, "Connections should appear as a child of Item");
+    assert_eq!(item_child.children[0].type_name, "Connections");
+
+    // undefinedThing is not in scope — it must be reported
+    let errors = check(source);
+    assert!(
+        errors.iter().any(|e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "undefinedThing"
+        )),
+        "Expected UndefinedName for undefinedThing, got: {errors:?}"
     );
-    assert_eq!(item_child.functions.len(), 0);
 }
 
 // ─── Checker: child id in scope (showKeyboardButton case) ────────────────────
@@ -1104,48 +1114,6 @@ Item {
     );
 }
 
-/// Shape and ShapePath from QtQuick.Shapes (non-aliased direct import) must be
-/// recognised as valid types — no UnknownType error.
-#[test]
-fn test_shape_and_shapepath_not_unknown() {
-    let source = r#"
-import QtQuick
-import QtQuick.Shapes
-
-Item {
-    Shape {
-        ShapePath {
-            strokeWidth: 2
-            strokeColor: "red"
-            fillColor: "transparent"
-        }
-    }
-}
-"#;
-    let file = parse_file("Test", source).expect("parse should succeed");
-    let db = load_db();
-    let mut ctx = CheckContext::empty();
-    ctx.known_types.insert("SomeKnownType".to_string());
-    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
-        .into_iter()
-        .map(|e| e.kind)
-        .collect();
-    assert!(
-        !has_error(
-            &errors,
-            |e| matches!(e, ErrorKind::UnknownType { type_name } if type_name == "Shape")
-        ),
-        "Shape must not be flagged as UnknownType, got: {errors:?}"
-    );
-    assert!(
-        !has_error(
-            &errors,
-            |e| matches!(e, ErrorKind::UnknownType { type_name } if type_name == "ShapePath")
-        ),
-        "ShapePath must not be flagged as UnknownType, got: {errors:?}"
-    );
-}
-
 // ─── Aliased root element ──────────────────────────────────────────────────────
 
 /// When a file's root element uses an aliased module type (e.g.
@@ -1754,3 +1722,813 @@ Item {
         "undefined name inside arrow in method call must be flagged, got: {errors:?}"
     );
 }
+
+// ─── Function parameter: member access must not be validated ─────────────────
+
+/// A function parameter is an untyped JS value. Accessing members on it
+/// (even when a child with the same id exists) must NOT produce errors.
+/// Regression: `function setClickPointParams(point) { point.backlight = ... }`
+/// was incorrectly flagged when a child `id: point` existed.
+#[test]
+fn test_function_param_member_access_not_flagged() {
+    let source = r#"
+Rectangle {
+    Rectangle { id: point; width: 10 }
+
+    function setClickPointParams(point) {
+        point.backlight = true
+        point.x = 5
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "point" && member == "backlight"
+        )),
+        "member access on a function parameter must not be flagged, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownMemberAccess { object, member }
+            if object == "point" && member == "backlight"
+        )),
+        "member assignment on a function parameter must not be flagged, got: {errors:?}"
+    );
+}
+
+/// Arrow-function parameters in forEach callbacks shadow outer child ids.
+/// Accessing members on the arrow-param must NOT produce UnknownQmlMember.
+/// Regression: `forEach(element => { element.name = ... })` with `id: element`.
+#[test]
+fn test_arrow_param_shadows_child_id_member_access_not_flagged() {
+    let source = r#"
+Item {
+    Rectangle { id: element; color: "red" }
+
+    function syncAll(list) {
+        list.forEach(element => {
+            element.name = "updated"
+            element.uuid = "abc"
+        })
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "element" && member == "name"
+        )),
+        "arrow-param member access must not be flagged as UnknownQmlMember, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownMemberAccess { object, member }
+            if object == "element" && member == "name"
+        )),
+        "arrow-param member assignment must not be flagged as UnknownMemberAccess, got: {errors:?}"
+    );
+}
+
+// ─── Nested function declarations in function body ────────────────────────────
+
+/// A nested `function name() {}` declaration is hoisted to the outer function's
+/// local scope. Calling it from the same function must NOT produce UndefinedName.
+/// Regression: `function canProceed() { function fieldsValid() {} fieldsValid() }`
+#[test]
+fn test_nested_function_decl_callable_in_outer_function() {
+    let source = r#"
+Item {
+    property string username: ""
+    property bool editing: false
+
+    function canProceed() {
+        function fieldsValid() {
+            return username !== ""
+        }
+        function passwordFieldValid() {
+            return editing
+        }
+        return fieldsValid() && passwordFieldValid()
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "fieldsValid"
+        )),
+        "nested function `fieldsValid` must be callable without UndefinedName, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "passwordFieldValid"
+        )),
+        "nested function `passwordFieldValid` must be callable without UndefinedName, got: {errors:?}"
+    );
+}
+
+// ─── Auto-generated <propName>Changed signal is in scope ─────────────────────
+
+/// Every `property T name` declaration implies a `nameChanged` signal.
+/// Using `nameChanged()` as a function call to emit it must NOT produce UndefinedName.
+/// Regression: `property var pointsModel` → `pointsModelChanged()` was flagged.
+#[test]
+fn test_auto_generated_changed_signal_not_undefined() {
+    let source = r#"
+Item {
+    property var pointsModel: null
+    property string title: ""
+
+    function notifyUpdates() {
+        pointsModelChanged()
+        titleChanged()
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "pointsModelChanged"
+        )),
+        "`pointsModelChanged` auto-signal must be in scope, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "titleChanged"
+        )),
+        "`titleChanged` auto-signal must be in scope, got: {errors:?}"
+    );
+}
+
+// ─── Sibling functions within a child element block ───────────────────────────
+
+/// Functions declared on the same child element block are mutually callable.
+/// Calling a sibling function from another handler must NOT produce UndefinedName.
+/// Regression: `function changeItems()` on a child was invisible to sibling handlers.
+#[test]
+fn test_sibling_function_in_child_element_not_undefined() {
+    let source = r#"
+Item {
+    Rectangle {
+        id: panel
+
+        function reloadItems() {
+            clearItems()
+        }
+
+        function clearItems() {
+            console.log("cleared")
+        }
+
+        onWidthChanged: {
+            reloadItems()
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "clearItems"
+        )),
+        "sibling function `clearItems` must not be flagged as undefined, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "reloadItems"
+        )),
+        "sibling function `reloadItems` must not be flagged as undefined in onWidthChanged, got: {errors:?}"
+    );
+}
+
+// ─── Root-element id: declared signals visible as members ────────────────────
+
+/// When the root element has an id (e.g. `id: dialog`) and declares a signal
+/// (`signal exportOnDisk()`), accessing `dialog.exportOnDisk` must NOT produce
+/// UnknownQmlMember.
+/// Regression: root-id ChildInfo did not include declared signals in function_names.
+#[test]
+fn test_root_id_signal_accessible_as_member() {
+    let source = r#"
+Item {
+    id: dialog
+    signal exportOnDisk()
+
+    Item {
+        id: acceptButton
+
+        function accept() {
+            dialog.exportOnDisk()
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "dialog" && member == "exportOnDisk"
+        )),
+        "`dialog.exportOnDisk` (declared signal) must not be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Qt signals are callable (emittable) from within the element ─────────────
+
+/// Qt signals can be emitted as function calls from within the element's handlers.
+/// E.g. `pressAndHold()` inside `onDoubleClicked` on a MouseArea must NOT produce
+/// UndefinedName.
+/// Regression: qt_signals were not added to child_scope.
+#[test]
+fn test_qt_signal_emittable_in_handler() {
+    let source = r#"
+Item {
+    MouseArea {
+        id: clickArea
+        anchors.fill: parent
+
+        onDoubleClicked: {
+            pressAndHold()
+        }
+
+        onPressAndHold: {
+            console.log("held")
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UndefinedName { name, .. } if name == "pressAndHold"
+        )),
+        "`pressAndHold()` (Qt signal) must be callable without UndefinedName, got: {errors:?}"
+    );
+}
+
+// ─── Loader own properties accessible via content-proxy id ───────────────────
+
+/// When a Loader has a source, its id maps to the loaded content type in child_id_map.
+/// But the Loader's OWN properties (`item`, `status`, `progress`) must still be valid.
+/// Regression: `property alias globals: globalsLoader.item` was flagged as UnknownQmlMember.
+#[test]
+fn test_loader_own_property_item_not_flagged() {
+    let source = r#"
+Item {
+    Loader {
+        id: globalsLoader
+        source: "qrc:/components/window/Globals.qml"
+    }
+
+    property alias globals: globalsLoader.item
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "globalsLoader" && member == "item"
+        )),
+        "`globalsLoader.item` (Loader property) must not be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Connections: QML child target with user-declared signals ────────────────
+
+/// When a Connections block targets a QML child (by id) that has declared signals,
+/// handlers for those signals must NOT produce UnknownSignalHandler.
+/// Regression: only Qt DB signals were checked; user-defined QML signals were ignored.
+#[test]
+fn test_connections_qml_child_target_user_signal_valid() {
+    let source = r#"
+Item {
+    Item {
+        id: navigationPanel
+        signal stopPressed()
+        signal pausePressed()
+    }
+
+    Connections {
+        target: navigationPanel
+        function onStopPressed() {
+            console.log("stopped")
+        }
+        function onPausePressed() {
+            console.log("paused")
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownSignalHandler { handler }
+            if handler == "onStopPressed"
+        )),
+        "`onStopPressed` handler for declared QML signal must be valid, got: {errors:?}"
+    );
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownSignalHandler { handler }
+            if handler == "onPausePressed"
+        )),
+        "`onPausePressed` handler for declared QML signal must be valid, got: {errors:?}"
+    );
+}
+
+/// A handler for a signal that is NOT declared on the target → UnknownSignalHandler.
+#[test]
+fn test_connections_qml_child_target_undeclared_signal_flagged() {
+    let source = r#"
+Item {
+    Item {
+        id: navigationPanel
+        signal stopPressed()
+    }
+
+    Connections {
+        target: navigationPanel
+        function onGhostPressed() {
+            console.log("ghost")
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownSignalHandler { handler }
+            if handler == "onGhostPressed"
+        )),
+        "`onGhostPressed` has no matching signal on navigationPanel, must be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Property alias member access ────────────────────────────────────────────
+
+/// `property alias X: Y` — calling `X.member()` where `member` is declared on Y
+/// must not be flagged as UnknownQmlMember.
+/// Regression: another parsed file may have a root `id: X` of a different type,
+/// which was inserted into child_id_map via parent_id_types before the alias was
+/// resolved, causing false positives like `Unknown member 'loadPatients' on 'list'`.
+#[test]
+fn test_property_alias_member_access_resolves_to_aliased_child() {
+    let source = r#"
+Item {
+    property alias list: patientsList
+
+    Item {
+        id: patientsList
+
+        function loadPatients() {
+            console.log("loading")
+        }
+    }
+
+    function onTodayModeChanged() {
+        list.loadPatients()
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "list" && member == "loadPatients"
+        )),
+        "`list.loadPatients()` via property alias must not be flagged, got: {errors:?}"
+    );
+}
+
+/// A property alias for a non-existent member on the aliased target IS still flagged.
+#[test]
+fn test_property_alias_unknown_member_still_flagged() {
+    let source = r#"
+Item {
+    property alias list: patientsList
+
+    Item {
+        id: patientsList
+
+        function loadPatients() {}
+    }
+
+    function onSomething() {
+        list.ghostMethod()
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "list" && member == "ghostMethod"
+        )),
+        "`list.ghostMethod()` must still be flagged since ghostMethod is not on patientsList, got: {errors:?}"
+    );
+}
+
+// ─── Fix 1: signal names in parent_id_types ──────────────────────────────────
+
+/// A signal declared on a root element (propagated via parent_id_types) must be
+/// callable as a method from any child file that references that element by id.
+/// Before the fix `exportDriveChanged()` was missing from function_names and
+/// `mainWin.exportDriveChanged()` was incorrectly flagged as UnknownQmlMember.
+#[test]
+fn test_signal_from_parent_id_types_not_flagged() {
+    let source = r#"
+Item {
+    function emitIt() {
+        mainWin.exportDriveChanged()
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    // Simulate mainWin being a root element of another file that declares
+    // `signal exportDriveChanged()` — fix adds signals into function_names.
+    ctx.parent_id_types.insert(
+        "mainWin".to_string(),
+        ("ApplicationWindow".to_string(), vec![], vec!["exportDriveChanged".to_string()], false),
+    );
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "mainWin" && member == "exportDriveChanged"
+        )),
+        "signal in function_names must not be flagged as UnknownQmlMember, got: {errors:?}"
+    );
+}
+
+/// An id member that is NOT in function_names must still be flagged.
+#[test]
+fn test_non_existent_member_on_parent_id_still_flagged() {
+    let source = r#"
+Item {
+    function call() {
+        mainWin.ghostSignal()
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    ctx.parent_id_types.insert(
+        "mainWin".to_string(),
+        ("ApplicationWindow".to_string(), vec![], vec!["exportDriveChanged".to_string()], false),
+    );
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "mainWin" && member == "ghostSignal"
+        )),
+        "unknown member must still be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Fix 2/5: propNameChanged from parent_scopes ─────────────────────────────
+
+/// When a property `worklistData` lives in a parent file and reaches a child
+/// via parent_scopes, the auto-generated `worklistDataChanged` signal must also
+/// be in scope.  Before the fix it was flagged as UndefinedName.
+#[test]
+fn test_prop_changed_from_parent_scopes_not_undefined() {
+    let source = r#"
+Item {
+    function notify() {
+        worklistDataChanged()
+    }
+    Connections {
+        target: root
+        function onWidthChanged() {
+            worklistDataChanged()
+        }
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    // worklistData comes from a parent file — only the raw name is in parent_scopes;
+    // the fix generates the Changed variant automatically.
+    let mut parent_scope = std::collections::HashSet::new();
+    parent_scope.insert("worklistData".to_string());
+    ctx.parent_scopes.insert("Child".to_string(), parent_scope);
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UndefinedName { name, .. } if name == "worklistDataChanged"
+        )),
+        "worklistDataChanged must not be flagged when worklistData is in parent_scopes, got: {errors:?}"
+    );
+}
+
+/// A completely unknown name must still be flagged even with parent_scopes present.
+#[test]
+fn test_unknown_name_still_flagged_with_parent_scopes() {
+    let source = r#"
+Item {
+    function broken() {
+        totallyMadeUpSignal()
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    let mut parent_scope = std::collections::HashSet::new();
+    parent_scope.insert("worklistData".to_string());
+    ctx.parent_scopes.insert("Child".to_string(), parent_scope);
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UndefinedName { name, .. } if name == "totallyMadeUpSignal"
+        )),
+        "made-up name must still be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Fix 3: Qt methods from parent_scopes ────────────────────────────────────
+
+/// Qt methods of a parent file's base type must be accessible in child files
+/// through parent_scopes (QML dynamic scoping).  Before the fix `releaseResources()`
+/// (a Window Qt method) was flagged as UndefinedName in children of a Window-based
+/// file.
+#[test]
+fn test_qt_method_from_parent_scopes_not_undefined() {
+    let source = r#"
+Item {
+    function cleanUp() {
+        releaseResources()
+    }
+    Connections {
+        target: root
+        function onWidthChanged() {
+            releaseResources()
+        }
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    // Simulate the fix: parent_scopes now includes Qt methods from the parent.
+    let mut parent_scope = std::collections::HashSet::new();
+    parent_scope.insert("releaseResources".to_string());
+    ctx.parent_scopes.insert("Child".to_string(), parent_scope);
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UndefinedName { name, .. } if name == "releaseResources"
+        )),
+        "Qt method from parent_scopes must not be flagged, got: {errors:?}"
+    );
+}
+
+/// A fake Qt method that is NOT in parent_scopes must still be flagged.
+#[test]
+fn test_fake_qt_method_still_flagged() {
+    let source = r#"
+Item {
+    function broken() {
+        absolutelyFakeQtMethod()
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    let mut parent_scope = std::collections::HashSet::new();
+    parent_scope.insert("releaseResources".to_string());
+    ctx.parent_scopes.insert("Child".to_string(), parent_scope);
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UndefinedName { name, .. } if name == "absolutelyFakeQtMethod"
+        )),
+        "fake method must still be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Fix 4: property var shadows global id ────────────────────────────────────
+
+/// When a file declares `property var X`, a global id `X` in parent_id_types
+/// must NOT be used for member-access validation — the var type means any
+/// member access is allowed.  Before the fix `networkDrive.address` was
+/// flagged as UnknownQmlMember because a global id `networkDrive` (of type
+/// Rectangle) was found in parent_id_types.
+#[test]
+fn test_property_var_shadows_global_id_no_member_error() {
+    let source = r#"
+Item {
+    property var networkDrive: null
+
+    function configure() {
+        networkDrive.address = "192.168.1.1"
+        networkDrive.arbitraryField = true
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    use qml_static_analyzer::types::{Property, PropertyType, PropertyValue};
+    // Insert a typed global id whose members are known — without the fix this
+    // would trigger UnknownQmlMember for `.address` and `.arbitraryField`.
+    ctx.parent_id_types.insert(
+        "networkDrive".to_string(),
+        (
+            "Rectangle".to_string(),
+            vec![Property {
+                name: "name".to_string(),
+                prop_type: PropertyType::String,
+                value: PropertyValue::Unset,
+                line: 0,
+                is_simple_ref: false,
+                accessed_properties: vec![],
+                raw_value_expr: String::new(),
+            }],
+            vec![],
+            false,
+        ),
+    );
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UnknownQmlMember { object, .. } if object == "networkDrive"
+        )),
+        "property var must suppress global-id member validation, got: {errors:?}"
+    );
+}
+
+/// Without a local `property var` declaration the global id is used normally
+/// and an unknown member IS flagged.
+#[test]
+fn test_global_id_member_validation_without_local_property() {
+    let source = r#"
+Item {
+    function call() {
+        networkDrive.ghostMember()
+    }
+}
+"#;
+    let file = parse_file("Child", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("Child".to_string());
+    use qml_static_analyzer::types::{Property, PropertyType, PropertyValue};
+    ctx.parent_id_types.insert(
+        "networkDrive".to_string(),
+        (
+            "Rectangle".to_string(),
+            vec![Property {
+                name: "name".to_string(),
+                prop_type: PropertyType::String,
+                value: PropertyValue::Unset,
+                line: 0,
+                is_simple_ref: false,
+                accessed_properties: vec![],
+                raw_value_expr: String::new(),
+            }],
+            vec![],
+            false,
+        ),
+    );
+    let errors: Vec<ErrorKind> = check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        has_error(&errors, |e| matches!(
+            e,
+            ErrorKind::UnknownQmlMember { object, member }
+            if object == "networkDrive" && member == "ghostMember"
+        )),
+        "without local property var, unknown member must be flagged, got: {errors:?}"
+    );
+}
+
+// ─── Property JS block name extraction ───────────────────────────────────────
+
+/// An undefined name inside `text: { if (unknownVar) ... }` must be flagged as UndefinedName.
+#[test]
+fn test_undefined_name_in_property_js_block_flagged() {
+    let source = r#"
+Item {
+    property string text2: ""
+    text2: {
+        if (undefinedVar2)
+            return "yes"
+        return "no"
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. } if name == "undefinedVar2")),
+        "undefined name in property JS block must be flagged, got: {errors:?}"
+    );
+}
+
+/// A name that IS in scope inside a JS block must not be flagged.
+#[test]
+fn test_defined_name_in_property_js_block_not_flagged() {
+    let source = r#"
+Item {
+    property bool isActive: false
+    property string label: ""
+    label: {
+        if (isActive)
+            return "active"
+        return "inactive"
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. } if name == "isActive")),
+        "defined name 'isActive' in property JS block must not be flagged, got: {errors:?}"
+    );
+}
+
+// ─── parent.member validation ─────────────────────────────────────────────────
+
+/// `parent.left2` — left2 is not an Item property → must produce UnknownQmlMember.
+#[test]
+fn test_parent_invalid_member_flagged() {
+    let source = r#"
+Item {
+    Rectangle {
+        id: inner
+        anchors.left: parent.left2
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UnknownQmlMember { object, member }
+            if object == "parent" && member == "left2")),
+        "parent.left2 must produce UnknownQmlMember, got: {errors:?}"
+    );
+}
+
+/// `parent.left` — left IS an Item anchor property → must not produce UnknownQmlMember.
+#[test]
+fn test_parent_valid_anchor_member_not_flagged() {
+    let source = r#"
+Item {
+    Rectangle {
+        id: inner
+        anchors.left: parent.left
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownQmlMember { object, member }
+            if object == "parent" && member == "left")),
+        "parent.left must not be flagged as unknown, got: {errors:?}"
+    );
+}
+

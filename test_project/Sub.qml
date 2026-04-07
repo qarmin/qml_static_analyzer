@@ -61,7 +61,10 @@ Rectangle {
             closed: () => { // No problem, closed is just a function we pass in an object, we don't check if it's a valid signal or not
                 console.error("Dialog closed"); // No problem, console.* is a valid - we don't check if error exists or not
             }
-        }, {});
+        }, {
+            titleText: qsTr("Error").arg(nonrrr_existent_variable), // Problem - nonrrr_existent_variable is not defined anywhere, so it should print error
+            random: nnnnnnnnnnonononononon_existent // Problem - nnnnnnnnnnonononononon_existent is not defined anywhere, so it should print error
+        });
     }
 
     onHeightChanged: { // No problem, onHeightChanged is a signal handler for the height property, which exists

@@ -48,6 +48,7 @@ fn test_simple_file() {
         functions: vec![],
         children: vec![],
         assignments: vec![],
+        property_js_block_funcs: vec![],
     };
 
     assert_eq!(result, expected);
@@ -312,6 +313,7 @@ fn test_children() {
                 QmlChild {
                     type_name: "Rectangle".to_string(),
                     id: Some("childRect".to_string()),
+                    signals: vec![],
                     properties: vec![Property {
                         name: "label".to_string(),
                         prop_type: PropertyType::String,
@@ -329,11 +331,14 @@ fn test_children() {
                     }],
                     children: vec![],
                     assignments: vec![],
+                    property_js_block_funcs: vec![],
                     line: 0,
+                    is_loader_content: false,
                 },
                 QmlChild {
                     type_name: "Item".to_string(),
                     id: Some("innerItem".to_string()),
+                    signals: vec![],
                     properties: vec![Property {
                         name: "active".to_string(),
                         prop_type: PropertyType::Bool,
@@ -346,9 +351,12 @@ fn test_children() {
                     functions: vec![],
                     line: 0,
                     assignments: vec![],
+                    property_js_block_funcs: vec![],
+                    is_loader_content: false,
                     children: vec![QmlChild {
                         type_name: "Rectangle".to_string(),
                         id: Some("deepRect".to_string()),
+                        signals: vec![],
                         properties: vec![Property {
                             name: "depth".to_string(),
                             prop_type: PropertyType::Int,
@@ -361,7 +369,9 @@ fn test_children() {
                         functions: vec![],
                         children: vec![],
                         assignments: vec![],
+                        property_js_block_funcs: vec![],
                         line: 0,
+                        is_loader_content: false,
                     }],
                 },
             ],
