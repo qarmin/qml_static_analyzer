@@ -716,9 +716,36 @@ pub fn collect_arrow_params(line: &str) -> Vec<String> {
             if let Some(open) = find_matching_open_paren(before, close) {
                 let params_str = &before[open + 1..close];
                 for p in params_str.split(',') {
-                    let name = p.trim();
-                    if !name.is_empty() && is_identifier(name) {
-                        params.push(name.to_string());
+                    let p = p.trim();
+                    if p.starts_with('{') && p.ends_with('}') {
+                        // Object destructuring param: `({prop})` or `({key: alias})`
+                        let inner = &p[1..p.len() - 1];
+                        for item in inner.split(',') {
+                            let item = item.trim();
+                            // `key: alias` → bind `alias`; plain `key` → bind `key`
+                            let bound = if let Some(colon) = item.find(':') {
+                                item[colon + 1..].trim()
+                            } else {
+                                item
+                            };
+                            if !bound.is_empty() && is_identifier(bound) {
+                                params.push(bound.to_string());
+                            }
+                        }
+                    } else if p.starts_with('[') && p.ends_with(']') {
+                        // Array destructuring param: `([a, b])`
+                        let inner = &p[1..p.len() - 1];
+                        for item in inner.split(',') {
+                            let item = item.trim();
+                            if !item.is_empty() && is_identifier(item) {
+                                params.push(item.to_string());
+                            }
+                        }
+                    } else {
+                        let name = p;
+                        if !name.is_empty() && is_identifier(name) {
+                            params.push(name.to_string());
+                        }
                     }
                 }
             }
@@ -794,9 +821,13 @@ pub fn try_parse_nested_function_decl_name(line: &str) -> Option<String> {
     Some(name.to_string())
 }
 
-/// If the line looks like `for (let/const/var name ...)` or
-/// `for (let/const/var [a, b] ...)`, returns the loop variable name(s).
+/// If the line looks like `for (let/const/var name ...)`,
+/// `for (let/const/var [a, b] ...)`, or
+/// `for (let/const/var {a, b} ...)`, returns the loop variable name(s).
 /// Used to add the loop variable(s) to declared_locals.
+///
+/// Object destructuring supports renaming (`{key: alias}` → binds `alias`)
+/// and default values (`{key = expr}` → binds `key`).
 pub fn try_parse_for_vars(line: &str) -> Vec<String> {
     let Some(rest) = line
         .trim()
@@ -824,6 +855,28 @@ pub fn try_parse_for_vars(line: &str) -> Vec<String> {
             .map(str::trim)
             .filter(|s| !s.is_empty() && is_identifier(s))
             .map(str::to_string)
+            .collect();
+    }
+    // Object destructuring: `for (const {a, b} of ...)` or `for (const {key: alias} of ...)`
+    if rest.starts_with('{') {
+        let Some(close) = rest.find('}') else {
+            return vec![];
+        };
+        return rest[1..close]
+            .split(',')
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .filter_map(|entry| {
+                // strip optional default: `key = value` or `key: alias = value`
+                let binding = entry.find('=').map_or(entry, |pos| entry[..pos].trim());
+                // rename: `key: alias` → bind `alias`
+                let name = binding.find(':').map_or(binding, |pos| binding[pos + 1..].trim());
+                if !name.is_empty() && is_identifier(name) {
+                    Some(name.to_string())
+                } else {
+                    None
+                }
+            })
             .collect();
     }
     // Regular single variable
@@ -1007,20 +1060,25 @@ pub fn try_parse_member_assignment(line: &str) -> Option<MemberAssignment> {
     let member = tokens[2].clone();
 
     let value = if let Some(rhs) = tokens.get(4) {
-        let rhs = rhs.as_str();
-        match rhs {
-            "true" => PropertyValue::Bool(true),
-            "false" => PropertyValue::Bool(false),
-            _ if rhs.parse::<i64>().is_ok() => PropertyValue::Int(rhs.parse().expect("TODO")),
-            _ if rhs.parse::<f64>().is_ok() => PropertyValue::Double(rhs.parse().expect("TODO")),
-            _ => PropertyValue::TooComplex, // complex expression
+        // More than one token in the RHS → complex expression (e.g. `1 + foo()`)
+        if tokens.len() > 5 {
+            PropertyValue::TooComplex
+        } else {
+            let rhs = rhs.as_str();
+            match rhs {
+                "true" => PropertyValue::Bool(true),
+                "false" => PropertyValue::Bool(false),
+                _ if rhs.parse::<i64>().is_ok() => PropertyValue::Int(rhs.parse().expect("TODO")),
+                _ if rhs.parse::<f64>().is_ok() => PropertyValue::Double(rhs.parse().expect("TODO")),
+                _ => PropertyValue::TooComplex, // complex expression
+            }
         }
     } else {
         // RHS was entirely consumed by tokenizer — string literal like `"…"` or backtick string
         PropertyValue::TooComplex
     };
 
-    Some(MemberAssignment { object, member, value })
+    Some(MemberAssignment { object, member, value, line: 0 })
 }
 
 pub fn is_js_keyword(s: &str) -> bool {

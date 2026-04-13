@@ -1106,11 +1106,12 @@ impl Checker<'_> {
                 && !child_qt_methods.contains_key(assignment.member.as_str())
                 && !is_auto_signal
             {
+                let err_line = if assignment.line > 0 { assignment.line } else { func.line };
                 let mut e = AE::new(ErrorKind::UnknownMemberAccess {
                     object: assignment.object.clone(),
                     member: assignment.member.clone(),
                 })
-                .with_line(func.line);
+                .with_line(err_line);
                 if let Some(c) = context {
                     e = e.with_context(c);
                 }
@@ -1135,13 +1136,14 @@ impl Checker<'_> {
             }
 
             if let Some(mismatch) = Self::literal_type_mismatch(&expected_type, &assignment.value) {
+                let err_line = if assignment.line > 0 { assignment.line } else { func.line };
                 let mut e = AE::new(ErrorKind::MemberAssignmentTypeMismatch {
                     object: assignment.object.clone(),
                     member: assignment.member.clone(),
                     expected: prop_type_name(&expected_type),
                     assigned: mismatch,
                 })
-                .with_line(func.line);
+                .with_line(err_line);
                 if let Some(c) = context {
                     e = e.with_context(c);
                 }

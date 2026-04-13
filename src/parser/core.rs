@@ -412,7 +412,7 @@ impl<'src> Parser<'src> {
             // Handler body begins on the next line, e.g.:
             //   onCurrentItemChanged:
             //       if (cond) { ... }
-            let Some((_, next_raw)) = self.peek() else {
+            let Some((next_lineno, next_raw)) = self.peek() else {
                 return Ok(Function {
                     name,
                     is_signal_handler,
@@ -479,9 +479,9 @@ impl<'src> Parser<'src> {
                 //       if (condition)
                 //           doSomething()
                 // Collect lines until we hit a blank line, closing brace, or a new QML declaration.
-                let mut body_lines = vec![next_line];
+                let mut body_lines = vec![(next_lineno, next_line)];
                 loop {
-                    let Some((_, peek_raw)) = self.peek() else { break };
+                    let Some((peek_lineno, peek_raw)) = self.peek() else { break };
                     let peek = strip_comment(peek_raw).trim().to_string();
                     if peek.is_empty()
                         || peek.starts_with('}')
@@ -494,14 +494,15 @@ impl<'src> Parser<'src> {
                     {
                         break;
                     }
-                    body_lines.push(peek);
+                    body_lines.push((peek_lineno, peek));
                     self.advance();
                 }
                 let mut used_names = Vec::new();
                 let mut member_assignments = Vec::new();
-                for l in &body_lines {
+                for (lno, l) in &body_lines {
                     used_names.extend(collect_names_from_expression(l));
-                    if let Some(ma) = try_parse_member_assignment(l) {
+                    if let Some(mut ma) = try_parse_member_assignment(l) {
+                        ma.line = *lno;
                         member_assignments.push(ma);
                     }
                 }
@@ -544,17 +545,22 @@ impl<'src> Parser<'src> {
             }
 
             // The `{` is inside an unclosed `(` — multi-line expression, not a block.
-            // Consume continuation lines until parens and braces balance to zero.
+            // Consume continuation lines until parens and braces balance to zero,
+            // collecting names and member assignments from each line along the way.
             let mut pdepth = paren_depth;
             let mut bdepth: i32 = rest.chars().fold(0i32, |d, c| match c {
                 '{' => d + 1,
                 '}' => d - 1,
                 _ => d,
             });
+            let mut used_names = collect_names_from_expression(rest);
+            let mut declared_locals = header_arrow_params;
+            declared_locals.extend(collect_arrow_params(rest));
+            let mut member_assignments = Vec::new();
             while pdepth > 0 || bdepth > 0 {
-                let Some((_, raw_line)) = self.advance() else { break };
-                let line = strip_comment(raw_line).trim();
-                for ch in line.chars() {
+                let Some((cont_lineno, raw_line)) = self.advance() else { break };
+                let cont_line = strip_comment(raw_line).trim();
+                for ch in cont_line.chars() {
                     match ch {
                         '(' => pdepth += 1,
                         ')' => pdepth -= 1,
@@ -563,15 +569,55 @@ impl<'src> Parser<'src> {
                         _ => {}
                     }
                 }
+                declared_locals.extend(collect_arrow_params(cont_line));
+                declared_locals.extend(collect_function_keyword_params(cont_line));
+                if let Some(nested_name) = try_parse_nested_function_decl_name(cont_line) {
+                    declared_locals.push(nested_name);
+                }
+                if let Some(catch_var) = try_parse_catch_param(cont_line) {
+                    declared_locals.push(catch_var);
+                }
+                let mut line_names = if let Some((names, rhs)) = try_parse_destructure_decl(cont_line) {
+                    declared_locals.extend(names);
+                    collect_names_from_expression(&rhs)
+                } else if let Some((var_name, rhs)) = try_parse_var_decl(cont_line) {
+                    declared_locals.push(var_name.to_string());
+                    collect_names_from_expression(rhs)
+                } else {
+                    let for_vars = try_parse_for_vars(cont_line);
+                    if !for_vars.is_empty() {
+                        declared_locals.extend(for_vars);
+                        collect_names_from_expression(cont_line)
+                    } else if let Some(mut ma) = try_parse_member_assignment(cont_line) {
+                        // Member assignment: record it, also collect whole-line names for RHS
+                        let names = collect_names_from_expression(cont_line);
+                        ma.line = cont_lineno;
+                        member_assignments.push(ma);
+                        names
+                    } else if cont_line.ends_with('{')
+                        && try_parse_method_shorthand_params(cont_line).is_some()
+                    {
+                        // ES6 method shorthand `methodName(params) {` — skip the name
+                        vec![]
+                    } else if let Some(value_part) = try_parse_object_key(cont_line) {
+                        // Object literal key: only scope-check the value, not the key
+                        collect_names_from_expression(value_part)
+                    } else {
+                        collect_names_from_expression(cont_line)
+                    }
+                };
+                for n in &mut line_names {
+                    n.line = cont_lineno;
+                }
+                used_names.extend(line_names);
             }
-            let used_names = collect_names_from_expression(rest);
             return Ok(Function {
                 name,
                 is_signal_handler,
                 parameters: vec![],
                 used_names,
-                declared_locals: header_arrow_params,
-                member_assignments: vec![],
+                declared_locals,
+                member_assignments,
                 line: lineno,
             });
         }
@@ -997,12 +1043,16 @@ impl<'src> Parser<'src> {
             }
 
             // Member assignment: `obj.member = literal`
-            if let Some(assignment) = try_parse_member_assignment(line) {
+            if let Some(mut assignment) = try_parse_member_assignment(line) {
+                assignment.line = lineno;
                 used_names.push(FunctionUsedName {
                     name: assignment.object.clone(),
                     accessed_item: Some(assignment.member.clone()),
                     line: lineno,
                 });
+                // Also collect names referenced in the RHS so that undefined variables
+                // used in the assigned expression are caught (e.g. `obj.x = bad2 + 1`).
+                used_names.extend(annotate(collect_names_from_expression(line)));
                 member_assignments.push(assignment);
                 continue;
             }

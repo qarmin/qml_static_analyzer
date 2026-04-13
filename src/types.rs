@@ -112,11 +112,21 @@ impl Eq for FunctionUsedName {}
 
 /// A simple assignment to a child's property inside a function body,
 /// e.g. `element.property = value` where value is a literal.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct MemberAssignment {
     pub object: String,
     pub member: String,
     pub value: PropertyValue,
+    /// Source line number (1-based). Not serialized — used for error reporting only.
+    #[serde(skip, default)]
+    pub line: usize,
+}
+
+impl PartialEq for MemberAssignment {
+    fn eq(&self, other: &Self) -> bool {
+        self.object == other.object && self.member == other.member && self.value == other.value
+        // `line` intentionally excluded — not persisted in snapshots
+    }
 }
 
 /// Describes a function or a signal handler, e.g. `function foo(a, b) { … }`

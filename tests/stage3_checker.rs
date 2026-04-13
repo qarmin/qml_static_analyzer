@@ -2532,3 +2532,255 @@ Item {
     );
 }
 
+// ─── regression: multi-token RHS not a type mismatch ─────────────────────────
+
+/// `elem.text = 1 + someCall()` — RHS is a complex expression, not a literal int.
+/// Must NOT produce MemberAssignmentTypeMismatch for a string property.
+#[test]
+fn test_member_assignment_complex_rhs_not_type_mismatch() {
+    let source = r#"
+Item {
+    TextField {
+        id: field
+    }
+    function doIt() {
+        field.text = 1 + someComplexExpr()
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::MemberAssignmentTypeMismatch { object, member, .. }
+            if object == "field" && member == "text")),
+        "complex RHS must not be flagged as type mismatch: {errors:?}"
+    );
+}
+
+// ─── regression: object literal keys in showDialog args not undefined ─────────
+
+/// Keys of a JS object literal passed as argument (`{ titleText: … }`) must not
+/// be flagged as undefined names.
+#[test]
+fn test_object_literal_keys_in_call_arg_not_undefined() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: BaseFunctions.showDialog("qrc:/Foo.qml", this, {
+            titleText: qsTr("Hello"),
+            messageText: qsTr("World")
+        })
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "titleText" || name == "messageText")),
+        "object literal keys must not be flagged as undefined: {errors:?}"
+    );
+}
+
+// ─── regression: destructuring arrow param ({prop}) not undefined ─────────────
+
+/// `QQmlListModelUtil.some(model, ({check}) => check)` — `check` is an arrow
+/// function parameter extracted via object destructuring; must not be flagged.
+#[test]
+fn test_destructuring_arrow_param_not_undefined() {
+    let source = r#"
+Item {
+    property bool result: false
+    function update() {
+        result = someUtil.some(myModel, ({check}) => check)
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "check")),
+        "destructuring arrow param 'check' must not be flagged as undefined: {errors:?}"
+    );
+}
+
+// ─── regression: const declaration inside multi-line call arg not undefined ────
+
+/// `const nowDateTime = …` declared inside a multi-line function-call argument
+/// body (e.g. `showDialog(…, { exportOnDisk: () => { const nowDateTime = … } })`)
+/// must not cause `nowDateTime` to be flagged as undefined when used later.
+#[test]
+fn test_const_decl_in_call_arg_body_not_undefined() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: testLogExportDialog = BaseFunctions.showDialog("qrc:/Foo.qml", this, {
+            exportOnDisk: () => {
+                const nowDateTime = new Date(Date.now())
+                doSomething(nowDateTime.getFullYear())
+            }
+        })
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "nowDateTime")),
+        "const-declared 'nowDateTime' must not be flagged as undefined: {errors:?}"
+    );
+}
+
+// ─── regression: ES6 method shorthand in object arg not flagged ───────────────
+
+/// `{ restoringBackupDone() { … } }` inside a function call argument — the
+/// method name must not be flagged as an undefined identifier.
+#[test]
+fn test_es6_method_shorthand_in_call_arg_not_undefined() {
+    let source = r#"
+Item {
+    TextButton {
+        id: btn
+        onClicked: BaseFunctions.showDialog("qrc:/Foo.qml", this, {
+            restoringBackupDone() {
+                doWork()
+            }
+        })
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "restoringBackupDone")),
+        "ES6 method shorthand name must not be flagged as undefined: {errors:?}"
+    );
+}
+
+// ─── regression: undefined name in call-arg body IS flagged ──────────────────
+
+/// Variables used but never declared inside a multi-line call argument body
+/// must still be caught (e.g. `uuid2` used where `uuid` was the parameter).
+#[test]
+fn test_undefined_name_in_call_arg_body_flagged() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: Patient.createNewPatient(model).then((uuid) => {
+            model.uuid = uuid2
+        })
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "uuid2")),
+        "undefined 'uuid2' inside call-arg body must be flagged: {errors:?}"
+    );
+}
+
+// ─── regression: object destructuring in for-of loops ────────────────────────
+
+/// `for (const {error, context} of errors)` — both destructured names must be
+/// added to the loop's local scope, not flagged as undefined.
+#[test]
+fn test_for_of_object_destructuring_not_undefined() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: {
+            for (const {error, context} of errors) {
+                BaseFunctions.printError(error, "Task failed")
+                if (context) {
+                    BaseFunctions.showDialog(context.title, context.message)
+                }
+            }
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "error" || name == "context")),
+        "destructured for-of vars 'error'/'context' must not be flagged as undefined: {errors:?}"
+    );
+}
+
+/// `for (const {key: alias} of arr)` — renamed bindings should expose the
+/// alias (`renamed`), not the source key (`key`).
+#[test]
+fn test_for_of_object_destructuring_renamed() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: {
+            for (const {key: renamed} of items) {
+                doSomething(renamed)
+            }
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "renamed")),
+        "renamed destructure alias 'renamed' must not be flagged as undefined: {errors:?}"
+    );
+}
+
+/// `for (const {value = 0} of arr)` — default values must not break binding;
+/// `value` must be recognised.
+#[test]
+fn test_for_of_object_destructuring_with_default() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: {
+            for (const {value = 0} of items) {
+                doSomething(value)
+            }
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "value")),
+        "destructured 'value' (with default) must not be flagged as undefined: {errors:?}"
+    );
+}
+
+/// After a `for (const {a, b} of …)` loop ends, `a` and `b` are out of scope.
+/// References after the loop should still be flagged. This test simply
+/// confirms object destructuring doesn't accidentally allow unrelated names
+/// to pass — `nope` is never bound.
+#[test]
+fn test_for_of_object_destructuring_unrelated_still_flagged() {
+    let source = r#"
+Item {
+    FilledButton {
+        id: btn
+        onClicked: {
+            for (const {error, context} of errors) {
+                doSomething(nope)
+            }
+        }
+    }
+}
+"#;
+    let errors = check(source);
+    assert!(
+        has_error(&errors, |e| matches!(e, ErrorKind::UndefinedName { name, .. }
+            if name == "nope")),
+        "unrelated name 'nope' must still be flagged inside for-of body: {errors:?}"
+    );
+}
+
