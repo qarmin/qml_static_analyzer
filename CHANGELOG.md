@@ -1,3 +1,12 @@
+# Version 0.4.1 - 13.04.2026
+- Errors for `UnknownMemberAccess` and `MemberAssignmentTypeMismatch` now point to the exact assignment line instead of the function header
+- Improved parser: multi-line expressions (open parentheses spanning multiple lines) now correctly collect `used_names`, `declared_locals`, and `member_assignments` from every continuation line
+- RHS names in member assignments (e.g. `obj.x = bad + 1`) are now checked for undefined identifiers
+- Arrow-function parameters support destructuring: `({prop})`, `([a, b])` patterns are correctly extracted as local bindings
+- `for`-loop object-destructuring (`for (const {key: alias} of ...)`) is now supported
+- `try_parse_member_assignment` correctly marks multi-token RHS as `TooComplex` instead of misclassifying them
+- `MemberAssignment` stores the source line number for accurate error reporting; `PartialEq` intentionally ignores it so snapshots remain stable
+
 # Version 0.4.0 - 10.04.2026
 - Added `UnknownQmlMember` error: member access on known QML child ids (e.g. `childId.nonExistentProp`) is now validated in function bodies, property declarations, and inline assignments
 - Added `UnknownConnectionsTarget` error: `Connections { target: unknownThing }` is now caught when the target is not in scope
