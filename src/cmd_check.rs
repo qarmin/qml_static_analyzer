@@ -324,13 +324,19 @@ pub fn cmd_check(args: &[String]) {
         parent_scopes,
         parent_id_types,
         complex: opts.complex,
+        opaque_type_names: config.external_types.names.iter().cloned().collect(),
     };
 
+    let root_type_names: HashSet<String> = ROOT_QT_TYPES
+        .iter()
+        .map(ToString::to_string)
+        .chain(config.roots.extra_types.iter().cloned())
+        .collect();
     let root_types: Vec<String> = parsed
         .iter()
         .filter(|(_, f)| {
             let qt_type = resolve_qt_base(&f.base_type, &db, &file_base_types);
-            is_root_qt_type(&qt_type)
+            root_type_names.contains(&qt_type)
         })
         .map(|(_, f)| f.name.clone())
         .collect();
@@ -456,10 +462,6 @@ fn load_qt_db(opts: &CheckOpts) -> QtTypeDb {
 // ── root discovery ────────────────────────────────────────────────────────────
 
 const ROOT_QT_TYPES: &[&str] = &["Window", "ApplicationWindow", "Dialog"];
-
-fn is_root_qt_type(qt_type: &str) -> bool {
-    ROOT_QT_TYPES.contains(&qt_type)
-}
 
 /// Find the type name of a child element with the given id anywhere in the element tree.
 fn find_child_type_by_id(children: &[qml_static_analyzer::types::QmlChild], id: &str) -> Option<String> {

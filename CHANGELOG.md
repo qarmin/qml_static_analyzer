@@ -1,3 +1,8 @@
+# Unreleased
+- Added `[external_types]` config section: type names from compiled C++/QML modules the analyzer cannot introspect (e.g. Quickshell's `ShellRoot`/`PanelWindow`/`Scope`, KDE's `PlasmoidItem`) no longer raise `UnknownType` and skip own-property validation, while their children are still checked normally
+- Added `[roots]` config section (`extra_types`): extra BFS reachability root element types on top of the built-in `Window`/`ApplicationWindow`/`Dialog` — needed for non-Qt-Quick entry points like Quickshell's `ShellRoot`/`Scope`
+- See `docs/cpp_projects_extension_ideas.md` for the full list of investigated extension points towards C++-heavy / non-Qt-Quick-native projects (Quickshell shells, KDE Plasma)
+
 # Version 0.4.1 - 13.04.2026
 - Errors for `UnknownMemberAccess` and `MemberAssignmentTypeMismatch` now point to the exact assignment line instead of the function header
 - Improved parser: multi-line expressions (open parentheses spanning multiple lines) now correctly collect `used_names`, `declared_locals`, and `member_assignments` from every continuation line

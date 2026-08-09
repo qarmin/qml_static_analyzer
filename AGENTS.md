@@ -152,6 +152,18 @@ MainContent = ["NewExaminationScreen"]            # synthetic child (file-wide)
 
 [ignore]
 paths = ["vendor/", "generated/"]                 # relative to --path
+
+[external_types]
+names = ["ShellRoot", "PanelWindow", "Scope"]     # opaque instantiable types from a
+                                                    # compiled C++/QML module (e.g. Quickshell).
+                                                    # No UnknownType, no own-property validation —
+                                                    # but children ARE still checked normally
+                                                    # (unlike the aliased-opaque case, e.g. Kirigami.Icon,
+                                                    # which skips its whole subtree).
+
+[roots]
+extra_types = ["ShellRoot", "Scope"]               # extra BFS entry point types, on top of the
+                                                    # built-in Window/ApplicationWindow/Dialog
 ```
 
 ---

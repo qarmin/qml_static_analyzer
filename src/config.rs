@@ -31,6 +31,20 @@
 //! [globals]
 //! # Names that are always considered valid (e.g. C preprocessor macros exposed to QML).
 //! names = ["AP600_GUI_TEST", "AP600_DEBUG_TIME"]
+//!
+//! [external_types]
+//! # Type names provided by a compiled C++/QML module the analyzer cannot introspect
+//! # (e.g. Quickshell's `ShellRoot`, `PanelWindow`, `Scope`, or KDE's `PlasmoidItem`).
+//! # Instantiating them (`PanelWindow { ... }`) no longer raises "Unknown type", and
+//! # property assignments directly on them are not validated (own members unknown).
+//! # Their children ARE still checked normally — only the element itself is opaque.
+//! names = ["ShellRoot", "PanelWindow", "Scope", "PlasmoidItem"]
+//!
+//! [roots]
+//! # Extra root element types (besides Window/ApplicationWindow/Dialog) from which the
+//! # BFS reachability scan starts. Needed for frameworks whose entry point is not a
+//! # standard Qt Quick window type (e.g. Quickshell's `ShellRoot`/`Scope`).
+//! extra_types = ["ShellRoot", "Scope"]
 //! ```
 
 use std::collections::HashMap;
@@ -50,6 +64,12 @@ pub struct Config {
     /// Always-valid global names (e.g. preprocessor macros exposed to QML).
     #[serde(default)]
     pub globals: GlobalsSection,
+    /// Type names from compiled C++/QML modules that cannot be introspected.
+    #[serde(default, rename = "external_types")]
+    pub external_types: ExternalTypesSection,
+    /// Extra BFS root element types, on top of the built-in Window/ApplicationWindow/Dialog.
+    #[serde(default)]
+    pub roots: RootsSection,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -64,6 +84,20 @@ pub struct GlobalsSection {
     /// Names that are always considered valid identifiers in QML scope.
     #[serde(default)]
     pub names: Vec<String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct ExternalTypesSection {
+    /// Element type names treated as known-but-opaque (unqualified, e.g. "PanelWindow").
+    #[serde(default)]
+    pub names: Vec<String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+pub struct RootsSection {
+    /// Extra element type names that count as BFS reachability roots.
+    #[serde(default)]
+    pub extra_types: Vec<String>,
 }
 
 /// Deprecated section — a flat list of C++ names (all opaque).

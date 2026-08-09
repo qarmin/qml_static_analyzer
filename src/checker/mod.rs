@@ -44,6 +44,12 @@ pub struct CheckContext {
     pub parent_id_types: std::collections::HashMap<String, (String, Vec<crate::types::Property>, Vec<String>, bool)>,
     /// When true, errors carry a full within-file element path (for --complex output mode).
     pub complex: bool,
+    /// Unqualified element type names from compiled C++/QML modules the analyzer cannot
+    /// introspect (config `[external_types]`, e.g. Quickshell's `PanelWindow`, `ShellRoot`).
+    /// Instantiating them never raises `UnknownType` and their own property assignments
+    /// are not validated — but, unlike aliased-opaque types (`Kirigami.Icon`), their
+    /// children ARE still checked normally.
+    pub opaque_type_names: std::collections::HashSet<String>,
 }
 
 impl CheckContext {
@@ -1309,8 +1315,15 @@ impl Checker<'_> {
         //   - Strip the alias prefix and look up the bare name in the Qt DB.
         //   - If found → use it as the effective type for full validation.
         //   - If NOT found (e.g. `Kirigami.Icon`) → opaque external type, skip silently.
-        let (resolved_type_name, child_full_validation): (&str, bool) = if let Some(dot_pos) = child.type_name.find('.')
+        let (resolved_type_name, child_full_validation): (&str, bool) = if self
+            .ctx
+            .opaque_type_names
+            .contains(child.type_name.as_str())
         {
+            // Configured external C++/QML type (`[external_types]`) — own members are
+            // unknown so we don't validate them, but children are still checked below.
+            (&child.type_name, false)
+        } else if let Some(dot_pos) = child.type_name.find('.') {
             let prefix = &child.type_name[..dot_pos];
             if import_aliases.contains_key(prefix) {
                 match self.resolve_aliased_base(&child.type_name, import_aliases) {
@@ -1326,10 +1339,11 @@ impl Checker<'_> {
             (&child.type_name, true)
         };
 
-        // Sprawdź czy typ jest znany — albo Qt, albo sparsowany plik QML.
+        // Sprawdź czy typ jest znany — albo Qt, albo sparsowany plik QML, albo opaque external.
         if !self.ctx.known_types.is_empty()
             && !self.db.has_type(resolved_type_name)
             && !self.ctx.known_types.contains(resolved_type_name)
+            && !self.ctx.opaque_type_names.contains(resolved_type_name)
         {
             errors.push(
                 AE::new(ErrorKind::UnknownType {
