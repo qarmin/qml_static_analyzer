@@ -164,7 +164,22 @@ names = ["ShellRoot", "PanelWindow", "Scope"]     # opaque instantiable types fr
 [roots]
 extra_types = ["ShellRoot", "Scope"]               # extra BFS entry point types, on top of the
                                                     # built-in Window/ApplicationWindow/Dialog
+
+extends = "presets/quickshell.toml"                # layer on top of a base config; relative to
+                                                    # THIS file's directory. List-valued sections are
+                                                    # unioned, map-valued sections merge key-by-key
+                                                    # with this (more specific) config winning.
 ```
+
+### Bootstrapping a config for a new (non-plain-QML) project
+`suggest-config --path <dir> [--builtin-qt-version X.Y.Z]` runs the same parse+BFS pipeline
+as `check` but, instead of reporting errors, prints candidate `[external_types]`/`[roots]`
+entries: unqualified element types instantiated somewhere that are neither a Qt type nor a
+project file, and base types of files unreachable via BFS. It's a heuristic aid for a human
+to review, not ground truth — it will also surface real typos in local components, and it
+won't see local `component Foo: Bar { ... }` inline type declarations (`known_types` is
+built only from `.qml` file names). See `docs/cpp_projects_extension_ideas.md` and
+`presets/quickshell.toml` for a worked example against Quickshell-based shells.
 
 ---
 

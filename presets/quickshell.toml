@@ -1,0 +1,44 @@
+# Best-effort preset for projects built on Quickshell (https://quickshell.org/).
+#
+# Quickshell ships as a compiled C++/QML plugin, so the analyzer can't introspect its
+# real types. This preset lists the Quickshell-provided element types most commonly
+# instantiated directly in shell configs (derived from cross-referencing several public
+# Quickshell-based shells against the bundled Qt type DB and their own project files, not
+# from Quickshell's own source) so they don't raise `Unknown type`.
+#
+# This is NOT a substitute for verification: Quickshell's API surface changes between
+# versions, and this list is not exhaustive. Run `suggest-config` on your own project and
+# merge anything new it finds into your project's own config (which extends this one) —
+# don't edit this preset itself unless you're contributing a fix upstream.
+#
+# Usage, from your project's own config file:
+#   extends = "path/to/presets/quickshell.toml"
+
+[external_types]
+names = [
+    "ShellRoot",
+    "Scope",
+    "Singleton",
+    "PanelWindow",
+    "FloatingWindow",
+    "PopupWindow",
+    "WlSessionLockSurface",
+    "PersistentProperties",
+    "Variants",
+    "FileView",
+    "Process",
+    "StdioCollector",
+    "IpcHandler",
+    "GlobalShortcut",
+    "HyprlandFocusGrab",
+    "Region",
+    "ClippingRectangle",
+    "RectangularShadow",
+    "ScriptModel",
+]
+
+[roots]
+# Quickshell's own entry-point types — a shell's root files are usually a bare `ShellRoot`
+# or `Scope`, never a Window/ApplicationWindow/Dialog, so without this they're silently
+# excluded from checking (not reachable from any root) rather than erroring loudly.
+extra_types = ["ShellRoot", "Scope"]

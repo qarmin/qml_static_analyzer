@@ -28,16 +28,22 @@ Status: zaimplementowane pozycje są oznaczone `[x]`.
   sprawdza (silent false negative, gorsze niż błąd — nic nie widać).
   Zaimplementowane w `src/config.rs` (`RootsSection`), `src/cmd_check.rs`.
 
-- [ ] **Generyczny skan metatypes z dowolnych modułów C++** — `qt_types_gen.rs` już
+- [x] **Generyczny skan metatypes z dowolnych modułów C++** — `qt_types_gen.rs` już
   parsuje standardowy format moc/AUTOMOC (`*_metatypes.json` z `QML.Element`,
   `QML.Foreign`, `QML.Attached`, properties/signals/methods), ale `load_all_classes()`
   (qt_types_gen.rs:107-122) ma zahardkodowaną listę modułów Qt (`qt6core`, `qt6gui`, ...)
   i szuka tylko w `lib/metatypes/`/`metatypes/`. KDE Frameworks, Plasma i Quickshell
-  generują pliki w tym samym formacie przy budowaniu z CMake. Trzeba: nowy subcommand
-  `generate-module-types --scan-dir <build_dir>` który rekurencyjnie zbiera wszystkie
-  `*_metatypes.json` niezależnie od nazwy modułu i scala je z istniejącą bazą Qt.
-  Rozwiązuje to problem klas C++ dla plasma-desktop/plasma-bigscreen i (po zbudowaniu ze
-  źródeł) samego Quickshella.
+  generują pliki w tym samym formacie przy budowaniu z CMake.
+  Zaimplementowane jako `--extra-metatypes-dir <build_dir>` (repeatable) na
+  `generate-qt-types`: rekurencyjnie zbiera wszystkie `*_metatypes.json` niezależnie od
+  nazwy modułu (`find_all_metatypes_files`/`load_extra_classes` w `qt_types_gen.rs`) i
+  scala je z bazą Qt (Qt wygrywa przy konflikcie nazw, potrzebne jako korzeń dziedziczenia).
+  Zweryfikowane testem jednostkowym z syntetycznym modułem (bez realnego SDK Quickshella/
+  KDE pod ręką) — potwierdzone poprawne rozwiązywanie `parent` przez scaloną bazę.
+  **Uwaga**: trzeba wskazywać na *rozwiązane* metatypes (te które qmltyperegistrar emituje
+  razem z `.qmltypes` modułu), nie na surowe pliki AUTOMOC z `CMakeFiles/*.dir/` — te mogą
+  zawierać nierozwiązany placeholder `"auto"` w `QML.Element`, który generator świadomie
+  pomija (tak jak już robi to dla samego Qt).
 
 - [ ] **Skaner rejestracji C++ → auto-generowanie `[cpp_objects]`** — ręczne wypisywanie
   w TOML każdej klasy C++ dostępnej w QML jest nierealne przy setkach klas. `cpp_header.rs`
@@ -97,12 +103,35 @@ Status: zaimplementowane pozycje są oznaczone `[x]`.
   jak plasma-desktop, gdzie moduły QML są rozbite po wielu katalogach (`imports/`,
   `containments/`, `applets/`).
 
+## Dodatkowo zaimplementowane (druga runda)
+
+- [x] **`extends` w configu** — warstwowanie presetów (`config.rs::load_config_file` +
+  `merge_configs`). Listy (`ignore.paths`, `globals.names`, `external_types.names`,
+  `roots.extra_types`) są unią po całym łańcuchu; mapy (`new_child`, `cpp_objects`)
+  scalane per-klucz, węższy config wygrywa przy konflikcie. Cykle wykrywane przez
+  kanonikalizację ścieżek i przerywane z ostrzeżeniem. Preset dla Quickshella w
+  `presets/quickshell.toml` (zweryfikowany end-to-end na `temp/shell`).
+
+- [x] **`suggest-config` subcommand** — heurystyczny bootstrapping bez kompilacji.
+  Uruchamia ten sam pipeline co `check`, ale zamiast błędów zbiera: (a) nazwy typów
+  użytych jako dziecko, których nie ma ani w bazie Qt, ani wśród plików projektu →
+  kandydaci do `[external_types]`; (b) typy bazowe plików nieosiągalnych z żadnego roota →
+  kandydaci do `[roots] extra_types`. **Realny efekt uboczny odkryty przy testowaniu na
+  `temp/shell`**: znaczna część "kandydatów" to nie prawdziwe typy zewnętrzne, a lokalne
+  deklaracje `component Foo: Bar { ... }` w tym samym pliku — `known_types` budowane jest
+  tylko z nazw plików `.qml`, więc inline `component` nigdy nie trafia do tej listy. To
+  jest osobny, nieopisany wcześniej gap (nie naprawiony w tej rundzie) — `suggest-config`
+  i tak jest użyteczny, ale trzeba uwzględnić ten szum przy przeglądzie listy.
+
 ## Zaimplementowane — jak używać
 
 ```toml
+extends = "presets/quickshell.toml"   # opcjonalnie — warstwowanie na bazie presetu
+
 [external_types]
 # Typy z modułów C++/QML, których analizator nie może zintrospektować.
-names = ["ShellRoot", "PanelWindow", "Scope", "PlasmoidItem"]
+# (merged z listą presetu, jeśli extends jest ustawione)
+names = ["MyProjectSpecificType"]
 
 [roots]
 # Dodatkowe typy root (obok wbudowanych Window/ApplicationWindow/Dialog),
@@ -110,10 +139,20 @@ names = ["ShellRoot", "PanelWindow", "Scope", "PlasmoidItem"]
 extra_types = ["ShellRoot", "Scope"]
 ```
 
-Weryfikacja bezpieczeństwa zmian: `just test` (98 testów, 1 fail pre-existing niezależny
-od tych zmian — potwierdzone przez `git stash` + porównanie na czystym `master`), `cargo
-clippy --all-targets` (brak nowych ostrzeżeń w zmienionych plikach), oraz manualny test na
-fixture'ze w stylu Quickshell (`ShellRoot { Rectangle { unknownProp: 42 } }`):
-- bez configu: plik nieosiągalny, 0 błędów (zachowanie identyczne jak przed zmianą),
-- z configem: `ShellRoot` nie jest już `UnknownType`, plik jest sprawdzany, a
-  `unknownProp` na `Rectangle` w środku i tak zostaje poprawnie wykryte.
+```bash
+# Bootstrapping configu dla nowego projektu (bez kompilacji):
+qml_static_analyzer suggest-config --path . --builtin-qt-version 6.8.3
+
+# Pełna introspekcja C++ (wymaga zbudowanego projektu docelowego):
+qml_static_analyzer generate-qt-types --qt-path ~/Qt/6.8.3/gcc_64 \
+    --extra-metatypes-dir ~/quickshell/build --output qt_types_6.8.3_quickshell.json
+```
+
+Weryfikacja bezpieczeństwa zmian (obie rundy): `just test` (98 testów, 1 fail pre-existing
+niezależny od tych zmian — potwierdzone przez `git stash` + porównanie na czystym
+`master`), `cargo clippy --all-targets` (brak nowych ostrzeżeń w zmienionych plikach),
+manualny test na fixture'ze w stylu Quickshell (`ShellRoot { Rectangle { unknownProp: 42 } }`),
+test jednostkowy dla `extends`/cykli w `config.rs`, test jednostkowy dla scalania metatypes
+w `qt_types_gen.rs`, oraz end-to-end na prawdziwym projekcie (`temp/shell` z presetem
+Quickshella): BFS poprawnie dociera głęboko w drzewo przez `ShellRoot`/`Scope`, a te typy
+(i pozostałe z presetu) nigdzie nie pojawiają się jako `Unknown type`.

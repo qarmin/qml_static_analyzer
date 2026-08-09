@@ -84,6 +84,75 @@ qml_static_analyzer list-builtins
 
 Not everything can be detected by static analysis, and some projects may have specific patterns that cause false positives. A config file allows you to ignore specific folders/files, include additional informations about C++ classes and 
 
+## Plugging into a project that isn't plain Qt Quick
+
+The analyzer was built for plain QML projects, but it can be pointed at projects that layer
+QML on top of a compiled C++/QML framework (Quickshell shells, KDE Plasma, ...), without
+needing to compile anything or hand-write a full type database. Two modes, from least to
+most setup:
+
+### Without compiling the target project
+
+1. Run `suggest-config` once on the target project to get a starter config:
+
+   ```bash
+   qml_static_analyzer suggest-config --path . --builtin-qt-version 6.8.3
+   ```
+
+   It scans the project the same way `check` does and prints candidate `[external_types]`
+   entries (element types that are instantiated but aren't a project file or a known Qt
+   type — e.g. Quickshell's `PanelWindow`) and candidate `[roots] extra_types` entries
+   (base types of files that BFS can never reach otherwise — e.g. Quickshell's `ShellRoot`).
+   This is a heuristic aid, not ground truth: review the list by hand before using it — some
+   names may be real typos in your own components rather than external types, and some may
+   be QML `component Foo: Bar { ... }` inline type declarations the analyzer doesn't track
+   as named types yet.
+
+2. Paste the reviewed snippet into a config file and run `check --config that-file.toml`.
+   Types listed in `[external_types]` are treated as known-but-opaque: instantiating them
+   no longer raises `Unknown type`, and their own property assignments aren't validated —
+   but, unlike the existing aliased-import opaque handling (e.g. `Kirigami.Icon`), **their
+   children are still checked normally**.
+
+3. If several projects share a framework, factor the common part into a preset and have
+   each project's config extend it:
+
+   ```toml
+   # project.toml
+   extends = "../presets/quickshell.toml"   # resolved relative to this file's directory
+
+   [external_types]
+   names = ["MyProjectSpecificType"]         # merged with the preset's list, not replaced
+   ```
+
+   List-valued sections (`ignore.paths`, `globals.names`, `external_types.names`,
+   `roots.extra_types`) are unioned across the `extends` chain; map-valued sections
+   (`new_child`, `cpp_objects`) merge key-by-key with the more specific config winning on
+   conflicts. Chains can nest to any depth; cycles are detected and ignored with a warning.
+   A best-effort Quickshell preset lives at `presets/quickshell.toml`.
+
+### With the target project compiled
+
+If you (or your CI) build the target project from source, `generate-qt-types` can merge
+its real C++ type introspection data into the Qt type DB, instead of treating those types
+as opaque. Point `--extra-metatypes-dir` at the build tree — it recursively scans for any
+`*_metatypes.json` file (the standard moc/AUTOMOC introspection format CMake emits for
+every Qt module, not just Qt's own):
+
+```bash
+qml_static_analyzer generate-qt-types \
+    --qt-path ~/Qt/6.8.3/gcc_64 \
+    --extra-metatypes-dir ~/quickshell/build \
+    --output qt_types_6.8.3_quickshell.json
+```
+
+The result is a normal `qt_types_*.json` — use it with `--qt-types-json` like any other.
+Real properties/signals/methods are now validated instead of skipped as opaque. One caveat:
+point this at the *resolved* metatypes (the ones qmltyperegistrar emits alongside a
+module's `.qmltypes` file), not raw per-translation-unit AUTOMOC intermediates buried in
+`CMakeFiles/*.dir/` — those can still contain the unresolved `QML_ELEMENT` placeholder
+`"auto"` instead of the real type name, which this tool intentionally skips.
+
 ## Suppressing individual errors
 
 Add `// qml-ignore` at the end of a line to suppress any error reported on that line:

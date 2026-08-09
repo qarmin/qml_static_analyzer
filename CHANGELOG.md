@@ -1,6 +1,10 @@
 # Unreleased
 - Added `[external_types]` config section: type names from compiled C++/QML modules the analyzer cannot introspect (e.g. Quickshell's `ShellRoot`/`PanelWindow`/`Scope`, KDE's `PlasmoidItem`) no longer raise `UnknownType` and skip own-property validation, while their children are still checked normally
 - Added `[roots]` config section (`extra_types`): extra BFS reachability root element types on top of the built-in `Window`/`ApplicationWindow`/`Dialog` — needed for non-Qt-Quick entry points like Quickshell's `ShellRoot`/`Scope`
+- Added `extends` config field: a config can now inherit from a base config/preset (list-valued sections union, map-valued sections merge with the more specific config winning); cycles are detected and ignored with a warning
+- Added `suggest-config` subcommand: scans a project without compiling it and prints a starter `[external_types]`/`[roots]` snippet, for quickly bootstrapping a config on a new project
+- `generate-qt-types` gained a repeatable `--extra-metatypes-dir <dir>` flag: recursively scans a build tree for any `*_metatypes.json` (the standard moc/AUTOMOC format, not specific to Qt itself) and merges it into the generated type DB, so third-party C++/QML modules get real property/signal/method validation instead of being treated as opaque — when the target project has actually been built
+- Added `presets/quickshell.toml`, a best-effort starter preset for Quickshell-based shell projects, usable via `extends`
 - See `docs/cpp_projects_extension_ideas.md` for the full list of investigated extension points towards C++-heavy / non-Qt-Quick-native projects (Quickshell shells, KDE Plasma)
 
 # Version 0.4.1 - 13.04.2026
