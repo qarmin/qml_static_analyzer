@@ -346,6 +346,9 @@ pub fn cmd_check(args: &[String]) {
             usage_paths.entry(type_name).or_insert(path);
         }
     }
+    if config.roots.treat_unreachable_as_roots {
+        extend_with_unreachable_as_roots(&parsed, &config.new_child, &mut usage_paths);
+    }
 
     let mut total_errors = 0usize;
     let mut unreachable: Vec<&PathBuf> = Vec::new();
@@ -556,6 +559,27 @@ fn is_ignored(file_path: &Path, base_dir: &Path, ignored_paths: &[String]) -> bo
         .any(|ignore| relative.starts_with(Path::new(ignore.as_str())))
 }
 
+/// Treats every file BFS still hasn't reached as its own root (config `[roots]
+/// treat_unreachable_as_roots`), cascading into whatever each one references. Needed for
+/// frameworks (e.g. KDE Plasma's KPackage) that load QML files by path convention rather
+/// than through a small, enumerable set of root element types.
+fn extend_with_unreachable_as_roots(
+    parsed: &[(PathBuf, FileItem)],
+    extra_children: &HashMap<String, Vec<String>>,
+    usage_paths: &mut HashMap<String, Vec<String>>,
+) {
+    let still_unreached: Vec<String> = parsed
+        .iter()
+        .filter(|(_, f)| !usage_paths.contains_key(&f.name))
+        .map(|(_, f)| f.name.clone())
+        .collect();
+    for type_name in still_unreached {
+        for (reached_type, path) in build_usage_paths(parsed, &type_name, extra_children) {
+            usage_paths.entry(reached_type).or_insert(path);
+        }
+    }
+}
+
 pub fn build_usage_paths(
     parsed: &[(PathBuf, FileItem)],
     root_type: &str,
@@ -680,14 +704,15 @@ pub fn cmd_suggest_config(args: &[String]) {
         .map(|(_, f)| (f.name.clone(), f.base_type.clone()))
         .collect();
 
-    // 1. Element type names instantiated somewhere that are neither a project file nor a
-    //    known Qt type → candidates for [external_types]. Dotted names (`Foo.Bar`) are
-    //    skipped: those already go through the aliased-import opaque path, unrelated to
-    //    this config section.
+    // 1. Element type names instantiated somewhere (as a child, or as a file's own root
+    //    base type) that are neither a project file nor a known Qt type → candidates for
+    //    [external_types]. Dotted names (`Foo.Bar`) are skipped: those already go through
+    //    the aliased-import opaque path, unrelated to this config section.
     let already_external: HashSet<&str> = config.external_types.names.iter().map(String::as_str).collect();
     let mut external_counts: HashMap<String, usize> = HashMap::new();
     for (_, file) in &parsed {
-        for type_name in collect_child_type_names(&file.children) {
+        let type_names = std::iter::once(file.base_type.clone()).chain(collect_child_type_names(&file.children));
+        for type_name in type_names {
             if type_name.contains('.') || db.has_type(&type_name) || known_types.contains(&type_name) {
                 continue;
             }
@@ -720,6 +745,9 @@ pub fn cmd_suggest_config(args: &[String]) {
         for (type_name, path) in build_usage_paths(&parsed, root_type, &config.new_child) {
             usage_paths.entry(type_name).or_insert(path);
         }
+    }
+    if config.roots.treat_unreachable_as_roots {
+        extend_with_unreachable_as_roots(&parsed, &config.new_child, &mut usage_paths);
     }
 
     let already_roots: HashSet<&str> = config.roots.extra_types.iter().map(String::as_str).collect();

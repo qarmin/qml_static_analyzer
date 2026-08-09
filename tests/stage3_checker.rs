@@ -1199,6 +1199,59 @@ Kirigami.Page {
     );
 }
 
+/// A signal handler on an opaque aliased root must not be flagged: qt_props/qt_signals
+/// are empty for an unresolved type, so we cannot know whether the handler corresponds to
+/// a real signal/property — better silent than a guaranteed false positive on every single
+/// handler declared on such a root. Uses a type name (`Kirigami.OverlaySheet`) that does
+/// NOT happen to collide with a real Qt type's unqualified name (unlike e.g. `Kirigami.Page`,
+/// which resolves to the real QtQuick.Controls `Page` and gets that type's real signals).
+#[test]
+fn test_signal_handler_on_opaque_aliased_root_not_flagged() {
+    let source = r#"
+import org.kde.kirigami as Kirigami
+
+Kirigami.OverlaySheet {
+    onSomeKirigamiSignal: console.log("fired")
+}
+"#;
+    let file = parse_file("Test", source).expect("parse should succeed");
+    let db = load_db();
+    let ctx = CheckContext::empty();
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownSignalHandler { .. })),
+        "signal handler on an opaque aliased root must not produce UnknownSignalHandler, got: {errors:?}"
+    );
+}
+
+/// A file whose own (unaliased) base type is a configured `[external_types]` entry
+/// (e.g. `ActionButton` from an opaque KDE module) must not have its own top-level
+/// property assignments flagged — we don't know ActionButton's real property set.
+#[test]
+fn test_external_type_as_file_root_not_flagged() {
+    let source = r#"
+ActionButton {
+    opacity: activeFocus ? 1 : 0.75
+}
+"#;
+    let file = parse_file("LogoutButton", source).expect("parse should succeed");
+    let db = load_db();
+    let mut ctx = CheckContext::empty();
+    ctx.known_types.insert("SomeType".to_string());
+    ctx.opaque_type_names.insert("ActionButton".to_string());
+    let errors: Vec<ErrorKind> = qml_static_analyzer::checker::check_file(&file, &db, &ctx)
+        .into_iter()
+        .map(|e| e.kind)
+        .collect();
+    assert!(
+        !has_error(&errors, |e| matches!(e, ErrorKind::UnknownPropertyAssignment { .. })),
+        "external_types root base type must not produce UnknownPropertyAssignment, got: {errors:?}"
+    );
+}
+
 // ─── PropertyTypeMismatch ─────────────────────────────────────────────────────
 
 /// `property int count: "hello"` — string literal assigned to int → PropertyTypeMismatch.

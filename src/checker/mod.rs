@@ -367,13 +367,23 @@ impl Checker<'_> {
         //   Some(("Page",        false))   → non-Qt alias + in DB → scope OK, skip assignment checks
         //   Some(("Kirigami.X",  false))   → alias but NOT in DB  → opaque (name unchanged)
         let import_aliases = extract_import_aliases(&file.imports);
-        let (effective_base_name, base_full_validation): (&str, bool) =
+        let (effective_base_name, base_full_validation): (&str, bool) = if self
+            .ctx
+            .opaque_type_names
+            .contains(file.base_type.as_str())
+        {
+            // Configured external C++/QML type (`[external_types]`) as this file's own
+            // base type (e.g. `ActionButton { ... }` where ActionButton comes from an
+            // opaque module) — own members are unknown, skip UnknownPropertyAssignment.
+            (&file.base_type, false)
+        } else {
             match self.resolve_aliased_base(&file.base_type, &import_aliases) {
                 // Opaque: alias prefix known but type not in DB → name unchanged
                 Some((name, _)) if name == file.base_type => (&file.base_type, false),
                 Some((name, full)) => (name, full),
                 None => (&file.base_type, true), // not an alias → normal validation
-            };
+            }
+        };
         let effective_base = self.resolve_qt_type(effective_base_name);
         let qt_props = self.db.all_properties(&effective_base);
         let qt_signals = self.db.all_signals(&effective_base);
@@ -877,8 +887,13 @@ impl Checker<'_> {
         errors: &mut Vec<AE>,
         context: Option<&str>,
     ) {
-        // Sprawdź czy handler sygnału ma odpowiadający sygnał/property
-        if func.is_signal_handler {
+        // Sprawdź czy handler sygnału ma odpowiadający sygnał/property.
+        // Skip entirely when the element's own type is opaque/unresolved (qt_props,
+        // qt_signals, AND declared_signals all empty): every resolvable Qt type has at
+        // least `objectName`/`objectNameChanged` from QtObject, so this triple-empty case
+        // only happens for aliased-opaque (`Kirigami.Page`) or `[external_types]` roots/
+        // children — validating against an empty set would flag every real handler.
+        if func.is_signal_handler && !(qt_props.is_empty() && qt_signals.is_empty() && declared_signals.is_empty()) {
             let signal_name = handler_to_signal(&func.name);
             let prop_exists = qt_props.contains_key(&signal_name) || file_scope.contains(&signal_name);
             let signal_exists = qt_signals.contains_key(&format!("{signal_name}Changed"))

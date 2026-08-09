@@ -120,6 +120,16 @@ pub struct RootsSection {
     /// Extra element type names that count as BFS reachability roots.
     #[serde(default)]
     pub extra_types: Vec<String>,
+    /// If true, any file BFS still can't reach after the normal root pass is treated as
+    /// its own root and checked anyway (still cascading into whatever it references).
+    ///
+    /// Some frameworks (e.g. KDE Plasma's KPackage system) load QML files directly by
+    /// path convention rather than through a small set of well-known root element types —
+    /// a package's `main.qml` might have almost any base type (`Item`, `PlasmoidItem`,
+    /// an aliased `Kirigami.Page`, ...). Enumerating every possible root type name doesn't
+    /// scale there, so this flag sidesteps type-name matching entirely.
+    #[serde(default)]
+    pub treat_unreachable_as_roots: bool,
 }
 
 /// Deprecated section — a flat list of C++ names (all opaque).
@@ -196,6 +206,7 @@ fn merge_configs(base: Config, child: Config) -> Config {
 
     merged.roots.extra_types.extend(child.roots.extra_types);
     dedup_preserve_order(&mut merged.roots.extra_types);
+    merged.roots.treat_unreachable_as_roots |= child.roots.treat_unreachable_as_roots;
 
     merged.extends = None;
     merged

@@ -29,3 +29,5 @@ names = ["ShellRoot", "PanelWindow", "Scope", "PlasmoidItem"]
 
 [roots]
 extra_types = ["ShellRoot", "Scope"]
+# treat_unreachable_as_roots = true   # KDE-Plasma-style: every file loaded by path
+                                       # convention rather than a known root type
