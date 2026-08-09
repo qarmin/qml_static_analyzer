@@ -103,6 +103,47 @@ Status: zaimplementowane pozycje są oznaczone `[x]`.
   jak plasma-desktop, gdzie moduły QML są rozbite po wielu katalogach (`imports/`,
   `containments/`, `applets/`).
 
+## Trzecia runda — weryfikacja na plasma-bigscreen (case study)
+
+Zobacz `temp/plasma-bigscreen/ANALYZER_NOTES.md` po pełny opis krok po kroku (nie kopiowane
+tutaj, bo `temp/` jest w `.gitignore` — to notatka roboczą dla tego konkretnego projektu).
+Skrót:
+
+- [x] **`[roots] treat_unreachable_as_roots`** — nowa opcja configu. KDE Plasma (KPackage)
+  ładuje pliki QML po konwencji ścieżki, nie przez mały, wyliczalny zbiór typów root jak
+  Quickshell (`ShellRoot`/`Scope`). `suggest-config` na plasma-bigscreen wypisał **38 różnych
+  typów bazowych** jako kandydatów do `[roots] extra_types` — niemożliwe do sensownego
+  utrzymania jako lista. Ta flaga rozwiązuje to inaczej: każdy plik, do którego BFS i tak nie
+  dotrze, staje się swoim własnym rootem (kaskadująco, wciąż dociera do referencji z niego).
+  Domyślnie `false` (zero ryzyka dla istniejących projektów).
+
+- [x] **Naprawiony bug: `check_root` nie respektował `[external_types]` dla własnego
+  base_type pliku** — tylko `check_child` miał tę logikę. Plik z rootem typu zewnętrznego
+  (np. `ActionButton { opacity: ... }` z `org.kde.breeze.components`) miał flagowane
+  `opacity` jako `Assignment to unknown property`, mimo że `ActionButton` był w
+  `[external_types]`. Naprawione w `checker/mod.rs::check_root`.
+
+- [x] **Naprawiony pre-existing bug: signal handlery nigdy nie respektowały "opaque"**
+  — ani dla starego mechanizmu aliasowanych importów (`Kirigami.X { onXxx: ... }`), ani dla
+  nowego `[external_types]`. `check_function` walidował istnienie sygnału bezwarunkowo, więc
+  KAŻDY handler na opaque elemencie był gwarantowanym false positive. Naprawione: pomijamy
+  walidację gdy `qt_props`/`qt_signals`/`declared_signals` są wszystkie puste (co — skoro
+  każdy rozwiązywalny typ Qt ma przynajmniej `objectName` z `QtObject` — zdarza się tylko dla
+  faktycznie nierozwiązanego/opaque typu). Na plasma-bigscreen to zredukowało błędy
+  `Signal handler ... has no corresponding signal or property` z **52 do 7**.
+
+- **Wynik końcowy na plasma-bigscreen**: 99 błędów / 93 z 106 plików nieprzeskanowanych
+  (baseline) → 290 błędów / 0 nieprzeskanowanych (po configu + poprawkach). Błędy poszły W GÓRĘ
+  bo dużo więcej projektu jest faktycznie sprawdzane — 93 nieprzeskanowane pliki to 93 pliki
+  realnych błędów, które wcześniej były całkowicie niewidoczne.
+
+- **Nieodkryty wcześniej gap, wciąż otwarty**: `qt_types_gen.rs`'s hardkodowana lista modułów
+  Qt (`MODULES` w `load_all_classes`) nie zawiera np. `qtquickeffects` (`MultiEffect`,
+  `DropShadow`), `qtquickshapes`, `qtlabsfolderlistmodel`, `qtqmlmodels`'s `DelegateChooser`
+  itp. — to prawdziwe typy Qt, tylko nieujęte w generatorze, więc muszą iść do
+  `[external_types]` (opaque) zamiast dostać pełną walidację. Osobna, mniejsza sprawa niż
+  cały ten dokument, ale warto naprawić przy następnej rundzie (dopisać moduły do listy).
+
 ## Dodatkowo zaimplementowane (druga runda)
 
 - [x] **`extends` w configu** — warstwowanie presetów (`config.rs::load_config_file` +

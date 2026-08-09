@@ -164,6 +164,10 @@ names = ["ShellRoot", "PanelWindow", "Scope"]     # opaque instantiable types fr
 [roots]
 extra_types = ["ShellRoot", "Scope"]               # extra BFS entry point types, on top of the
                                                     # built-in Window/ApplicationWindow/Dialog
+treat_unreachable_as_roots = true                  # every file BFS still can't reach becomes its
+                                                    # own root instead of being silently skipped —
+                                                    # for frameworks (KDE Plasma/KPackage) that load
+                                                    # QML by path convention, not a known root type
 
 extends = "presets/quickshell.toml"                # layer on top of a base config; relative to
                                                     # THIS file's directory. List-valued sections are
