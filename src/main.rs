@@ -23,6 +23,7 @@ fn main() {
 
     match subcmd {
         Some("check") => cmd_check::cmd_check(&args[2..]),
+        Some("suggest-config") => cmd_check::cmd_suggest_config(&args[2..]),
         Some("generate-qt-types") => cmd_generate_qt_types(&args[2..]),
         Some("list-builtins") => cmd_list_builtins(),
         Some(other) => {
@@ -47,9 +48,22 @@ fn print_usage() {
     eprintln!("    --complex                     show full element hierarchy in error paths");
     eprintln!("    --no-warn-useless-ignore      suppress warnings for useless // qml-ignore comments");
     eprintln!();
+    eprintln!("  qml_static_analyzer suggest-config --path <dir> [options]");
+    eprintln!("    --config <file>               existing config to build on top of (avoids re-suggesting)");
+    eprintln!("    --builtin-qt-version <ver>    use compiled-in Qt types (e.g. 6.3.2)");
+    eprintln!("    --qt-types-json <file>        use qt_types JSON from disk");
+    eprintln!("    Prints a starter [external_types]/[roots] TOML snippet for a new project.");
+    eprintln!();
     eprintln!("  qml_static_analyzer generate-qt-types --qt-path <qt_gcc64_dir> [options]");
     eprintln!("    --output <file>               output file (default: qt_types_VER.json)");
     eprintln!("    --qt-version <ver>            override version string in output");
+    eprintln!(
+        "    --extra-metatypes-dir <dir>   also scan this build dir (recursively) for *_metatypes.json"
+    );
+    eprintln!(
+        "                                  from a third-party C++/QML module (Quickshell, KDE Frameworks, ...)."
+    );
+    eprintln!("                                  Repeatable.");
     eprintln!();
     eprintln!("  qml_static_analyzer list-builtins");
     eprintln!("    List Qt versions compiled into this binary.");
@@ -76,12 +90,14 @@ struct GenerateOpts {
     qt_path: PathBuf,
     output: Option<PathBuf>,
     qt_version: Option<String>,
+    extra_metatypes_dirs: Vec<PathBuf>,
 }
 
 fn parse_generate_args(args: &[String]) -> Result<GenerateOpts, String> {
     let mut qt_path: Option<PathBuf> = None;
     let mut output: Option<PathBuf> = None;
     let mut qt_version: Option<String> = None;
+    let mut extra_metatypes_dirs: Vec<PathBuf> = Vec::new();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -97,6 +113,11 @@ fn parse_generate_args(args: &[String]) -> Result<GenerateOpts, String> {
                 i += 1;
                 qt_version = Some(args.get(i).ok_or("missing value for --qt-version")?.clone());
             }
+            "--extra-metatypes-dir" => {
+                i += 1;
+                extra_metatypes_dirs
+                    .push(PathBuf::from(args.get(i).ok_or("missing value for --extra-metatypes-dir")?));
+            }
             other => return Err(format!("unknown argument: {other}")),
         }
         i += 1;
@@ -105,6 +126,7 @@ fn parse_generate_args(args: &[String]) -> Result<GenerateOpts, String> {
         qt_path: qt_path.ok_or("--qt-path is required")?,
         output,
         qt_version,
+        extra_metatypes_dirs,
     })
 }
 
@@ -127,7 +149,12 @@ fn cmd_generate_qt_types(args: &[String]) {
             process::exit(1);
         });
 
-    let json = qml_static_analyzer::qt_types_gen::generate_qt_types_json(&opts.qt_path).unwrap_or_else(|e| {
+    let json = if opts.extra_metatypes_dirs.is_empty() {
+        qml_static_analyzer::qt_types_gen::generate_qt_types_json(&opts.qt_path)
+    } else {
+        qml_static_analyzer::qt_types_gen::generate_module_types_json(&opts.qt_path, &opts.extra_metatypes_dirs)
+    }
+    .unwrap_or_else(|e| {
         eprintln!("error: {e}");
         process::exit(1);
     });

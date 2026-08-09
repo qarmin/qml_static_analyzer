@@ -93,8 +93,7 @@ pub fn cmd_check(args: &[String]) {
     let config = opts
         .config_file
         .as_ref()
-        .and_then(|p| std::fs::read_to_string(p).ok())
-        .map(|s| qml_static_analyzer::config::parse_config(&s))
+        .map(|p| qml_static_analyzer::config::load_config_file(p))
         .unwrap_or_default();
 
     // Resolve the directory that contains the config file — headers are relative to it.
@@ -615,6 +614,149 @@ fn collect_child_type_names(children: &[qml_static_analyzer::types::QmlChild]) -
         result.extend(collect_child_type_names(&child.children));
     }
     result
+}
+
+// ── subcommand: suggest-config ────────────────────────────────────────────────
+//
+// Heuristic, no-compile bootstrapping aid for plugging the analyzer into a new project
+// (e.g. one built on Quickshell or KDE Plasma): scans the project the same way `check`
+// does, but instead of reporting errors, prints a starter `[external_types]`/`[roots]`
+// TOML snippet for element type names that look like they come from a framework the
+// analyzer can't introspect. It's a one-time suggestion to review by hand, not a source
+// of truth — some flagged names may be real typos worth fixing instead of allow-listing,
+// and rarely-used external types may not surface at all.
+
+pub fn cmd_suggest_config(args: &[String]) {
+    let opts = parse_check_args(args).unwrap_or_else(|e| {
+        eprintln!("error: {e}");
+        eprintln!(
+            "usage: qml_static_analyzer suggest-config --path <dir> \
+             [--config <existing-config>] [--builtin-qt-version X.Y.Z] [--qt-types-json <file>]"
+        );
+        process::exit(1);
+    });
+
+    if !opts.path.exists() {
+        eprintln!("error: --path {:?} does not exist", opts.path);
+        process::exit(1);
+    }
+
+    // An existing config (if given) is loaded so already-declared types/roots aren't
+    // re-suggested — this makes the command safe to re-run after partially editing the config.
+    let config = opts
+        .config_file
+        .as_ref()
+        .map(|p| qml_static_analyzer::config::load_config_file(p))
+        .unwrap_or_default();
+
+    let db = load_qt_db(&opts);
+
+    let all_qml_files = collect_qml_files(&opts.path);
+    let qml_files: Vec<PathBuf> = all_qml_files
+        .into_iter()
+        .filter(|p| !is_ignored(p, &opts.path, &config.ignore.paths))
+        .collect();
+
+    if qml_files.is_empty() {
+        eprintln!("no .qml files found in {:?}", opts.path);
+        process::exit(1);
+    }
+
+    let mut parsed: Vec<(PathBuf, FileItem)> = Vec::new();
+    for file_path in &qml_files {
+        let Ok(source) = std::fs::read_to_string(file_path) else {
+            continue;
+        };
+        let name = file_path.file_stem().and_then(|s| s.to_str()).unwrap_or("Unknown");
+        let Ok(file_item) = qml_static_analyzer::parser::parse_file(name, &source) else {
+            continue;
+        };
+        parsed.push((file_path.clone(), file_item));
+    }
+
+    let known_types: HashSet<String> = parsed.iter().map(|(_, f)| f.name.clone()).collect();
+    let file_base_types: HashMap<String, String> = parsed
+        .iter()
+        .map(|(_, f)| (f.name.clone(), f.base_type.clone()))
+        .collect();
+
+    // 1. Element type names instantiated somewhere that are neither a project file nor a
+    //    known Qt type → candidates for [external_types]. Dotted names (`Foo.Bar`) are
+    //    skipped: those already go through the aliased-import opaque path, unrelated to
+    //    this config section.
+    let already_external: HashSet<&str> = config.external_types.names.iter().map(String::as_str).collect();
+    let mut external_counts: HashMap<String, usize> = HashMap::new();
+    for (_, file) in &parsed {
+        for type_name in collect_child_type_names(&file.children) {
+            if type_name.contains('.') || db.has_type(&type_name) || known_types.contains(&type_name) {
+                continue;
+            }
+            *external_counts.entry(type_name).or_insert(0) += 1;
+        }
+    }
+    let mut external_candidates: Vec<(String, usize)> = external_counts
+        .into_iter()
+        .filter(|(name, _)| !already_external.contains(name.as_str()))
+        .collect();
+    external_candidates.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+
+    // 2. Base types of files that BFS can't reach (given the built-in roots plus any
+    //    already-configured extra_types) → candidates for [roots] extra_types.
+    let root_type_names: HashSet<String> = ROOT_QT_TYPES
+        .iter()
+        .map(ToString::to_string)
+        .chain(config.roots.extra_types.iter().cloned())
+        .collect();
+    let root_types: Vec<String> = parsed
+        .iter()
+        .filter(|(_, f)| {
+            let qt_type = resolve_qt_base(&f.base_type, &db, &file_base_types);
+            root_type_names.contains(&qt_type)
+        })
+        .map(|(_, f)| f.name.clone())
+        .collect();
+    let mut usage_paths: HashMap<String, Vec<String>> = HashMap::new();
+    for root_type in &root_types {
+        for (type_name, path) in build_usage_paths(&parsed, root_type, &config.new_child) {
+            usage_paths.entry(type_name).or_insert(path);
+        }
+    }
+
+    let already_roots: HashSet<&str> = config.roots.extra_types.iter().map(String::as_str).collect();
+    let mut root_counts: HashMap<String, usize> = HashMap::new();
+    for (_, file) in &parsed {
+        if !usage_paths.contains_key(&file.name) && !already_roots.contains(file.base_type.as_str()) {
+            *root_counts.entry(file.base_type.clone()).or_insert(0) += 1;
+        }
+    }
+    let mut root_candidates: Vec<(String, usize)> = root_counts.into_iter().collect();
+    root_candidates.sort_by(|a, b| b.1.cmp(&a.1).then_with(|| a.0.cmp(&b.0)));
+
+    println!("# Suggested config for {} — review before use, heuristic-based.", opts.path.display());
+    println!("# Names may include real typos in your own components, not just external types.");
+
+    if external_candidates.is_empty() && root_candidates.is_empty() {
+        println!("# Nothing to suggest: no unresolved instantiated types, no unreachable root files.");
+        return;
+    }
+
+    if !external_candidates.is_empty() {
+        println!("\n[external_types]");
+        println!("names = [");
+        for (name, count) in &external_candidates {
+            println!("    \"{name}\", # used {count}x as an element type, not a project file or Qt type");
+        }
+        println!("]");
+    }
+
+    if !root_candidates.is_empty() {
+        println!("\n[roots]");
+        println!("extra_types = [");
+        for (base_type, count) in &root_candidates {
+            println!("    \"{base_type}\", # {count} unreachable file(s) with this base type");
+        }
+        println!("]");
+    }
 }
 
 fn collect_qml_files(dir: &PathBuf) -> Vec<PathBuf> {

@@ -476,7 +476,84 @@ pub fn generate_qt_types_json(qt_dir: &Path) -> Result<String, String> {
         .ok_or_else(|| format!("Could not find metatypes directory in {}", qt_dir.display()))?;
 
     let all_classes = load_all_classes(&metatypes_dir);
-    let cpp_to_qml = build_cpp_to_qml(&all_classes);
+    build_output_json(&all_classes)
+}
+
+/// Recursively finds every `*_metatypes.json` file under `dir`, regardless of module name.
+///
+/// Qt's own generator (`load_all_classes`) only looks at a fixed list of Qt module names
+/// in a single flat directory. Third-party C++/QML modules (Quickshell, KDE Frameworks,
+/// Plasma, ...) emit metatype JSON in the exact same moc/AUTOMOC format when built with
+/// CMake, just under module-specific names and often nested build directories — so this
+/// walks the whole tree instead of assuming a fixed layout.
+fn find_all_metatypes_files(dir: &Path) -> Vec<PathBuf> {
+    let mut result = Vec::new();
+    let Ok(entries) = std::fs::read_dir(dir) else {
+        return result;
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.is_dir() {
+            result.extend(find_all_metatypes_files(&path));
+        } else if path.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.ends_with("_metatypes.json")) {
+            result.push(path);
+        }
+    }
+    result
+}
+
+/// Loads classes from every `*_metatypes.json` found under any of `dirs`. First-seen wins
+/// on name clashes, same as `load_all_classes`.
+fn load_extra_classes(dirs: &[PathBuf]) -> HashMap<String, Value> {
+    let mut all_classes: HashMap<String, Value> = HashMap::new();
+    for dir in dirs {
+        for path in find_all_metatypes_files(dir) {
+            let Ok(content) = std::fs::read_to_string(&path) else {
+                continue;
+            };
+            let Ok(data) = serde_json::from_str::<Value>(&content) else {
+                continue;
+            };
+            let Some(entries) = data.as_array() else { continue };
+            for entry in entries {
+                let Some(classes) = entry.get("classes").and_then(Value::as_array) else {
+                    continue;
+                };
+                for cls in classes {
+                    let name = cls
+                        .get("qualifiedClassName")
+                        .or_else(|| cls.get("className"))
+                        .and_then(Value::as_str);
+                    if let Some(n) = name {
+                        all_classes.entry(n.to_string()).or_insert_with(|| cls.clone());
+                    }
+                }
+            }
+        }
+    }
+    all_classes
+}
+
+/// Same as [`generate_qt_types_json`], but also merges in classes from arbitrary
+/// C++/QML module build directories (e.g. a Quickshell or KDE Frameworks build tree),
+/// found by recursively scanning `extra_dirs` for any `*_metatypes.json` file.
+///
+/// Qt's own classes are loaded first and take priority on name clashes, since they're
+/// needed as the inheritance root for third-party types (e.g. a Quickshell `PanelWindow`
+/// extending `QQuickItem`).
+pub fn generate_module_types_json(qt_dir: &Path, extra_dirs: &[PathBuf]) -> Result<String, String> {
+    let metatypes_dir = find_metatypes_dir(qt_dir)
+        .ok_or_else(|| format!("Could not find metatypes directory in {}", qt_dir.display()))?;
+
+    let mut all_classes = load_all_classes(&metatypes_dir);
+    for (name, cls) in load_extra_classes(extra_dirs) {
+        all_classes.entry(name).or_insert(cls);
+    }
+    build_output_json(&all_classes)
+}
+
+fn build_output_json(all_classes: &HashMap<String, Value>) -> Result<String, String> {
+    let cpp_to_qml = build_cpp_to_qml(all_classes);
 
     let mut output: Map<String, Value> = Map::new();
     output.insert(
@@ -524,18 +601,18 @@ pub fn generate_qt_types_json(qt_dir: &Path) -> Result<String, String> {
             continue;
         };
 
-        let qml_parent = find_qml_parent(cls, &cpp_to_qml, &all_classes, qml_name, &mut vec![]);
+        let qml_parent = find_qml_parent(cls, &cpp_to_qml, all_classes, qml_name, &mut vec![]);
 
-        let mut properties = collect_own_properties(cls, &cpp_to_qml, &all_classes, qml_name, &mut vec![]);
+        let mut properties = collect_own_properties(cls, &cpp_to_qml, all_classes, qml_name, &mut vec![]);
 
-        let signals = collect_own_signals(cls, &cpp_to_qml, &all_classes, qml_name, &mut vec![]);
+        let signals = collect_own_signals(cls, &cpp_to_qml, all_classes, qml_name, &mut vec![]);
 
         // QML.Attached: merge attached type's properties (e.g. ListView.isCurrentItem)
         let ci = class_infos(cls);
         if let Some(attached_cpp) = ci.get("QML.Attached")
             && let Some(att_cls) = all_classes.get(attached_cpp)
         {
-            let att_props = collect_own_properties(att_cls, &cpp_to_qml, &all_classes, qml_name, &mut vec![]);
+            let att_props = collect_own_properties(att_cls, &cpp_to_qml, all_classes, qml_name, &mut vec![]);
             for (k, v) in att_props {
                 properties.entry(k).or_insert(v);
             }
@@ -575,4 +652,69 @@ pub fn generate_qt_types_json(qt_dir: &Path) -> Result<String, String> {
     }
 
     serde_json::to_string_pretty(&output).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Write;
+
+    use super::*;
+
+    fn write_json(path: &Path, content: &str) {
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::File::create(path).unwrap().write_all(content.as_bytes()).unwrap();
+    }
+
+    /// Builds a minimal fake Qt install (just enough `QObject`/`QQuickItem` metatype data
+    /// for inheritance walking) plus a fake third-party module build dir, then verifies
+    /// `generate_module_types_json` merges the two into a single, inheritance-aware DB —
+    /// without needing a real Qt SDK on the test machine.
+    #[test]
+    fn extra_metatypes_dir_merges_third_party_module_with_qt_inheritance() {
+        let root = std::env::temp_dir().join(format!("qml_analyzer_qt_gen_test_{}", std::process::id()));
+        let qt_dir = root.join("qt");
+        let extra_dir = root.join("thirdparty_build");
+
+        write_json(
+            &qt_dir.join("metatypes/qt6core_metatypes.json"),
+            r#"[{"classes": [{"className": "QObject", "qualifiedClassName": "QObject", "classInfos": [], "properties": [], "signals": [], "methods": []}]}]"#,
+        );
+        write_json(
+            &qt_dir.join("metatypes/qt6quick_metatypes.json"),
+            r#"[{"classes": [{
+                "className": "QQuickItem",
+                "qualifiedClassName": "QQuickItem",
+                "superClasses": [{"access": "public", "name": "QObject"}],
+                "classInfos": [{"name": "QML.Element", "value": "Item"}],
+                "properties": [{"name": "width", "type": "qreal", "index": 0}],
+                "signals": [],
+                "methods": []
+            }]}]"#,
+        );
+        write_json(
+            &extra_dir.join("build/fakemodule_metatypes.json"),
+            r#"[{"classes": [{
+                "className": "FakePanel",
+                "qualifiedClassName": "FakePanel",
+                "superClasses": [{"access": "public", "name": "QQuickItem"}],
+                "classInfos": [{"name": "QML.Element", "value": "FakePanel"}],
+                "properties": [{"name": "screenName", "type": "QString", "index": 0}],
+                "signals": [],
+                "methods": []
+            }]}]"#,
+        );
+
+        let json = generate_module_types_json(&qt_dir, &[extra_dir]).expect("generation should succeed");
+        let parsed: Value = serde_json::from_str(&json).unwrap();
+
+        let fake_panel = parsed.get("FakePanel").expect("FakePanel must be present in merged output");
+        assert_eq!(fake_panel["parent"], "Item", "FakePanel must resolve its Qt ancestor through the merged DB");
+        assert!(
+            fake_panel["properties"]["screenName"] == "string",
+            "FakePanel's own property must be preserved: {fake_panel}"
+        );
+        assert!(parsed.get("Item").is_some(), "Qt's own Item type must still be present");
+
+        let _ = std::fs::remove_dir_all(&root);
+    }
 }
